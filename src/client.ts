@@ -358,6 +358,7 @@ class Client {
         locale: string;
         session: string;
         devkey: string;
+        cookie: string;
         impersonateuserid: string;
         impersonateuseremail: string;
         impersonateuserphone: string;
@@ -369,6 +370,7 @@ class Client {
         locale: '',
         session: '',
         devkey: '',
+        cookie: '',
         impersonateuserid: '',
         impersonateuseremail: '',
         impersonateuserphone: '',
@@ -380,8 +382,8 @@ class Client {
         'x-sdk-name': 'Web',
         'x-sdk-platform': 'client',
         'x-sdk-language': 'web',
-        'x-sdk-version': '25.0.0',
-        'X-Appwrite-Response-Format': '1.9.2',
+        'x-sdk-version': '25.1.0',
+        'X-Appwrite-Response-Format': '1.9.4',
     };
 
     /**
@@ -506,6 +508,20 @@ class Client {
     setDevKey(value: string): this {
         this.headers['X-Appwrite-Dev-Key'] = value;
         this.config.devkey = value;
+        return this;
+    }
+    /**
+     * Set Cookie
+     *
+     * The user cookie to authenticate with. Used by SDKs that forward an incoming Cookie header in server-side runtimes.
+     *
+     * @param value string
+     *
+     * @return {this}
+     */
+    setCookie(value: string): this {
+        this.headers['Cookie'] = value;
+        this.config.cookie = value;
         return this;
     }
     /**
