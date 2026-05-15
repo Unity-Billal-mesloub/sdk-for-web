@@ -1,10 +1,15 @@
 # Change Log
 
-## 25.1.0
+## 26.0.0
 
-* Added: Added `setCookie()` method to `Client` for forwarding incoming `Cookie` headers in server-side runtimes
-* Added: Added `Fusionauth`, `Keycloak`, and `Kick` OAuth providers to `OAuthProvider` enum
-* Updated: Updated `X-Appwrite-Response-Format` header to `1.9.4`
+* Breaking: Web SDK now generated from the server API spec; package exposes the full server-side service surface (`Users`, `Projects`, `Functions` admin endpoints, `Sites`, `Health`, `Proxy`, `Webhooks`, `Backups`, `Activities`, `Tokens`) in addition to the existing client services
+* Added: Isomorphic `Client.from()`, `Client.fromSession()`, `Client.fromAPIKey()`, `Client.fromCookie()`, `Client.fromJWT()`, `Client.fromDevKey()`, and `Client.fromImpersonation()` static factories for use in both browser and server runtimes
+* Added: `setCookie()` method on `Client` for forwarding cookies from server runtimes
+* Added: `prompt` parameter on `Project.updateOAuth2Google()` plus `Prompt` and `OAuth2GooglePrompt` enums
+* Added: `Project.updateDenyCanonicalEmailPolicy()`, `Project.updateDenyDisposableEmailPolicy()`, `Project.updateDenyFreeEmailPolicy()`
+* Added: `fusionauth`, `keycloak`, and `kick` to `OAuthProvider` enum
+* Updated: `X-Appwrite-Response-Format` header to `1.9.4`
+* Updated: `BuildRuntime` and `Runtime` enums with `deno-1.21`, `deno-1.24`, `deno-1.35`
 
 ## 25.0.0
 

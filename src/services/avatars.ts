@@ -87,6 +87,7 @@ export class Avatars {
         }
 
         payload['project'] = this.client.config.project;
+        payload['session'] = this.client.config.session;
 
         for (const [key, value] of Object.entries(Service.flatten(payload))) {
             uri.searchParams.append(key, value);
@@ -167,6 +168,7 @@ export class Avatars {
         }
 
         payload['project'] = this.client.config.project;
+        payload['session'] = this.client.config.session;
 
         for (const [key, value] of Object.entries(Service.flatten(payload))) {
             uri.searchParams.append(key, value);
@@ -226,6 +228,7 @@ export class Avatars {
         }
 
         payload['project'] = this.client.config.project;
+        payload['session'] = this.client.config.session;
 
         for (const [key, value] of Object.entries(Service.flatten(payload))) {
             uri.searchParams.append(key, value);
@@ -306,6 +309,7 @@ export class Avatars {
         }
 
         payload['project'] = this.client.config.project;
+        payload['session'] = this.client.config.session;
 
         for (const [key, value] of Object.entries(Service.flatten(payload))) {
             uri.searchParams.append(key, value);
@@ -384,6 +388,7 @@ export class Avatars {
         }
 
         payload['project'] = this.client.config.project;
+        payload['session'] = this.client.config.session;
 
         for (const [key, value] of Object.entries(Service.flatten(payload))) {
             uri.searchParams.append(key, value);
@@ -468,6 +473,7 @@ export class Avatars {
         }
 
         payload['project'] = this.client.config.project;
+        payload['session'] = this.client.config.session;
 
         for (const [key, value] of Object.entries(Service.flatten(payload))) {
             uri.searchParams.append(key, value);
@@ -547,6 +553,7 @@ export class Avatars {
         }
 
         payload['project'] = this.client.config.project;
+        payload['session'] = this.client.config.session;
 
         for (const [key, value] of Object.entries(Service.flatten(payload))) {
             uri.searchParams.append(key, value);
@@ -744,6 +751,7 @@ export class Avatars {
         }
 
         payload['project'] = this.client.config.project;
+        payload['session'] = this.client.config.session;
 
         for (const [key, value] of Object.entries(Service.flatten(payload))) {
             uri.searchParams.append(key, value);
