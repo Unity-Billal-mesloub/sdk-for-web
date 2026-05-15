@@ -1,5 +1,4 @@
-import { Service } from '../service';
-import { AppwriteException, Client, type Payload, UploadProgress } from '../client';
+import { AppwriteException, Client, type ServerAuth, type Payload } from '../client';
 import type { Models } from '../models';
 
 import { AuthMethod } from '../enums/auth-method';
@@ -13,10 +12,12 @@ import { Secure } from '../enums/secure';
 import { EmailTemplateType } from '../enums/email-template-type';
 import { EmailTemplateLocale } from '../enums/email-template-locale';
 
-export class Project {
-    client: Client;
+export type Project = Omit<ProjectRuntime, 'client'>;
 
-    constructor(client: Client) {
+class ProjectRuntime {
+    client: Client<ServerAuth>;
+
+    constructor(client: Client<ServerAuth>) {
         this.client = client;
     }
 
@@ -6434,3 +6435,9 @@ export class Project {
         );
     }
 }
+
+const Project = ProjectRuntime as unknown as {
+    new (client: Client<ServerAuth>): Project;
+};
+
+export { Project };

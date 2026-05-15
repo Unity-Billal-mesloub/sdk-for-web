@@ -1,5 +1,5 @@
 import { Service } from '../service';
-import { AppwriteException, Client, type Payload, UploadProgress } from '../client';
+import { AppwriteException, Client, type ServerAuth, type Payload, UploadProgress } from '../client';
 import type { Models } from '../models';
 
 import { Framework } from '../enums/framework';
@@ -9,10 +9,12 @@ import { TemplateReferenceType } from '../enums/template-reference-type';
 import { VCSReferenceType } from '../enums/vcs-reference-type';
 import { DeploymentDownloadType } from '../enums/deployment-download-type';
 
-export class Sites {
-    client: Client;
+export type Sites = Omit<SitesRuntime, 'client'>;
 
-    constructor(client: Client) {
+class SitesRuntime {
+    client: Client<ServerAuth>;
+
+    constructor(client: Client<ServerAuth>) {
         this.client = client;
     }
 
@@ -1304,8 +1306,8 @@ export class Sites {
         const apiHeaders: { [header: string]: string } = {
         }
 
-        payload['project'] = this.client.config.project;
-        payload['key'] = this.client.config.key;
+        payload['project'] = (this.client.config as unknown as Record<string, string>)['project'];
+        payload['key'] = (this.client.config as unknown as Record<string, string>)['key'];
 
         for (const [key, value] of Object.entries(Service.flatten(payload))) {
             uri.searchParams.append(key, value);
@@ -1915,3 +1917,9 @@ export class Sites {
         );
     }
 }
+
+const Sites = SitesRuntime as unknown as {
+    new (client: Client<ServerAuth>): Sites;
+};
+
+export { Sites };

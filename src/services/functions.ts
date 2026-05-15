@@ -1,5 +1,5 @@
 import { Service } from '../service';
-import { AppwriteException, Client, type Payload, UploadProgress } from '../client';
+import { AppwriteException, Client, type ClientAuth, type ServerAuth, type Payload, UploadProgress } from '../client';
 import type { Models } from '../models';
 
 import { Runtime } from '../enums/runtime';
@@ -9,10 +9,20 @@ import { VCSReferenceType } from '../enums/vcs-reference-type';
 import { DeploymentDownloadType } from '../enums/deployment-download-type';
 import { ExecutionMethod } from '../enums/execution-method';
 
-export class Functions {
-    client: Client;
+type FunctionsServerOnlyMethod = 'list' | 'create' | 'listRuntimes' | 'listSpecifications' | 'get' | 'update' | 'delete' | 'updateFunctionDeployment' | 'listDeployments' | 'createDeployment' | 'createDuplicateDeployment' | 'createTemplateDeployment' | 'createVcsDeployment' | 'getDeployment' | 'deleteDeployment' | 'getDeploymentDownload' | 'updateDeploymentStatus' | 'deleteExecution' | 'listVariables' | 'createVariable' | 'getVariable' | 'updateVariable' | 'deleteVariable';
+type FunctionsClientOnlyMethod = never;
 
-    constructor(client: Client) {
+export type Functions<TAuth extends ClientAuth | ServerAuth = ClientAuth | ServerAuth> =
+    TAuth extends ClientAuth
+        ? Omit<FunctionsRuntime<TAuth>, 'client' | FunctionsServerOnlyMethod>
+        : TAuth extends ServerAuth
+            ? Omit<FunctionsRuntime<TAuth>, 'client' | FunctionsClientOnlyMethod>
+            : Omit<FunctionsRuntime<TAuth>, 'client'>;
+
+class FunctionsRuntime<TAuth extends ClientAuth | ServerAuth = ClientAuth | ServerAuth> {
+    client: Client<TAuth>;
+
+    constructor(client: Client<TAuth>) {
         this.client = client;
     }
 
@@ -25,7 +35,7 @@ export class Functions {
      * @throws {AppwriteException}
      * @returns {Promise<Models.FunctionList>}
      */
-    list(params?: { queries?: string[], search?: string, total?: boolean }): Promise<Models.FunctionList>;
+    list(this: Functions<ServerAuth>, params?: { queries?: string[], search?: string, total?: boolean }): Promise<Models.FunctionList>;
     /**
      * Get a list of all the project's functions. You can use the query params to filter your results.
      *
@@ -36,7 +46,7 @@ export class Functions {
      * @returns {Promise<Models.FunctionList>}
      * @deprecated Use the object parameter style method for a better developer experience.
      */
-    list(queries?: string[], search?: string, total?: boolean): Promise<Models.FunctionList>;
+    list(this: Functions<ServerAuth>, queries?: string[], search?: string, total?: boolean): Promise<Models.FunctionList>;
     list(
         paramsOrFirst?: { queries?: string[], search?: string, total?: boolean } | string[],
         ...rest: [(string)?, (boolean)?]    
@@ -108,7 +118,7 @@ export class Functions {
      * @throws {AppwriteException}
      * @returns {Promise<Models.Function>}
      */
-    create(params: { functionId: string, name: string, runtime: Runtime, execute?: string[], events?: string[], schedule?: string, timeout?: number, enabled?: boolean, logging?: boolean, entrypoint?: string, commands?: string, scopes?: Scopes[], installationId?: string, providerRepositoryId?: string, providerBranch?: string, providerSilentMode?: boolean, providerRootDirectory?: string, buildSpecification?: string, runtimeSpecification?: string, deploymentRetention?: number }): Promise<Models.Function>;
+    create(this: Functions<ServerAuth>, params: { functionId: string, name: string, runtime: Runtime, execute?: string[], events?: string[], schedule?: string, timeout?: number, enabled?: boolean, logging?: boolean, entrypoint?: string, commands?: string, scopes?: Scopes[], installationId?: string, providerRepositoryId?: string, providerBranch?: string, providerSilentMode?: boolean, providerRootDirectory?: string, buildSpecification?: string, runtimeSpecification?: string, deploymentRetention?: number }): Promise<Models.Function>;
     /**
      * Create a new function. You can pass a list of [permissions](https://appwrite.io/docs/permissions) to allow different project users or team with access to execute the function using the client API.
      *
@@ -136,7 +146,7 @@ export class Functions {
      * @returns {Promise<Models.Function>}
      * @deprecated Use the object parameter style method for a better developer experience.
      */
-    create(functionId: string, name: string, runtime: Runtime, execute?: string[], events?: string[], schedule?: string, timeout?: number, enabled?: boolean, logging?: boolean, entrypoint?: string, commands?: string, scopes?: Scopes[], installationId?: string, providerRepositoryId?: string, providerBranch?: string, providerSilentMode?: boolean, providerRootDirectory?: string, buildSpecification?: string, runtimeSpecification?: string, deploymentRetention?: number): Promise<Models.Function>;
+    create(this: Functions<ServerAuth>, functionId: string, name: string, runtime: Runtime, execute?: string[], events?: string[], schedule?: string, timeout?: number, enabled?: boolean, logging?: boolean, entrypoint?: string, commands?: string, scopes?: Scopes[], installationId?: string, providerRepositoryId?: string, providerBranch?: string, providerSilentMode?: boolean, providerRootDirectory?: string, buildSpecification?: string, runtimeSpecification?: string, deploymentRetention?: number): Promise<Models.Function>;
     create(
         paramsOrFirst: { functionId: string, name: string, runtime: Runtime, execute?: string[], events?: string[], schedule?: string, timeout?: number, enabled?: boolean, logging?: boolean, entrypoint?: string, commands?: string, scopes?: Scopes[], installationId?: string, providerRepositoryId?: string, providerBranch?: string, providerSilentMode?: boolean, providerRootDirectory?: string, buildSpecification?: string, runtimeSpecification?: string, deploymentRetention?: number } | string,
         ...rest: [(string)?, (Runtime)?, (string[])?, (string[])?, (string)?, (number)?, (boolean)?, (boolean)?, (string)?, (string)?, (Scopes[])?, (string)?, (string)?, (string)?, (boolean)?, (string)?, (string)?, (string)?, (number)?]    
@@ -283,6 +293,7 @@ export class Functions {
      * @throws {AppwriteException}
      * @returns {Promise<Models.RuntimeList>}
      */
+    listRuntimes(this: Functions<ServerAuth>, ): Promise<Models.RuntimeList>;
     listRuntimes(): Promise<Models.RuntimeList> {
 
         const apiPath = '/functions/runtimes';
@@ -306,6 +317,7 @@ export class Functions {
      * @throws {AppwriteException}
      * @returns {Promise<Models.SpecificationList>}
      */
+    listSpecifications(this: Functions<ServerAuth>, ): Promise<Models.SpecificationList>;
     listSpecifications(): Promise<Models.SpecificationList> {
 
         const apiPath = '/functions/specifications';
@@ -330,7 +342,7 @@ export class Functions {
      * @throws {AppwriteException}
      * @returns {Promise<Models.Function>}
      */
-    get(params: { functionId: string }): Promise<Models.Function>;
+    get(this: Functions<ServerAuth>, params: { functionId: string }): Promise<Models.Function>;
     /**
      * Get a function by its unique ID.
      *
@@ -339,7 +351,7 @@ export class Functions {
      * @returns {Promise<Models.Function>}
      * @deprecated Use the object parameter style method for a better developer experience.
      */
-    get(functionId: string): Promise<Models.Function>;
+    get(this: Functions<ServerAuth>, functionId: string): Promise<Models.Function>;
     get(
         paramsOrFirst: { functionId: string } | string    
     ): Promise<Models.Function> {
@@ -400,7 +412,7 @@ export class Functions {
      * @throws {AppwriteException}
      * @returns {Promise<Models.Function>}
      */
-    update(params: { functionId: string, name: string, runtime?: Runtime, execute?: string[], events?: string[], schedule?: string, timeout?: number, enabled?: boolean, logging?: boolean, entrypoint?: string, commands?: string, scopes?: Scopes[], installationId?: string, providerRepositoryId?: string, providerBranch?: string, providerSilentMode?: boolean, providerRootDirectory?: string, buildSpecification?: string, runtimeSpecification?: string, deploymentRetention?: number }): Promise<Models.Function>;
+    update(this: Functions<ServerAuth>, params: { functionId: string, name: string, runtime?: Runtime, execute?: string[], events?: string[], schedule?: string, timeout?: number, enabled?: boolean, logging?: boolean, entrypoint?: string, commands?: string, scopes?: Scopes[], installationId?: string, providerRepositoryId?: string, providerBranch?: string, providerSilentMode?: boolean, providerRootDirectory?: string, buildSpecification?: string, runtimeSpecification?: string, deploymentRetention?: number }): Promise<Models.Function>;
     /**
      * Update function by its unique ID.
      *
@@ -428,7 +440,7 @@ export class Functions {
      * @returns {Promise<Models.Function>}
      * @deprecated Use the object parameter style method for a better developer experience.
      */
-    update(functionId: string, name: string, runtime?: Runtime, execute?: string[], events?: string[], schedule?: string, timeout?: number, enabled?: boolean, logging?: boolean, entrypoint?: string, commands?: string, scopes?: Scopes[], installationId?: string, providerRepositoryId?: string, providerBranch?: string, providerSilentMode?: boolean, providerRootDirectory?: string, buildSpecification?: string, runtimeSpecification?: string, deploymentRetention?: number): Promise<Models.Function>;
+    update(this: Functions<ServerAuth>, functionId: string, name: string, runtime?: Runtime, execute?: string[], events?: string[], schedule?: string, timeout?: number, enabled?: boolean, logging?: boolean, entrypoint?: string, commands?: string, scopes?: Scopes[], installationId?: string, providerRepositoryId?: string, providerBranch?: string, providerSilentMode?: boolean, providerRootDirectory?: string, buildSpecification?: string, runtimeSpecification?: string, deploymentRetention?: number): Promise<Models.Function>;
     update(
         paramsOrFirst: { functionId: string, name: string, runtime?: Runtime, execute?: string[], events?: string[], schedule?: string, timeout?: number, enabled?: boolean, logging?: boolean, entrypoint?: string, commands?: string, scopes?: Scopes[], installationId?: string, providerRepositoryId?: string, providerBranch?: string, providerSilentMode?: boolean, providerRootDirectory?: string, buildSpecification?: string, runtimeSpecification?: string, deploymentRetention?: number } | string,
         ...rest: [(string)?, (Runtime)?, (string[])?, (string[])?, (string)?, (number)?, (boolean)?, (boolean)?, (string)?, (string)?, (Scopes[])?, (string)?, (string)?, (string)?, (boolean)?, (string)?, (string)?, (string)?, (number)?]    
@@ -570,7 +582,7 @@ export class Functions {
      * @throws {AppwriteException}
      * @returns {Promise<{}>}
      */
-    delete(params: { functionId: string }): Promise<{}>;
+    delete(this: Functions<ServerAuth>, params: { functionId: string }): Promise<{}>;
     /**
      * Delete a function by its unique ID.
      *
@@ -579,7 +591,7 @@ export class Functions {
      * @returns {Promise<{}>}
      * @deprecated Use the object parameter style method for a better developer experience.
      */
-    delete(functionId: string): Promise<{}>;
+    delete(this: Functions<ServerAuth>, functionId: string): Promise<{}>;
     delete(
         paramsOrFirst: { functionId: string } | string    
     ): Promise<{}> {
@@ -623,7 +635,7 @@ export class Functions {
      * @throws {AppwriteException}
      * @returns {Promise<Models.Function>}
      */
-    updateFunctionDeployment(params: { functionId: string, deploymentId: string }): Promise<Models.Function>;
+    updateFunctionDeployment(this: Functions<ServerAuth>, params: { functionId: string, deploymentId: string }): Promise<Models.Function>;
     /**
      * Update the function active deployment. Use this endpoint to switch the code deployment that should be used when visitor opens your function.
      *
@@ -633,7 +645,7 @@ export class Functions {
      * @returns {Promise<Models.Function>}
      * @deprecated Use the object parameter style method for a better developer experience.
      */
-    updateFunctionDeployment(functionId: string, deploymentId: string): Promise<Models.Function>;
+    updateFunctionDeployment(this: Functions<ServerAuth>, functionId: string, deploymentId: string): Promise<Models.Function>;
     updateFunctionDeployment(
         paramsOrFirst: { functionId: string, deploymentId: string } | string,
         ...rest: [(string)?]    
@@ -688,7 +700,7 @@ export class Functions {
      * @throws {AppwriteException}
      * @returns {Promise<Models.DeploymentList>}
      */
-    listDeployments(params: { functionId: string, queries?: string[], search?: string, total?: boolean }): Promise<Models.DeploymentList>;
+    listDeployments(this: Functions<ServerAuth>, params: { functionId: string, queries?: string[], search?: string, total?: boolean }): Promise<Models.DeploymentList>;
     /**
      * Get a list of all the function's code deployments. You can use the query params to filter your results.
      *
@@ -700,7 +712,7 @@ export class Functions {
      * @returns {Promise<Models.DeploymentList>}
      * @deprecated Use the object parameter style method for a better developer experience.
      */
-    listDeployments(functionId: string, queries?: string[], search?: string, total?: boolean): Promise<Models.DeploymentList>;
+    listDeployments(this: Functions<ServerAuth>, functionId: string, queries?: string[], search?: string, total?: boolean): Promise<Models.DeploymentList>;
     listDeployments(
         paramsOrFirst: { functionId: string, queries?: string[], search?: string, total?: boolean } | string,
         ...rest: [(string[])?, (string)?, (boolean)?]    
@@ -766,7 +778,7 @@ export class Functions {
      * @throws {AppwriteException}
      * @returns {Promise<Models.Deployment>}
      */
-    createDeployment(params: { functionId: string, code: File, activate: boolean, entrypoint?: string, commands?: string, onProgress?: (progress: UploadProgress) => void }): Promise<Models.Deployment>;
+    createDeployment(this: Functions<ServerAuth>, params: { functionId: string, code: File, activate: boolean, entrypoint?: string, commands?: string, onProgress?: (progress: UploadProgress) => void }): Promise<Models.Deployment>;
     /**
      * Create a new function code deployment. Use this endpoint to upload a new version of your code function. To execute your newly uploaded code, you'll need to update the function's deployment to use your new deployment UID.
      * 
@@ -783,7 +795,7 @@ export class Functions {
      * @returns {Promise<Models.Deployment>}
      * @deprecated Use the object parameter style method for a better developer experience.
      */
-    createDeployment(functionId: string, code: File, activate: boolean, entrypoint?: string, commands?: string, onProgress?: (progress: UploadProgress) => void): Promise<Models.Deployment>;
+    createDeployment(this: Functions<ServerAuth>, functionId: string, code: File, activate: boolean, entrypoint?: string, commands?: string, onProgress?: (progress: UploadProgress) => void): Promise<Models.Deployment>;
     createDeployment(
         paramsOrFirst: { functionId: string, code: File, activate: boolean, entrypoint?: string, commands?: string, onProgress?: (progress: UploadProgress) => void } | string,
         ...rest: [(File)?, (boolean)?, (string)?, (string)?,((progress: UploadProgress) => void)?]    
@@ -859,7 +871,7 @@ export class Functions {
      * @throws {AppwriteException}
      * @returns {Promise<Models.Deployment>}
      */
-    createDuplicateDeployment(params: { functionId: string, deploymentId: string, buildId?: string }): Promise<Models.Deployment>;
+    createDuplicateDeployment(this: Functions<ServerAuth>, params: { functionId: string, deploymentId: string, buildId?: string }): Promise<Models.Deployment>;
     /**
      * Create a new build for an existing function deployment. This endpoint allows you to rebuild a deployment with the updated function configuration, including its entrypoint and build commands if they have been modified. The build process will be queued and executed asynchronously. The original deployment's code will be preserved and used for the new build.
      *
@@ -870,7 +882,7 @@ export class Functions {
      * @returns {Promise<Models.Deployment>}
      * @deprecated Use the object parameter style method for a better developer experience.
      */
-    createDuplicateDeployment(functionId: string, deploymentId: string, buildId?: string): Promise<Models.Deployment>;
+    createDuplicateDeployment(this: Functions<ServerAuth>, functionId: string, deploymentId: string, buildId?: string): Promise<Models.Deployment>;
     createDuplicateDeployment(
         paramsOrFirst: { functionId: string, deploymentId: string, buildId?: string } | string,
         ...rest: [(string)?, (string)?]    
@@ -935,7 +947,7 @@ export class Functions {
      * @throws {AppwriteException}
      * @returns {Promise<Models.Deployment>}
      */
-    createTemplateDeployment(params: { functionId: string, repository: string, owner: string, rootDirectory: string, type: TemplateReferenceType, reference: string, activate?: boolean }): Promise<Models.Deployment>;
+    createTemplateDeployment(this: Functions<ServerAuth>, params: { functionId: string, repository: string, owner: string, rootDirectory: string, type: TemplateReferenceType, reference: string, activate?: boolean }): Promise<Models.Deployment>;
     /**
      * Create a deployment based on a template.
      * 
@@ -952,7 +964,7 @@ export class Functions {
      * @returns {Promise<Models.Deployment>}
      * @deprecated Use the object parameter style method for a better developer experience.
      */
-    createTemplateDeployment(functionId: string, repository: string, owner: string, rootDirectory: string, type: TemplateReferenceType, reference: string, activate?: boolean): Promise<Models.Deployment>;
+    createTemplateDeployment(this: Functions<ServerAuth>, functionId: string, repository: string, owner: string, rootDirectory: string, type: TemplateReferenceType, reference: string, activate?: boolean): Promise<Models.Deployment>;
     createTemplateDeployment(
         paramsOrFirst: { functionId: string, repository: string, owner: string, rootDirectory: string, type: TemplateReferenceType, reference: string, activate?: boolean } | string,
         ...rest: [(string)?, (string)?, (string)?, (TemplateReferenceType)?, (string)?, (boolean)?]    
@@ -1046,7 +1058,7 @@ export class Functions {
      * @throws {AppwriteException}
      * @returns {Promise<Models.Deployment>}
      */
-    createVcsDeployment(params: { functionId: string, type: VCSReferenceType, reference: string, activate?: boolean }): Promise<Models.Deployment>;
+    createVcsDeployment(this: Functions<ServerAuth>, params: { functionId: string, type: VCSReferenceType, reference: string, activate?: boolean }): Promise<Models.Deployment>;
     /**
      * Create a deployment when a function is connected to VCS.
      * 
@@ -1060,7 +1072,7 @@ export class Functions {
      * @returns {Promise<Models.Deployment>}
      * @deprecated Use the object parameter style method for a better developer experience.
      */
-    createVcsDeployment(functionId: string, type: VCSReferenceType, reference: string, activate?: boolean): Promise<Models.Deployment>;
+    createVcsDeployment(this: Functions<ServerAuth>, functionId: string, type: VCSReferenceType, reference: string, activate?: boolean): Promise<Models.Deployment>;
     createVcsDeployment(
         paramsOrFirst: { functionId: string, type: VCSReferenceType, reference: string, activate?: boolean } | string,
         ...rest: [(VCSReferenceType)?, (string)?, (boolean)?]    
@@ -1126,7 +1138,7 @@ export class Functions {
      * @throws {AppwriteException}
      * @returns {Promise<Models.Deployment>}
      */
-    getDeployment(params: { functionId: string, deploymentId: string }): Promise<Models.Deployment>;
+    getDeployment(this: Functions<ServerAuth>, params: { functionId: string, deploymentId: string }): Promise<Models.Deployment>;
     /**
      * Get a function deployment by its unique ID.
      *
@@ -1136,7 +1148,7 @@ export class Functions {
      * @returns {Promise<Models.Deployment>}
      * @deprecated Use the object parameter style method for a better developer experience.
      */
-    getDeployment(functionId: string, deploymentId: string): Promise<Models.Deployment>;
+    getDeployment(this: Functions<ServerAuth>, functionId: string, deploymentId: string): Promise<Models.Deployment>;
     getDeployment(
         paramsOrFirst: { functionId: string, deploymentId: string } | string,
         ...rest: [(string)?]    
@@ -1185,7 +1197,7 @@ export class Functions {
      * @throws {AppwriteException}
      * @returns {Promise<{}>}
      */
-    deleteDeployment(params: { functionId: string, deploymentId: string }): Promise<{}>;
+    deleteDeployment(this: Functions<ServerAuth>, params: { functionId: string, deploymentId: string }): Promise<{}>;
     /**
      * Delete a code deployment by its unique ID.
      *
@@ -1195,7 +1207,7 @@ export class Functions {
      * @returns {Promise<{}>}
      * @deprecated Use the object parameter style method for a better developer experience.
      */
-    deleteDeployment(functionId: string, deploymentId: string): Promise<{}>;
+    deleteDeployment(this: Functions<ServerAuth>, functionId: string, deploymentId: string): Promise<{}>;
     deleteDeployment(
         paramsOrFirst: { functionId: string, deploymentId: string } | string,
         ...rest: [(string)?]    
@@ -1246,7 +1258,7 @@ export class Functions {
      * @throws {AppwriteException}
      * @returns {string}
      */
-    getDeploymentDownload(params: { functionId: string, deploymentId: string, type?: DeploymentDownloadType }): string;
+    getDeploymentDownload(this: Functions<ServerAuth>, params: { functionId: string, deploymentId: string, type?: DeploymentDownloadType }): string;
     /**
      * Get a function deployment content by its unique ID. The endpoint response return with a 'Content-Disposition: attachment' header that tells the browser to start downloading the file to user downloads directory.
      *
@@ -1257,7 +1269,7 @@ export class Functions {
      * @returns {string}
      * @deprecated Use the object parameter style method for a better developer experience.
      */
-    getDeploymentDownload(functionId: string, deploymentId: string, type?: DeploymentDownloadType): string;
+    getDeploymentDownload(this: Functions<ServerAuth>, functionId: string, deploymentId: string, type?: DeploymentDownloadType): string;
     getDeploymentDownload(
         paramsOrFirst: { functionId: string, deploymentId: string, type?: DeploymentDownloadType } | string,
         ...rest: [(string)?, (DeploymentDownloadType)?]    
@@ -1295,8 +1307,8 @@ export class Functions {
         const apiHeaders: { [header: string]: string } = {
         }
 
-        payload['project'] = this.client.config.project;
-        payload['key'] = this.client.config.key;
+        payload['project'] = (this.client.config as unknown as Record<string, string>)['project'];
+        payload['key'] = (this.client.config as unknown as Record<string, string>)['key'];
 
         for (const [key, value] of Object.entries(Service.flatten(payload))) {
             uri.searchParams.append(key, value);
@@ -1313,7 +1325,7 @@ export class Functions {
      * @throws {AppwriteException}
      * @returns {Promise<Models.Deployment>}
      */
-    updateDeploymentStatus(params: { functionId: string, deploymentId: string }): Promise<Models.Deployment>;
+    updateDeploymentStatus(this: Functions<ServerAuth>, params: { functionId: string, deploymentId: string }): Promise<Models.Deployment>;
     /**
      * Cancel an ongoing function deployment build. If the build is already in progress, it will be stopped and marked as canceled. If the build hasn't started yet, it will be marked as canceled without executing. You cannot cancel builds that have already completed (status 'ready') or failed. The response includes the final build status and details.
      *
@@ -1323,7 +1335,7 @@ export class Functions {
      * @returns {Promise<Models.Deployment>}
      * @deprecated Use the object parameter style method for a better developer experience.
      */
-    updateDeploymentStatus(functionId: string, deploymentId: string): Promise<Models.Deployment>;
+    updateDeploymentStatus(this: Functions<ServerAuth>, functionId: string, deploymentId: string): Promise<Models.Deployment>;
     updateDeploymentStatus(
         paramsOrFirst: { functionId: string, deploymentId: string } | string,
         ...rest: [(string)?]    
@@ -1593,7 +1605,7 @@ export class Functions {
      * @throws {AppwriteException}
      * @returns {Promise<{}>}
      */
-    deleteExecution(params: { functionId: string, executionId: string }): Promise<{}>;
+    deleteExecution(this: Functions<ServerAuth>, params: { functionId: string, executionId: string }): Promise<{}>;
     /**
      * Delete a function execution by its unique ID.
      *
@@ -1603,7 +1615,7 @@ export class Functions {
      * @returns {Promise<{}>}
      * @deprecated Use the object parameter style method for a better developer experience.
      */
-    deleteExecution(functionId: string, executionId: string): Promise<{}>;
+    deleteExecution(this: Functions<ServerAuth>, functionId: string, executionId: string): Promise<{}>;
     deleteExecution(
         paramsOrFirst: { functionId: string, executionId: string } | string,
         ...rest: [(string)?]    
@@ -1654,7 +1666,7 @@ export class Functions {
      * @throws {AppwriteException}
      * @returns {Promise<Models.VariableList>}
      */
-    listVariables(params: { functionId: string, queries?: string[], total?: boolean }): Promise<Models.VariableList>;
+    listVariables(this: Functions<ServerAuth>, params: { functionId: string, queries?: string[], total?: boolean }): Promise<Models.VariableList>;
     /**
      * Get a list of all variables of a specific function.
      *
@@ -1665,7 +1677,7 @@ export class Functions {
      * @returns {Promise<Models.VariableList>}
      * @deprecated Use the object parameter style method for a better developer experience.
      */
-    listVariables(functionId: string, queries?: string[], total?: boolean): Promise<Models.VariableList>;
+    listVariables(this: Functions<ServerAuth>, functionId: string, queries?: string[], total?: boolean): Promise<Models.VariableList>;
     listVariables(
         paramsOrFirst: { functionId: string, queries?: string[], total?: boolean } | string,
         ...rest: [(string[])?, (boolean)?]    
@@ -1722,7 +1734,7 @@ export class Functions {
      * @throws {AppwriteException}
      * @returns {Promise<Models.Variable>}
      */
-    createVariable(params: { functionId: string, variableId: string, key: string, value: string, secret?: boolean }): Promise<Models.Variable>;
+    createVariable(this: Functions<ServerAuth>, params: { functionId: string, variableId: string, key: string, value: string, secret?: boolean }): Promise<Models.Variable>;
     /**
      * Create a new function environment variable. These variables can be accessed in the function at runtime as environment variables.
      *
@@ -1735,7 +1747,7 @@ export class Functions {
      * @returns {Promise<Models.Variable>}
      * @deprecated Use the object parameter style method for a better developer experience.
      */
-    createVariable(functionId: string, variableId: string, key: string, value: string, secret?: boolean): Promise<Models.Variable>;
+    createVariable(this: Functions<ServerAuth>, functionId: string, variableId: string, key: string, value: string, secret?: boolean): Promise<Models.Variable>;
     createVariable(
         paramsOrFirst: { functionId: string, variableId: string, key: string, value: string, secret?: boolean } | string,
         ...rest: [(string)?, (string)?, (string)?, (boolean)?]    
@@ -1809,7 +1821,7 @@ export class Functions {
      * @throws {AppwriteException}
      * @returns {Promise<Models.Variable>}
      */
-    getVariable(params: { functionId: string, variableId: string }): Promise<Models.Variable>;
+    getVariable(this: Functions<ServerAuth>, params: { functionId: string, variableId: string }): Promise<Models.Variable>;
     /**
      * Get a variable by its unique ID.
      *
@@ -1819,7 +1831,7 @@ export class Functions {
      * @returns {Promise<Models.Variable>}
      * @deprecated Use the object parameter style method for a better developer experience.
      */
-    getVariable(functionId: string, variableId: string): Promise<Models.Variable>;
+    getVariable(this: Functions<ServerAuth>, functionId: string, variableId: string): Promise<Models.Variable>;
     getVariable(
         paramsOrFirst: { functionId: string, variableId: string } | string,
         ...rest: [(string)?]    
@@ -1871,7 +1883,7 @@ export class Functions {
      * @throws {AppwriteException}
      * @returns {Promise<Models.Variable>}
      */
-    updateVariable(params: { functionId: string, variableId: string, key?: string, value?: string, secret?: boolean }): Promise<Models.Variable>;
+    updateVariable(this: Functions<ServerAuth>, params: { functionId: string, variableId: string, key?: string, value?: string, secret?: boolean }): Promise<Models.Variable>;
     /**
      * Update variable by its unique ID.
      *
@@ -1884,7 +1896,7 @@ export class Functions {
      * @returns {Promise<Models.Variable>}
      * @deprecated Use the object parameter style method for a better developer experience.
      */
-    updateVariable(functionId: string, variableId: string, key?: string, value?: string, secret?: boolean): Promise<Models.Variable>;
+    updateVariable(this: Functions<ServerAuth>, functionId: string, variableId: string, key?: string, value?: string, secret?: boolean): Promise<Models.Variable>;
     updateVariable(
         paramsOrFirst: { functionId: string, variableId: string, key?: string, value?: string, secret?: boolean } | string,
         ...rest: [(string)?, (string)?, (string)?, (boolean)?]    
@@ -1949,7 +1961,7 @@ export class Functions {
      * @throws {AppwriteException}
      * @returns {Promise<{}>}
      */
-    deleteVariable(params: { functionId: string, variableId: string }): Promise<{}>;
+    deleteVariable(this: Functions<ServerAuth>, params: { functionId: string, variableId: string }): Promise<{}>;
     /**
      * Delete a variable by its unique ID.
      *
@@ -1959,7 +1971,7 @@ export class Functions {
      * @returns {Promise<{}>}
      * @deprecated Use the object parameter style method for a better developer experience.
      */
-    deleteVariable(functionId: string, variableId: string): Promise<{}>;
+    deleteVariable(this: Functions<ServerAuth>, functionId: string, variableId: string): Promise<{}>;
     deleteVariable(
         paramsOrFirst: { functionId: string, variableId: string } | string,
         ...rest: [(string)?]    
@@ -2001,3 +2013,9 @@ export class Functions {
         );
     }
 }
+
+const Functions = FunctionsRuntime as unknown as {
+    new <TAuth extends ClientAuth | ServerAuth = ClientAuth | ServerAuth>(client: Client<TAuth>): Functions<TAuth>;
+};
+
+export { Functions };

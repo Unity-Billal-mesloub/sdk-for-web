@@ -1,5 +1,4 @@
-import { Service } from '../service';
-import { AppwriteException, Client, type Payload, UploadProgress } from '../client';
+import { AppwriteException, Client, type ClientAuth, type ServerAuth, type Payload } from '../client';
 import type { Models } from '../models';
 
 import { RelationshipType } from '../enums/relationship-type';
@@ -7,10 +6,20 @@ import { RelationMutate } from '../enums/relation-mutate';
 import { DatabasesIndexType } from '../enums/databases-index-type';
 import { OrderBy } from '../enums/order-by';
 
-export class Databases {
-    client: Client;
+type DatabasesServerOnlyMethod = 'list' | 'create' | 'get' | 'update' | 'delete' | 'listCollections' | 'createCollection' | 'getCollection' | 'updateCollection' | 'deleteCollection' | 'listAttributes' | 'createBigIntAttribute' | 'updateBigIntAttribute' | 'createBooleanAttribute' | 'updateBooleanAttribute' | 'createDatetimeAttribute' | 'updateDatetimeAttribute' | 'createEmailAttribute' | 'updateEmailAttribute' | 'createEnumAttribute' | 'updateEnumAttribute' | 'createFloatAttribute' | 'updateFloatAttribute' | 'createIntegerAttribute' | 'updateIntegerAttribute' | 'createIpAttribute' | 'updateIpAttribute' | 'createLineAttribute' | 'updateLineAttribute' | 'createLongtextAttribute' | 'updateLongtextAttribute' | 'createMediumtextAttribute' | 'updateMediumtextAttribute' | 'createPointAttribute' | 'updatePointAttribute' | 'createPolygonAttribute' | 'updatePolygonAttribute' | 'createRelationshipAttribute' | 'updateRelationshipAttribute' | 'createStringAttribute' | 'updateStringAttribute' | 'createTextAttribute' | 'updateTextAttribute' | 'createUrlAttribute' | 'updateUrlAttribute' | 'createVarcharAttribute' | 'updateVarcharAttribute' | 'getAttribute' | 'deleteAttribute' | 'upsertDocuments' | 'updateDocuments' | 'deleteDocuments' | 'listIndexes' | 'createIndex' | 'getIndex' | 'deleteIndex';
+type DatabasesClientOnlyMethod = never;
 
-    constructor(client: Client) {
+export type Databases<TAuth extends ClientAuth | ServerAuth = ClientAuth | ServerAuth> =
+    TAuth extends ClientAuth
+        ? Omit<DatabasesRuntime<TAuth>, 'client' | DatabasesServerOnlyMethod>
+        : TAuth extends ServerAuth
+            ? Omit<DatabasesRuntime<TAuth>, 'client' | DatabasesClientOnlyMethod>
+            : Omit<DatabasesRuntime<TAuth>, 'client'>;
+
+class DatabasesRuntime<TAuth extends ClientAuth | ServerAuth = ClientAuth | ServerAuth> {
+    client: Client<TAuth>;
+
+    constructor(client: Client<TAuth>) {
         this.client = client;
     }
 
@@ -24,7 +33,7 @@ export class Databases {
      * @returns {Promise<Models.DatabaseList>}
      * @deprecated This API has been deprecated since 1.8.0. Please use `TablesDB.list` instead.
      */
-    list(params?: { queries?: string[], search?: string, total?: boolean }): Promise<Models.DatabaseList>;
+    list(this: Databases<ServerAuth>, params?: { queries?: string[], search?: string, total?: boolean }): Promise<Models.DatabaseList>;
     /**
      * Get a list of all databases from the current Appwrite project. You can use the search parameter to filter your results.
      *
@@ -35,7 +44,7 @@ export class Databases {
      * @returns {Promise<Models.DatabaseList>}
      * @deprecated Use the object parameter style method for a better developer experience.
      */
-    list(queries?: string[], search?: string, total?: boolean): Promise<Models.DatabaseList>;
+    list(this: Databases<ServerAuth>, queries?: string[], search?: string, total?: boolean): Promise<Models.DatabaseList>;
     list(
         paramsOrFirst?: { queries?: string[], search?: string, total?: boolean } | string[],
         ...rest: [(string)?, (boolean)?]    
@@ -92,7 +101,7 @@ export class Databases {
      * @returns {Promise<Models.Database>}
      * @deprecated This API has been deprecated since 1.8.0. Please use `TablesDB.create` instead.
      */
-    create(params: { databaseId: string, name: string, enabled?: boolean }): Promise<Models.Database>;
+    create(this: Databases<ServerAuth>, params: { databaseId: string, name: string, enabled?: boolean }): Promise<Models.Database>;
     /**
      * Create a new Database.
      * 
@@ -104,7 +113,7 @@ export class Databases {
      * @returns {Promise<Models.Database>}
      * @deprecated Use the object parameter style method for a better developer experience.
      */
-    create(databaseId: string, name: string, enabled?: boolean): Promise<Models.Database>;
+    create(this: Databases<ServerAuth>, databaseId: string, name: string, enabled?: boolean): Promise<Models.Database>;
     create(
         paramsOrFirst: { databaseId: string, name: string, enabled?: boolean } | string,
         ...rest: [(string)?, (boolean)?]    
@@ -498,7 +507,7 @@ export class Databases {
      * @returns {Promise<Models.Database>}
      * @deprecated This API has been deprecated since 1.8.0. Please use `TablesDB.get` instead.
      */
-    get(params: { databaseId: string }): Promise<Models.Database>;
+    get(this: Databases<ServerAuth>, params: { databaseId: string }): Promise<Models.Database>;
     /**
      * Get a database by its unique ID. This endpoint response returns a JSON object with the database metadata.
      *
@@ -507,7 +516,7 @@ export class Databases {
      * @returns {Promise<Models.Database>}
      * @deprecated Use the object parameter style method for a better developer experience.
      */
-    get(databaseId: string): Promise<Models.Database>;
+    get(this: Databases<ServerAuth>, databaseId: string): Promise<Models.Database>;
     get(
         paramsOrFirst: { databaseId: string } | string    
     ): Promise<Models.Database> {
@@ -552,7 +561,7 @@ export class Databases {
      * @returns {Promise<Models.Database>}
      * @deprecated This API has been deprecated since 1.8.0. Please use `TablesDB.update` instead.
      */
-    update(params: { databaseId: string, name?: string, enabled?: boolean }): Promise<Models.Database>;
+    update(this: Databases<ServerAuth>, params: { databaseId: string, name?: string, enabled?: boolean }): Promise<Models.Database>;
     /**
      * Update a database by its unique ID.
      *
@@ -563,7 +572,7 @@ export class Databases {
      * @returns {Promise<Models.Database>}
      * @deprecated Use the object parameter style method for a better developer experience.
      */
-    update(databaseId: string, name?: string, enabled?: boolean): Promise<Models.Database>;
+    update(this: Databases<ServerAuth>, databaseId: string, name?: string, enabled?: boolean): Promise<Models.Database>;
     update(
         paramsOrFirst: { databaseId: string, name?: string, enabled?: boolean } | string,
         ...rest: [(string)?, (boolean)?]    
@@ -618,7 +627,7 @@ export class Databases {
      * @returns {Promise<{}>}
      * @deprecated This API has been deprecated since 1.8.0. Please use `TablesDB.delete` instead.
      */
-    delete(params: { databaseId: string }): Promise<{}>;
+    delete(this: Databases<ServerAuth>, params: { databaseId: string }): Promise<{}>;
     /**
      * Delete a database by its unique ID. Only API keys with with databases.write scope can delete a database.
      *
@@ -627,7 +636,7 @@ export class Databases {
      * @returns {Promise<{}>}
      * @deprecated Use the object parameter style method for a better developer experience.
      */
-    delete(databaseId: string): Promise<{}>;
+    delete(this: Databases<ServerAuth>, databaseId: string): Promise<{}>;
     delete(
         paramsOrFirst: { databaseId: string } | string    
     ): Promise<{}> {
@@ -674,7 +683,7 @@ export class Databases {
      * @returns {Promise<Models.CollectionList>}
      * @deprecated This API has been deprecated since 1.8.0. Please use `TablesDB.listTables` instead.
      */
-    listCollections(params: { databaseId: string, queries?: string[], search?: string, total?: boolean }): Promise<Models.CollectionList>;
+    listCollections(this: Databases<ServerAuth>, params: { databaseId: string, queries?: string[], search?: string, total?: boolean }): Promise<Models.CollectionList>;
     /**
      * Get a list of all collections that belong to the provided databaseId. You can use the search parameter to filter your results.
      *
@@ -686,7 +695,7 @@ export class Databases {
      * @returns {Promise<Models.CollectionList>}
      * @deprecated Use the object parameter style method for a better developer experience.
      */
-    listCollections(databaseId: string, queries?: string[], search?: string, total?: boolean): Promise<Models.CollectionList>;
+    listCollections(this: Databases<ServerAuth>, databaseId: string, queries?: string[], search?: string, total?: boolean): Promise<Models.CollectionList>;
     listCollections(
         paramsOrFirst: { databaseId: string, queries?: string[], search?: string, total?: boolean } | string,
         ...rest: [(string[])?, (string)?, (boolean)?]    
@@ -752,7 +761,7 @@ export class Databases {
      * @returns {Promise<Models.Collection>}
      * @deprecated This API has been deprecated since 1.8.0. Please use `TablesDB.createTable` instead.
      */
-    createCollection(params: { databaseId: string, collectionId: string, name: string, permissions?: string[], documentSecurity?: boolean, enabled?: boolean, attributes?: object[], indexes?: object[] }): Promise<Models.Collection>;
+    createCollection(this: Databases<ServerAuth>, params: { databaseId: string, collectionId: string, name: string, permissions?: string[], documentSecurity?: boolean, enabled?: boolean, attributes?: object[], indexes?: object[] }): Promise<Models.Collection>;
     /**
      * Create a new Collection. Before using this route, you should create a new database resource using either a [server integration](https://appwrite.io/docs/server/databases#databasesCreateCollection) API or directly from your database console.
      *
@@ -768,7 +777,7 @@ export class Databases {
      * @returns {Promise<Models.Collection>}
      * @deprecated Use the object parameter style method for a better developer experience.
      */
-    createCollection(databaseId: string, collectionId: string, name: string, permissions?: string[], documentSecurity?: boolean, enabled?: boolean, attributes?: object[], indexes?: object[]): Promise<Models.Collection>;
+    createCollection(this: Databases<ServerAuth>, databaseId: string, collectionId: string, name: string, permissions?: string[], documentSecurity?: boolean, enabled?: boolean, attributes?: object[], indexes?: object[]): Promise<Models.Collection>;
     createCollection(
         paramsOrFirst: { databaseId: string, collectionId: string, name: string, permissions?: string[], documentSecurity?: boolean, enabled?: boolean, attributes?: object[], indexes?: object[] } | string,
         ...rest: [(string)?, (string)?, (string[])?, (boolean)?, (boolean)?, (object[])?, (object[])?]    
@@ -855,7 +864,7 @@ export class Databases {
      * @returns {Promise<Models.Collection>}
      * @deprecated This API has been deprecated since 1.8.0. Please use `TablesDB.getTable` instead.
      */
-    getCollection(params: { databaseId: string, collectionId: string }): Promise<Models.Collection>;
+    getCollection(this: Databases<ServerAuth>, params: { databaseId: string, collectionId: string }): Promise<Models.Collection>;
     /**
      * Get a collection by its unique ID. This endpoint response returns a JSON object with the collection metadata.
      *
@@ -865,7 +874,7 @@ export class Databases {
      * @returns {Promise<Models.Collection>}
      * @deprecated Use the object parameter style method for a better developer experience.
      */
-    getCollection(databaseId: string, collectionId: string): Promise<Models.Collection>;
+    getCollection(this: Databases<ServerAuth>, databaseId: string, collectionId: string): Promise<Models.Collection>;
     getCollection(
         paramsOrFirst: { databaseId: string, collectionId: string } | string,
         ...rest: [(string)?]    
@@ -920,7 +929,7 @@ export class Databases {
      * @returns {Promise<Models.Collection>}
      * @deprecated This API has been deprecated since 1.8.0. Please use `TablesDB.updateTable` instead.
      */
-    updateCollection(params: { databaseId: string, collectionId: string, name?: string, permissions?: string[], documentSecurity?: boolean, enabled?: boolean, purge?: boolean }): Promise<Models.Collection>;
+    updateCollection(this: Databases<ServerAuth>, params: { databaseId: string, collectionId: string, name?: string, permissions?: string[], documentSecurity?: boolean, enabled?: boolean, purge?: boolean }): Promise<Models.Collection>;
     /**
      * Update a collection by its unique ID.
      *
@@ -935,7 +944,7 @@ export class Databases {
      * @returns {Promise<Models.Collection>}
      * @deprecated Use the object parameter style method for a better developer experience.
      */
-    updateCollection(databaseId: string, collectionId: string, name?: string, permissions?: string[], documentSecurity?: boolean, enabled?: boolean, purge?: boolean): Promise<Models.Collection>;
+    updateCollection(this: Databases<ServerAuth>, databaseId: string, collectionId: string, name?: string, permissions?: string[], documentSecurity?: boolean, enabled?: boolean, purge?: boolean): Promise<Models.Collection>;
     updateCollection(
         paramsOrFirst: { databaseId: string, collectionId: string, name?: string, permissions?: string[], documentSecurity?: boolean, enabled?: boolean, purge?: boolean } | string,
         ...rest: [(string)?, (string)?, (string[])?, (boolean)?, (boolean)?, (boolean)?]    
@@ -1011,7 +1020,7 @@ export class Databases {
      * @returns {Promise<{}>}
      * @deprecated This API has been deprecated since 1.8.0. Please use `TablesDB.deleteTable` instead.
      */
-    deleteCollection(params: { databaseId: string, collectionId: string }): Promise<{}>;
+    deleteCollection(this: Databases<ServerAuth>, params: { databaseId: string, collectionId: string }): Promise<{}>;
     /**
      * Delete a collection by its unique ID. Only users with write permissions have access to delete this resource.
      *
@@ -1021,7 +1030,7 @@ export class Databases {
      * @returns {Promise<{}>}
      * @deprecated Use the object parameter style method for a better developer experience.
      */
-    deleteCollection(databaseId: string, collectionId: string): Promise<{}>;
+    deleteCollection(this: Databases<ServerAuth>, databaseId: string, collectionId: string): Promise<{}>;
     deleteCollection(
         paramsOrFirst: { databaseId: string, collectionId: string } | string,
         ...rest: [(string)?]    
@@ -1074,7 +1083,7 @@ export class Databases {
      * @returns {Promise<Models.AttributeList>}
      * @deprecated This API has been deprecated since 1.8.0. Please use `TablesDB.listColumns` instead.
      */
-    listAttributes(params: { databaseId: string, collectionId: string, queries?: string[], total?: boolean }): Promise<Models.AttributeList>;
+    listAttributes(this: Databases<ServerAuth>, params: { databaseId: string, collectionId: string, queries?: string[], total?: boolean }): Promise<Models.AttributeList>;
     /**
      * List attributes in the collection.
      *
@@ -1086,7 +1095,7 @@ export class Databases {
      * @returns {Promise<Models.AttributeList>}
      * @deprecated Use the object parameter style method for a better developer experience.
      */
-    listAttributes(databaseId: string, collectionId: string, queries?: string[], total?: boolean): Promise<Models.AttributeList>;
+    listAttributes(this: Databases<ServerAuth>, databaseId: string, collectionId: string, queries?: string[], total?: boolean): Promise<Models.AttributeList>;
     listAttributes(
         paramsOrFirst: { databaseId: string, collectionId: string, queries?: string[], total?: boolean } | string,
         ...rest: [(string)?, (string[])?, (boolean)?]    
@@ -1153,7 +1162,7 @@ export class Databases {
      * @returns {Promise<Models.AttributeBigint>}
      * @deprecated This API has been deprecated since 1.8.0. Please use `TablesDB.createBigIntColumn` instead.
      */
-    createBigIntAttribute(params: { databaseId: string, collectionId: string, key: string, required: boolean, min?: number | bigint, max?: number | bigint, xdefault?: number | bigint, array?: boolean }): Promise<Models.AttributeBigint>;
+    createBigIntAttribute(this: Databases<ServerAuth>, params: { databaseId: string, collectionId: string, key: string, required: boolean, min?: number | bigint, max?: number | bigint, xdefault?: number | bigint, array?: boolean }): Promise<Models.AttributeBigint>;
     /**
      * Create a bigint attribute. Optionally, minimum and maximum values can be provided.
      * 
@@ -1170,7 +1179,7 @@ export class Databases {
      * @returns {Promise<Models.AttributeBigint>}
      * @deprecated Use the object parameter style method for a better developer experience.
      */
-    createBigIntAttribute(databaseId: string, collectionId: string, key: string, required: boolean, min?: number | bigint, max?: number | bigint, xdefault?: number | bigint, array?: boolean): Promise<Models.AttributeBigint>;
+    createBigIntAttribute(this: Databases<ServerAuth>, databaseId: string, collectionId: string, key: string, required: boolean, min?: number | bigint, max?: number | bigint, xdefault?: number | bigint, array?: boolean): Promise<Models.AttributeBigint>;
     createBigIntAttribute(
         paramsOrFirst: { databaseId: string, collectionId: string, key: string, required: boolean, min?: number | bigint, max?: number | bigint, xdefault?: number | bigint, array?: boolean } | string,
         ...rest: [(string)?, (string)?, (boolean)?, (number | bigint)?, (number | bigint)?, (number | bigint)?, (boolean)?]    
@@ -1264,7 +1273,7 @@ export class Databases {
      * @returns {Promise<Models.AttributeBigint>}
      * @deprecated This API has been deprecated since 1.8.0. Please use `TablesDB.updateBigIntColumn` instead.
      */
-    updateBigIntAttribute(params: { databaseId: string, collectionId: string, key: string, required: boolean, xdefault?: number | bigint, min?: number | bigint, max?: number | bigint, newKey?: string }): Promise<Models.AttributeBigint>;
+    updateBigIntAttribute(this: Databases<ServerAuth>, params: { databaseId: string, collectionId: string, key: string, required: boolean, xdefault?: number | bigint, min?: number | bigint, max?: number | bigint, newKey?: string }): Promise<Models.AttributeBigint>;
     /**
      * Update a bigint attribute. Changing the `default` value will not update already existing documents.
      * 
@@ -1281,7 +1290,7 @@ export class Databases {
      * @returns {Promise<Models.AttributeBigint>}
      * @deprecated Use the object parameter style method for a better developer experience.
      */
-    updateBigIntAttribute(databaseId: string, collectionId: string, key: string, required: boolean, xdefault?: number | bigint, min?: number | bigint, max?: number | bigint, newKey?: string): Promise<Models.AttributeBigint>;
+    updateBigIntAttribute(this: Databases<ServerAuth>, databaseId: string, collectionId: string, key: string, required: boolean, xdefault?: number | bigint, min?: number | bigint, max?: number | bigint, newKey?: string): Promise<Models.AttributeBigint>;
     updateBigIntAttribute(
         paramsOrFirst: { databaseId: string, collectionId: string, key: string, required: boolean, xdefault?: number | bigint, min?: number | bigint, max?: number | bigint, newKey?: string } | string,
         ...rest: [(string)?, (string)?, (boolean)?, (number | bigint)?, (number | bigint)?, (number | bigint)?, (string)?]    
@@ -1373,7 +1382,7 @@ export class Databases {
      * @returns {Promise<Models.AttributeBoolean>}
      * @deprecated This API has been deprecated since 1.8.0. Please use `TablesDB.createBooleanColumn` instead.
      */
-    createBooleanAttribute(params: { databaseId: string, collectionId: string, key: string, required: boolean, xdefault?: boolean, array?: boolean }): Promise<Models.AttributeBoolean>;
+    createBooleanAttribute(this: Databases<ServerAuth>, params: { databaseId: string, collectionId: string, key: string, required: boolean, xdefault?: boolean, array?: boolean }): Promise<Models.AttributeBoolean>;
     /**
      * Create a boolean attribute.
      * 
@@ -1388,7 +1397,7 @@ export class Databases {
      * @returns {Promise<Models.AttributeBoolean>}
      * @deprecated Use the object parameter style method for a better developer experience.
      */
-    createBooleanAttribute(databaseId: string, collectionId: string, key: string, required: boolean, xdefault?: boolean, array?: boolean): Promise<Models.AttributeBoolean>;
+    createBooleanAttribute(this: Databases<ServerAuth>, databaseId: string, collectionId: string, key: string, required: boolean, xdefault?: boolean, array?: boolean): Promise<Models.AttributeBoolean>;
     createBooleanAttribute(
         paramsOrFirst: { databaseId: string, collectionId: string, key: string, required: boolean, xdefault?: boolean, array?: boolean } | string,
         ...rest: [(string)?, (string)?, (boolean)?, (boolean)?, (boolean)?]    
@@ -1469,7 +1478,7 @@ export class Databases {
      * @returns {Promise<Models.AttributeBoolean>}
      * @deprecated This API has been deprecated since 1.8.0. Please use `TablesDB.updateBooleanColumn` instead.
      */
-    updateBooleanAttribute(params: { databaseId: string, collectionId: string, key: string, required: boolean, xdefault?: boolean, newKey?: string }): Promise<Models.AttributeBoolean>;
+    updateBooleanAttribute(this: Databases<ServerAuth>, params: { databaseId: string, collectionId: string, key: string, required: boolean, xdefault?: boolean, newKey?: string }): Promise<Models.AttributeBoolean>;
     /**
      * Update a boolean attribute. Changing the `default` value will not update already existing documents.
      *
@@ -1483,7 +1492,7 @@ export class Databases {
      * @returns {Promise<Models.AttributeBoolean>}
      * @deprecated Use the object parameter style method for a better developer experience.
      */
-    updateBooleanAttribute(databaseId: string, collectionId: string, key: string, required: boolean, xdefault?: boolean, newKey?: string): Promise<Models.AttributeBoolean>;
+    updateBooleanAttribute(this: Databases<ServerAuth>, databaseId: string, collectionId: string, key: string, required: boolean, xdefault?: boolean, newKey?: string): Promise<Models.AttributeBoolean>;
     updateBooleanAttribute(
         paramsOrFirst: { databaseId: string, collectionId: string, key: string, required: boolean, xdefault?: boolean, newKey?: string } | string,
         ...rest: [(string)?, (string)?, (boolean)?, (boolean)?, (string)?]    
@@ -1564,7 +1573,7 @@ export class Databases {
      * @returns {Promise<Models.AttributeDatetime>}
      * @deprecated This API has been deprecated since 1.8.0. Please use `TablesDB.createDatetimeColumn` instead.
      */
-    createDatetimeAttribute(params: { databaseId: string, collectionId: string, key: string, required: boolean, xdefault?: string, array?: boolean }): Promise<Models.AttributeDatetime>;
+    createDatetimeAttribute(this: Databases<ServerAuth>, params: { databaseId: string, collectionId: string, key: string, required: boolean, xdefault?: string, array?: boolean }): Promise<Models.AttributeDatetime>;
     /**
      * Create a date time attribute according to the ISO 8601 standard.
      *
@@ -1578,7 +1587,7 @@ export class Databases {
      * @returns {Promise<Models.AttributeDatetime>}
      * @deprecated Use the object parameter style method for a better developer experience.
      */
-    createDatetimeAttribute(databaseId: string, collectionId: string, key: string, required: boolean, xdefault?: string, array?: boolean): Promise<Models.AttributeDatetime>;
+    createDatetimeAttribute(this: Databases<ServerAuth>, databaseId: string, collectionId: string, key: string, required: boolean, xdefault?: string, array?: boolean): Promise<Models.AttributeDatetime>;
     createDatetimeAttribute(
         paramsOrFirst: { databaseId: string, collectionId: string, key: string, required: boolean, xdefault?: string, array?: boolean } | string,
         ...rest: [(string)?, (string)?, (boolean)?, (string)?, (boolean)?]    
@@ -1659,7 +1668,7 @@ export class Databases {
      * @returns {Promise<Models.AttributeDatetime>}
      * @deprecated This API has been deprecated since 1.8.0. Please use `TablesDB.updateDatetimeColumn` instead.
      */
-    updateDatetimeAttribute(params: { databaseId: string, collectionId: string, key: string, required: boolean, xdefault?: string, newKey?: string }): Promise<Models.AttributeDatetime>;
+    updateDatetimeAttribute(this: Databases<ServerAuth>, params: { databaseId: string, collectionId: string, key: string, required: boolean, xdefault?: string, newKey?: string }): Promise<Models.AttributeDatetime>;
     /**
      * Update a date time attribute. Changing the `default` value will not update already existing documents.
      *
@@ -1673,7 +1682,7 @@ export class Databases {
      * @returns {Promise<Models.AttributeDatetime>}
      * @deprecated Use the object parameter style method for a better developer experience.
      */
-    updateDatetimeAttribute(databaseId: string, collectionId: string, key: string, required: boolean, xdefault?: string, newKey?: string): Promise<Models.AttributeDatetime>;
+    updateDatetimeAttribute(this: Databases<ServerAuth>, databaseId: string, collectionId: string, key: string, required: boolean, xdefault?: string, newKey?: string): Promise<Models.AttributeDatetime>;
     updateDatetimeAttribute(
         paramsOrFirst: { databaseId: string, collectionId: string, key: string, required: boolean, xdefault?: string, newKey?: string } | string,
         ...rest: [(string)?, (string)?, (boolean)?, (string)?, (string)?]    
@@ -1755,7 +1764,7 @@ export class Databases {
      * @returns {Promise<Models.AttributeEmail>}
      * @deprecated This API has been deprecated since 1.8.0. Please use `TablesDB.createEmailColumn` instead.
      */
-    createEmailAttribute(params: { databaseId: string, collectionId: string, key: string, required: boolean, xdefault?: string, array?: boolean }): Promise<Models.AttributeEmail>;
+    createEmailAttribute(this: Databases<ServerAuth>, params: { databaseId: string, collectionId: string, key: string, required: boolean, xdefault?: string, array?: boolean }): Promise<Models.AttributeEmail>;
     /**
      * Create an email attribute.
      * 
@@ -1770,7 +1779,7 @@ export class Databases {
      * @returns {Promise<Models.AttributeEmail>}
      * @deprecated Use the object parameter style method for a better developer experience.
      */
-    createEmailAttribute(databaseId: string, collectionId: string, key: string, required: boolean, xdefault?: string, array?: boolean): Promise<Models.AttributeEmail>;
+    createEmailAttribute(this: Databases<ServerAuth>, databaseId: string, collectionId: string, key: string, required: boolean, xdefault?: string, array?: boolean): Promise<Models.AttributeEmail>;
     createEmailAttribute(
         paramsOrFirst: { databaseId: string, collectionId: string, key: string, required: boolean, xdefault?: string, array?: boolean } | string,
         ...rest: [(string)?, (string)?, (boolean)?, (string)?, (boolean)?]    
@@ -1852,7 +1861,7 @@ export class Databases {
      * @returns {Promise<Models.AttributeEmail>}
      * @deprecated This API has been deprecated since 1.8.0. Please use `TablesDB.updateEmailColumn` instead.
      */
-    updateEmailAttribute(params: { databaseId: string, collectionId: string, key: string, required: boolean, xdefault?: string, newKey?: string }): Promise<Models.AttributeEmail>;
+    updateEmailAttribute(this: Databases<ServerAuth>, params: { databaseId: string, collectionId: string, key: string, required: boolean, xdefault?: string, newKey?: string }): Promise<Models.AttributeEmail>;
     /**
      * Update an email attribute. Changing the `default` value will not update already existing documents.
      * 
@@ -1867,7 +1876,7 @@ export class Databases {
      * @returns {Promise<Models.AttributeEmail>}
      * @deprecated Use the object parameter style method for a better developer experience.
      */
-    updateEmailAttribute(databaseId: string, collectionId: string, key: string, required: boolean, xdefault?: string, newKey?: string): Promise<Models.AttributeEmail>;
+    updateEmailAttribute(this: Databases<ServerAuth>, databaseId: string, collectionId: string, key: string, required: boolean, xdefault?: string, newKey?: string): Promise<Models.AttributeEmail>;
     updateEmailAttribute(
         paramsOrFirst: { databaseId: string, collectionId: string, key: string, required: boolean, xdefault?: string, newKey?: string } | string,
         ...rest: [(string)?, (string)?, (boolean)?, (string)?, (string)?]    
@@ -1950,7 +1959,7 @@ export class Databases {
      * @returns {Promise<Models.AttributeEnum>}
      * @deprecated This API has been deprecated since 1.8.0. Please use `TablesDB.createEnumColumn` instead.
      */
-    createEnumAttribute(params: { databaseId: string, collectionId: string, key: string, elements: string[], required: boolean, xdefault?: string, array?: boolean }): Promise<Models.AttributeEnum>;
+    createEnumAttribute(this: Databases<ServerAuth>, params: { databaseId: string, collectionId: string, key: string, elements: string[], required: boolean, xdefault?: string, array?: boolean }): Promise<Models.AttributeEnum>;
     /**
      * Create an enum attribute. The `elements` param acts as a white-list of accepted values for this attribute. 
      * 
@@ -1966,7 +1975,7 @@ export class Databases {
      * @returns {Promise<Models.AttributeEnum>}
      * @deprecated Use the object parameter style method for a better developer experience.
      */
-    createEnumAttribute(databaseId: string, collectionId: string, key: string, elements: string[], required: boolean, xdefault?: string, array?: boolean): Promise<Models.AttributeEnum>;
+    createEnumAttribute(this: Databases<ServerAuth>, databaseId: string, collectionId: string, key: string, elements: string[], required: boolean, xdefault?: string, array?: boolean): Promise<Models.AttributeEnum>;
     createEnumAttribute(
         paramsOrFirst: { databaseId: string, collectionId: string, key: string, elements: string[], required: boolean, xdefault?: string, array?: boolean } | string,
         ...rest: [(string)?, (string)?, (string[])?, (boolean)?, (string)?, (boolean)?]    
@@ -2057,7 +2066,7 @@ export class Databases {
      * @returns {Promise<Models.AttributeEnum>}
      * @deprecated This API has been deprecated since 1.8.0. Please use `TablesDB.updateEnumColumn` instead.
      */
-    updateEnumAttribute(params: { databaseId: string, collectionId: string, key: string, elements: string[], required: boolean, xdefault?: string, newKey?: string }): Promise<Models.AttributeEnum>;
+    updateEnumAttribute(this: Databases<ServerAuth>, params: { databaseId: string, collectionId: string, key: string, elements: string[], required: boolean, xdefault?: string, newKey?: string }): Promise<Models.AttributeEnum>;
     /**
      * Update an enum attribute. Changing the `default` value will not update already existing documents.
      * 
@@ -2073,7 +2082,7 @@ export class Databases {
      * @returns {Promise<Models.AttributeEnum>}
      * @deprecated Use the object parameter style method for a better developer experience.
      */
-    updateEnumAttribute(databaseId: string, collectionId: string, key: string, elements: string[], required: boolean, xdefault?: string, newKey?: string): Promise<Models.AttributeEnum>;
+    updateEnumAttribute(this: Databases<ServerAuth>, databaseId: string, collectionId: string, key: string, elements: string[], required: boolean, xdefault?: string, newKey?: string): Promise<Models.AttributeEnum>;
     updateEnumAttribute(
         paramsOrFirst: { databaseId: string, collectionId: string, key: string, elements: string[], required: boolean, xdefault?: string, newKey?: string } | string,
         ...rest: [(string)?, (string)?, (string[])?, (boolean)?, (string)?, (string)?]    
@@ -2165,7 +2174,7 @@ export class Databases {
      * @returns {Promise<Models.AttributeFloat>}
      * @deprecated This API has been deprecated since 1.8.0. Please use `TablesDB.createFloatColumn` instead.
      */
-    createFloatAttribute(params: { databaseId: string, collectionId: string, key: string, required: boolean, min?: number, max?: number, xdefault?: number, array?: boolean }): Promise<Models.AttributeFloat>;
+    createFloatAttribute(this: Databases<ServerAuth>, params: { databaseId: string, collectionId: string, key: string, required: boolean, min?: number, max?: number, xdefault?: number, array?: boolean }): Promise<Models.AttributeFloat>;
     /**
      * Create a float attribute. Optionally, minimum and maximum values can be provided.
      * 
@@ -2182,7 +2191,7 @@ export class Databases {
      * @returns {Promise<Models.AttributeFloat>}
      * @deprecated Use the object parameter style method for a better developer experience.
      */
-    createFloatAttribute(databaseId: string, collectionId: string, key: string, required: boolean, min?: number, max?: number, xdefault?: number, array?: boolean): Promise<Models.AttributeFloat>;
+    createFloatAttribute(this: Databases<ServerAuth>, databaseId: string, collectionId: string, key: string, required: boolean, min?: number, max?: number, xdefault?: number, array?: boolean): Promise<Models.AttributeFloat>;
     createFloatAttribute(
         paramsOrFirst: { databaseId: string, collectionId: string, key: string, required: boolean, min?: number, max?: number, xdefault?: number, array?: boolean } | string,
         ...rest: [(string)?, (string)?, (boolean)?, (number)?, (number)?, (number)?, (boolean)?]    
@@ -2276,7 +2285,7 @@ export class Databases {
      * @returns {Promise<Models.AttributeFloat>}
      * @deprecated This API has been deprecated since 1.8.0. Please use `TablesDB.updateFloatColumn` instead.
      */
-    updateFloatAttribute(params: { databaseId: string, collectionId: string, key: string, required: boolean, xdefault?: number, min?: number, max?: number, newKey?: string }): Promise<Models.AttributeFloat>;
+    updateFloatAttribute(this: Databases<ServerAuth>, params: { databaseId: string, collectionId: string, key: string, required: boolean, xdefault?: number, min?: number, max?: number, newKey?: string }): Promise<Models.AttributeFloat>;
     /**
      * Update a float attribute. Changing the `default` value will not update already existing documents.
      * 
@@ -2293,7 +2302,7 @@ export class Databases {
      * @returns {Promise<Models.AttributeFloat>}
      * @deprecated Use the object parameter style method for a better developer experience.
      */
-    updateFloatAttribute(databaseId: string, collectionId: string, key: string, required: boolean, xdefault?: number, min?: number, max?: number, newKey?: string): Promise<Models.AttributeFloat>;
+    updateFloatAttribute(this: Databases<ServerAuth>, databaseId: string, collectionId: string, key: string, required: boolean, xdefault?: number, min?: number, max?: number, newKey?: string): Promise<Models.AttributeFloat>;
     updateFloatAttribute(
         paramsOrFirst: { databaseId: string, collectionId: string, key: string, required: boolean, xdefault?: number, min?: number, max?: number, newKey?: string } | string,
         ...rest: [(string)?, (string)?, (boolean)?, (number)?, (number)?, (number)?, (string)?]    
@@ -2387,7 +2396,7 @@ export class Databases {
      * @returns {Promise<Models.AttributeInteger>}
      * @deprecated This API has been deprecated since 1.8.0. Please use `TablesDB.createIntegerColumn` instead.
      */
-    createIntegerAttribute(params: { databaseId: string, collectionId: string, key: string, required: boolean, min?: number | bigint, max?: number | bigint, xdefault?: number | bigint, array?: boolean }): Promise<Models.AttributeInteger>;
+    createIntegerAttribute(this: Databases<ServerAuth>, params: { databaseId: string, collectionId: string, key: string, required: boolean, min?: number | bigint, max?: number | bigint, xdefault?: number | bigint, array?: boolean }): Promise<Models.AttributeInteger>;
     /**
      * Create an integer attribute. Optionally, minimum and maximum values can be provided.
      * 
@@ -2404,7 +2413,7 @@ export class Databases {
      * @returns {Promise<Models.AttributeInteger>}
      * @deprecated Use the object parameter style method for a better developer experience.
      */
-    createIntegerAttribute(databaseId: string, collectionId: string, key: string, required: boolean, min?: number | bigint, max?: number | bigint, xdefault?: number | bigint, array?: boolean): Promise<Models.AttributeInteger>;
+    createIntegerAttribute(this: Databases<ServerAuth>, databaseId: string, collectionId: string, key: string, required: boolean, min?: number | bigint, max?: number | bigint, xdefault?: number | bigint, array?: boolean): Promise<Models.AttributeInteger>;
     createIntegerAttribute(
         paramsOrFirst: { databaseId: string, collectionId: string, key: string, required: boolean, min?: number | bigint, max?: number | bigint, xdefault?: number | bigint, array?: boolean } | string,
         ...rest: [(string)?, (string)?, (boolean)?, (number | bigint)?, (number | bigint)?, (number | bigint)?, (boolean)?]    
@@ -2498,7 +2507,7 @@ export class Databases {
      * @returns {Promise<Models.AttributeInteger>}
      * @deprecated This API has been deprecated since 1.8.0. Please use `TablesDB.updateIntegerColumn` instead.
      */
-    updateIntegerAttribute(params: { databaseId: string, collectionId: string, key: string, required: boolean, xdefault?: number | bigint, min?: number | bigint, max?: number | bigint, newKey?: string }): Promise<Models.AttributeInteger>;
+    updateIntegerAttribute(this: Databases<ServerAuth>, params: { databaseId: string, collectionId: string, key: string, required: boolean, xdefault?: number | bigint, min?: number | bigint, max?: number | bigint, newKey?: string }): Promise<Models.AttributeInteger>;
     /**
      * Update an integer attribute. Changing the `default` value will not update already existing documents.
      * 
@@ -2515,7 +2524,7 @@ export class Databases {
      * @returns {Promise<Models.AttributeInteger>}
      * @deprecated Use the object parameter style method for a better developer experience.
      */
-    updateIntegerAttribute(databaseId: string, collectionId: string, key: string, required: boolean, xdefault?: number | bigint, min?: number | bigint, max?: number | bigint, newKey?: string): Promise<Models.AttributeInteger>;
+    updateIntegerAttribute(this: Databases<ServerAuth>, databaseId: string, collectionId: string, key: string, required: boolean, xdefault?: number | bigint, min?: number | bigint, max?: number | bigint, newKey?: string): Promise<Models.AttributeInteger>;
     updateIntegerAttribute(
         paramsOrFirst: { databaseId: string, collectionId: string, key: string, required: boolean, xdefault?: number | bigint, min?: number | bigint, max?: number | bigint, newKey?: string } | string,
         ...rest: [(string)?, (string)?, (boolean)?, (number | bigint)?, (number | bigint)?, (number | bigint)?, (string)?]    
@@ -2607,7 +2616,7 @@ export class Databases {
      * @returns {Promise<Models.AttributeIp>}
      * @deprecated This API has been deprecated since 1.8.0. Please use `TablesDB.createIpColumn` instead.
      */
-    createIpAttribute(params: { databaseId: string, collectionId: string, key: string, required: boolean, xdefault?: string, array?: boolean }): Promise<Models.AttributeIp>;
+    createIpAttribute(this: Databases<ServerAuth>, params: { databaseId: string, collectionId: string, key: string, required: boolean, xdefault?: string, array?: boolean }): Promise<Models.AttributeIp>;
     /**
      * Create IP address attribute.
      * 
@@ -2622,7 +2631,7 @@ export class Databases {
      * @returns {Promise<Models.AttributeIp>}
      * @deprecated Use the object parameter style method for a better developer experience.
      */
-    createIpAttribute(databaseId: string, collectionId: string, key: string, required: boolean, xdefault?: string, array?: boolean): Promise<Models.AttributeIp>;
+    createIpAttribute(this: Databases<ServerAuth>, databaseId: string, collectionId: string, key: string, required: boolean, xdefault?: string, array?: boolean): Promise<Models.AttributeIp>;
     createIpAttribute(
         paramsOrFirst: { databaseId: string, collectionId: string, key: string, required: boolean, xdefault?: string, array?: boolean } | string,
         ...rest: [(string)?, (string)?, (boolean)?, (string)?, (boolean)?]    
@@ -2704,7 +2713,7 @@ export class Databases {
      * @returns {Promise<Models.AttributeIp>}
      * @deprecated This API has been deprecated since 1.8.0. Please use `TablesDB.updateIpColumn` instead.
      */
-    updateIpAttribute(params: { databaseId: string, collectionId: string, key: string, required: boolean, xdefault?: string, newKey?: string }): Promise<Models.AttributeIp>;
+    updateIpAttribute(this: Databases<ServerAuth>, params: { databaseId: string, collectionId: string, key: string, required: boolean, xdefault?: string, newKey?: string }): Promise<Models.AttributeIp>;
     /**
      * Update an ip attribute. Changing the `default` value will not update already existing documents.
      * 
@@ -2719,7 +2728,7 @@ export class Databases {
      * @returns {Promise<Models.AttributeIp>}
      * @deprecated Use the object parameter style method for a better developer experience.
      */
-    updateIpAttribute(databaseId: string, collectionId: string, key: string, required: boolean, xdefault?: string, newKey?: string): Promise<Models.AttributeIp>;
+    updateIpAttribute(this: Databases<ServerAuth>, databaseId: string, collectionId: string, key: string, required: boolean, xdefault?: string, newKey?: string): Promise<Models.AttributeIp>;
     updateIpAttribute(
         paramsOrFirst: { databaseId: string, collectionId: string, key: string, required: boolean, xdefault?: string, newKey?: string } | string,
         ...rest: [(string)?, (string)?, (boolean)?, (string)?, (string)?]    
@@ -2799,7 +2808,7 @@ export class Databases {
      * @returns {Promise<Models.AttributeLine>}
      * @deprecated This API has been deprecated since 1.8.0. Please use `TablesDB.createLineColumn` instead.
      */
-    createLineAttribute(params: { databaseId: string, collectionId: string, key: string, required: boolean, xdefault?: any[] }): Promise<Models.AttributeLine>;
+    createLineAttribute(this: Databases<ServerAuth>, params: { databaseId: string, collectionId: string, key: string, required: boolean, xdefault?: any[] }): Promise<Models.AttributeLine>;
     /**
      * Create a geometric line attribute.
      *
@@ -2812,7 +2821,7 @@ export class Databases {
      * @returns {Promise<Models.AttributeLine>}
      * @deprecated Use the object parameter style method for a better developer experience.
      */
-    createLineAttribute(databaseId: string, collectionId: string, key: string, required: boolean, xdefault?: any[]): Promise<Models.AttributeLine>;
+    createLineAttribute(this: Databases<ServerAuth>, databaseId: string, collectionId: string, key: string, required: boolean, xdefault?: any[]): Promise<Models.AttributeLine>;
     createLineAttribute(
         paramsOrFirst: { databaseId: string, collectionId: string, key: string, required: boolean, xdefault?: any[] } | string,
         ...rest: [(string)?, (string)?, (boolean)?, (any[])?]    
@@ -2888,7 +2897,7 @@ export class Databases {
      * @returns {Promise<Models.AttributeLine>}
      * @deprecated This API has been deprecated since 1.8.0. Please use `TablesDB.updateLineColumn` instead.
      */
-    updateLineAttribute(params: { databaseId: string, collectionId: string, key: string, required: boolean, xdefault?: any[], newKey?: string }): Promise<Models.AttributeLine>;
+    updateLineAttribute(this: Databases<ServerAuth>, params: { databaseId: string, collectionId: string, key: string, required: boolean, xdefault?: any[], newKey?: string }): Promise<Models.AttributeLine>;
     /**
      * Update a line attribute. Changing the `default` value will not update already existing documents.
      *
@@ -2902,7 +2911,7 @@ export class Databases {
      * @returns {Promise<Models.AttributeLine>}
      * @deprecated Use the object parameter style method for a better developer experience.
      */
-    updateLineAttribute(databaseId: string, collectionId: string, key: string, required: boolean, xdefault?: any[], newKey?: string): Promise<Models.AttributeLine>;
+    updateLineAttribute(this: Databases<ServerAuth>, databaseId: string, collectionId: string, key: string, required: boolean, xdefault?: any[], newKey?: string): Promise<Models.AttributeLine>;
     updateLineAttribute(
         paramsOrFirst: { databaseId: string, collectionId: string, key: string, required: boolean, xdefault?: any[], newKey?: string } | string,
         ...rest: [(string)?, (string)?, (boolean)?, (any[])?, (string)?]    
@@ -2981,7 +2990,7 @@ export class Databases {
      * @throws {AppwriteException}
      * @returns {Promise<Models.AttributeLongtext>}
      */
-    createLongtextAttribute(params: { databaseId: string, collectionId: string, key: string, required: boolean, xdefault?: string, array?: boolean, encrypt?: boolean }): Promise<Models.AttributeLongtext>;
+    createLongtextAttribute(this: Databases<ServerAuth>, params: { databaseId: string, collectionId: string, key: string, required: boolean, xdefault?: string, array?: boolean, encrypt?: boolean }): Promise<Models.AttributeLongtext>;
     /**
      * Create a longtext attribute.
      * 
@@ -2997,7 +3006,7 @@ export class Databases {
      * @returns {Promise<Models.AttributeLongtext>}
      * @deprecated Use the object parameter style method for a better developer experience.
      */
-    createLongtextAttribute(databaseId: string, collectionId: string, key: string, required: boolean, xdefault?: string, array?: boolean, encrypt?: boolean): Promise<Models.AttributeLongtext>;
+    createLongtextAttribute(this: Databases<ServerAuth>, databaseId: string, collectionId: string, key: string, required: boolean, xdefault?: string, array?: boolean, encrypt?: boolean): Promise<Models.AttributeLongtext>;
     createLongtextAttribute(
         paramsOrFirst: { databaseId: string, collectionId: string, key: string, required: boolean, xdefault?: string, array?: boolean, encrypt?: boolean } | string,
         ...rest: [(string)?, (string)?, (boolean)?, (string)?, (boolean)?, (boolean)?]    
@@ -3083,7 +3092,7 @@ export class Databases {
      * @throws {AppwriteException}
      * @returns {Promise<Models.AttributeLongtext>}
      */
-    updateLongtextAttribute(params: { databaseId: string, collectionId: string, key: string, required: boolean, xdefault?: string, newKey?: string }): Promise<Models.AttributeLongtext>;
+    updateLongtextAttribute(this: Databases<ServerAuth>, params: { databaseId: string, collectionId: string, key: string, required: boolean, xdefault?: string, newKey?: string }): Promise<Models.AttributeLongtext>;
     /**
      * Update a longtext attribute. Changing the `default` value will not update already existing documents.
      * 
@@ -3098,7 +3107,7 @@ export class Databases {
      * @returns {Promise<Models.AttributeLongtext>}
      * @deprecated Use the object parameter style method for a better developer experience.
      */
-    updateLongtextAttribute(databaseId: string, collectionId: string, key: string, required: boolean, xdefault?: string, newKey?: string): Promise<Models.AttributeLongtext>;
+    updateLongtextAttribute(this: Databases<ServerAuth>, databaseId: string, collectionId: string, key: string, required: boolean, xdefault?: string, newKey?: string): Promise<Models.AttributeLongtext>;
     updateLongtextAttribute(
         paramsOrFirst: { databaseId: string, collectionId: string, key: string, required: boolean, xdefault?: string, newKey?: string } | string,
         ...rest: [(string)?, (string)?, (boolean)?, (string)?, (string)?]    
@@ -3180,7 +3189,7 @@ export class Databases {
      * @throws {AppwriteException}
      * @returns {Promise<Models.AttributeMediumtext>}
      */
-    createMediumtextAttribute(params: { databaseId: string, collectionId: string, key: string, required: boolean, xdefault?: string, array?: boolean, encrypt?: boolean }): Promise<Models.AttributeMediumtext>;
+    createMediumtextAttribute(this: Databases<ServerAuth>, params: { databaseId: string, collectionId: string, key: string, required: boolean, xdefault?: string, array?: boolean, encrypt?: boolean }): Promise<Models.AttributeMediumtext>;
     /**
      * Create a mediumtext attribute.
      * 
@@ -3196,7 +3205,7 @@ export class Databases {
      * @returns {Promise<Models.AttributeMediumtext>}
      * @deprecated Use the object parameter style method for a better developer experience.
      */
-    createMediumtextAttribute(databaseId: string, collectionId: string, key: string, required: boolean, xdefault?: string, array?: boolean, encrypt?: boolean): Promise<Models.AttributeMediumtext>;
+    createMediumtextAttribute(this: Databases<ServerAuth>, databaseId: string, collectionId: string, key: string, required: boolean, xdefault?: string, array?: boolean, encrypt?: boolean): Promise<Models.AttributeMediumtext>;
     createMediumtextAttribute(
         paramsOrFirst: { databaseId: string, collectionId: string, key: string, required: boolean, xdefault?: string, array?: boolean, encrypt?: boolean } | string,
         ...rest: [(string)?, (string)?, (boolean)?, (string)?, (boolean)?, (boolean)?]    
@@ -3282,7 +3291,7 @@ export class Databases {
      * @throws {AppwriteException}
      * @returns {Promise<Models.AttributeMediumtext>}
      */
-    updateMediumtextAttribute(params: { databaseId: string, collectionId: string, key: string, required: boolean, xdefault?: string, newKey?: string }): Promise<Models.AttributeMediumtext>;
+    updateMediumtextAttribute(this: Databases<ServerAuth>, params: { databaseId: string, collectionId: string, key: string, required: boolean, xdefault?: string, newKey?: string }): Promise<Models.AttributeMediumtext>;
     /**
      * Update a mediumtext attribute. Changing the `default` value will not update already existing documents.
      * 
@@ -3297,7 +3306,7 @@ export class Databases {
      * @returns {Promise<Models.AttributeMediumtext>}
      * @deprecated Use the object parameter style method for a better developer experience.
      */
-    updateMediumtextAttribute(databaseId: string, collectionId: string, key: string, required: boolean, xdefault?: string, newKey?: string): Promise<Models.AttributeMediumtext>;
+    updateMediumtextAttribute(this: Databases<ServerAuth>, databaseId: string, collectionId: string, key: string, required: boolean, xdefault?: string, newKey?: string): Promise<Models.AttributeMediumtext>;
     updateMediumtextAttribute(
         paramsOrFirst: { databaseId: string, collectionId: string, key: string, required: boolean, xdefault?: string, newKey?: string } | string,
         ...rest: [(string)?, (string)?, (boolean)?, (string)?, (string)?]    
@@ -3377,7 +3386,7 @@ export class Databases {
      * @returns {Promise<Models.AttributePoint>}
      * @deprecated This API has been deprecated since 1.8.0. Please use `TablesDB.createPointColumn` instead.
      */
-    createPointAttribute(params: { databaseId: string, collectionId: string, key: string, required: boolean, xdefault?: any[] }): Promise<Models.AttributePoint>;
+    createPointAttribute(this: Databases<ServerAuth>, params: { databaseId: string, collectionId: string, key: string, required: boolean, xdefault?: any[] }): Promise<Models.AttributePoint>;
     /**
      * Create a geometric point attribute.
      *
@@ -3390,7 +3399,7 @@ export class Databases {
      * @returns {Promise<Models.AttributePoint>}
      * @deprecated Use the object parameter style method for a better developer experience.
      */
-    createPointAttribute(databaseId: string, collectionId: string, key: string, required: boolean, xdefault?: any[]): Promise<Models.AttributePoint>;
+    createPointAttribute(this: Databases<ServerAuth>, databaseId: string, collectionId: string, key: string, required: boolean, xdefault?: any[]): Promise<Models.AttributePoint>;
     createPointAttribute(
         paramsOrFirst: { databaseId: string, collectionId: string, key: string, required: boolean, xdefault?: any[] } | string,
         ...rest: [(string)?, (string)?, (boolean)?, (any[])?]    
@@ -3466,7 +3475,7 @@ export class Databases {
      * @returns {Promise<Models.AttributePoint>}
      * @deprecated This API has been deprecated since 1.8.0. Please use `TablesDB.updatePointColumn` instead.
      */
-    updatePointAttribute(params: { databaseId: string, collectionId: string, key: string, required: boolean, xdefault?: any[], newKey?: string }): Promise<Models.AttributePoint>;
+    updatePointAttribute(this: Databases<ServerAuth>, params: { databaseId: string, collectionId: string, key: string, required: boolean, xdefault?: any[], newKey?: string }): Promise<Models.AttributePoint>;
     /**
      * Update a point attribute. Changing the `default` value will not update already existing documents.
      *
@@ -3480,7 +3489,7 @@ export class Databases {
      * @returns {Promise<Models.AttributePoint>}
      * @deprecated Use the object parameter style method for a better developer experience.
      */
-    updatePointAttribute(databaseId: string, collectionId: string, key: string, required: boolean, xdefault?: any[], newKey?: string): Promise<Models.AttributePoint>;
+    updatePointAttribute(this: Databases<ServerAuth>, databaseId: string, collectionId: string, key: string, required: boolean, xdefault?: any[], newKey?: string): Promise<Models.AttributePoint>;
     updatePointAttribute(
         paramsOrFirst: { databaseId: string, collectionId: string, key: string, required: boolean, xdefault?: any[], newKey?: string } | string,
         ...rest: [(string)?, (string)?, (boolean)?, (any[])?, (string)?]    
@@ -3557,7 +3566,7 @@ export class Databases {
      * @returns {Promise<Models.AttributePolygon>}
      * @deprecated This API has been deprecated since 1.8.0. Please use `TablesDB.createPolygonColumn` instead.
      */
-    createPolygonAttribute(params: { databaseId: string, collectionId: string, key: string, required: boolean, xdefault?: any[] }): Promise<Models.AttributePolygon>;
+    createPolygonAttribute(this: Databases<ServerAuth>, params: { databaseId: string, collectionId: string, key: string, required: boolean, xdefault?: any[] }): Promise<Models.AttributePolygon>;
     /**
      * Create a geometric polygon attribute.
      *
@@ -3570,7 +3579,7 @@ export class Databases {
      * @returns {Promise<Models.AttributePolygon>}
      * @deprecated Use the object parameter style method for a better developer experience.
      */
-    createPolygonAttribute(databaseId: string, collectionId: string, key: string, required: boolean, xdefault?: any[]): Promise<Models.AttributePolygon>;
+    createPolygonAttribute(this: Databases<ServerAuth>, databaseId: string, collectionId: string, key: string, required: boolean, xdefault?: any[]): Promise<Models.AttributePolygon>;
     createPolygonAttribute(
         paramsOrFirst: { databaseId: string, collectionId: string, key: string, required: boolean, xdefault?: any[] } | string,
         ...rest: [(string)?, (string)?, (boolean)?, (any[])?]    
@@ -3646,7 +3655,7 @@ export class Databases {
      * @returns {Promise<Models.AttributePolygon>}
      * @deprecated This API has been deprecated since 1.8.0. Please use `TablesDB.updatePolygonColumn` instead.
      */
-    updatePolygonAttribute(params: { databaseId: string, collectionId: string, key: string, required: boolean, xdefault?: any[], newKey?: string }): Promise<Models.AttributePolygon>;
+    updatePolygonAttribute(this: Databases<ServerAuth>, params: { databaseId: string, collectionId: string, key: string, required: boolean, xdefault?: any[], newKey?: string }): Promise<Models.AttributePolygon>;
     /**
      * Update a polygon attribute. Changing the `default` value will not update already existing documents.
      *
@@ -3660,7 +3669,7 @@ export class Databases {
      * @returns {Promise<Models.AttributePolygon>}
      * @deprecated Use the object parameter style method for a better developer experience.
      */
-    updatePolygonAttribute(databaseId: string, collectionId: string, key: string, required: boolean, xdefault?: any[], newKey?: string): Promise<Models.AttributePolygon>;
+    updatePolygonAttribute(this: Databases<ServerAuth>, databaseId: string, collectionId: string, key: string, required: boolean, xdefault?: any[], newKey?: string): Promise<Models.AttributePolygon>;
     updatePolygonAttribute(
         paramsOrFirst: { databaseId: string, collectionId: string, key: string, required: boolean, xdefault?: any[], newKey?: string } | string,
         ...rest: [(string)?, (string)?, (boolean)?, (any[])?, (string)?]    
@@ -3741,7 +3750,7 @@ export class Databases {
      * @returns {Promise<Models.AttributeRelationship>}
      * @deprecated This API has been deprecated since 1.8.0. Please use `TablesDB.createRelationshipColumn` instead.
      */
-    createRelationshipAttribute(params: { databaseId: string, collectionId: string, relatedCollectionId: string, type: RelationshipType, twoWay?: boolean, key?: string, twoWayKey?: string, onDelete?: RelationMutate }): Promise<Models.AttributeRelationship>;
+    createRelationshipAttribute(this: Databases<ServerAuth>, params: { databaseId: string, collectionId: string, relatedCollectionId: string, type: RelationshipType, twoWay?: boolean, key?: string, twoWayKey?: string, onDelete?: RelationMutate }): Promise<Models.AttributeRelationship>;
     /**
      * Create relationship attribute. [Learn more about relationship attributes](https://appwrite.io/docs/databases-relationships#relationship-attributes).
      * 
@@ -3758,7 +3767,7 @@ export class Databases {
      * @returns {Promise<Models.AttributeRelationship>}
      * @deprecated Use the object parameter style method for a better developer experience.
      */
-    createRelationshipAttribute(databaseId: string, collectionId: string, relatedCollectionId: string, type: RelationshipType, twoWay?: boolean, key?: string, twoWayKey?: string, onDelete?: RelationMutate): Promise<Models.AttributeRelationship>;
+    createRelationshipAttribute(this: Databases<ServerAuth>, databaseId: string, collectionId: string, relatedCollectionId: string, type: RelationshipType, twoWay?: boolean, key?: string, twoWayKey?: string, onDelete?: RelationMutate): Promise<Models.AttributeRelationship>;
     createRelationshipAttribute(
         paramsOrFirst: { databaseId: string, collectionId: string, relatedCollectionId: string, type: RelationshipType, twoWay?: boolean, key?: string, twoWayKey?: string, onDelete?: RelationMutate } | string,
         ...rest: [(string)?, (string)?, (RelationshipType)?, (boolean)?, (string)?, (string)?, (RelationMutate)?]    
@@ -3849,7 +3858,7 @@ export class Databases {
      * @returns {Promise<Models.AttributeRelationship>}
      * @deprecated This API has been deprecated since 1.8.0. Please use `TablesDB.updateRelationshipColumn` instead.
      */
-    updateRelationshipAttribute(params: { databaseId: string, collectionId: string, key: string, onDelete?: RelationMutate, newKey?: string }): Promise<Models.AttributeRelationship>;
+    updateRelationshipAttribute(this: Databases<ServerAuth>, params: { databaseId: string, collectionId: string, key: string, onDelete?: RelationMutate, newKey?: string }): Promise<Models.AttributeRelationship>;
     /**
      * Update relationship attribute. [Learn more about relationship attributes](https://appwrite.io/docs/databases-relationships#relationship-attributes).
      * 
@@ -3863,7 +3872,7 @@ export class Databases {
      * @returns {Promise<Models.AttributeRelationship>}
      * @deprecated Use the object parameter style method for a better developer experience.
      */
-    updateRelationshipAttribute(databaseId: string, collectionId: string, key: string, onDelete?: RelationMutate, newKey?: string): Promise<Models.AttributeRelationship>;
+    updateRelationshipAttribute(this: Databases<ServerAuth>, databaseId: string, collectionId: string, key: string, onDelete?: RelationMutate, newKey?: string): Promise<Models.AttributeRelationship>;
     updateRelationshipAttribute(
         paramsOrFirst: { databaseId: string, collectionId: string, key: string, onDelete?: RelationMutate, newKey?: string } | string,
         ...rest: [(string)?, (string)?, (RelationMutate)?, (string)?]    
@@ -3936,7 +3945,7 @@ export class Databases {
      * @returns {Promise<Models.AttributeString>}
      * @deprecated This API has been deprecated since 1.8.0. Please use `TablesDB.createStringColumn` instead.
      */
-    createStringAttribute(params: { databaseId: string, collectionId: string, key: string, size: number, required: boolean, xdefault?: string, array?: boolean, encrypt?: boolean }): Promise<Models.AttributeString>;
+    createStringAttribute(this: Databases<ServerAuth>, params: { databaseId: string, collectionId: string, key: string, size: number, required: boolean, xdefault?: string, array?: boolean, encrypt?: boolean }): Promise<Models.AttributeString>;
     /**
      * Create a string attribute.
      * 
@@ -3953,7 +3962,7 @@ export class Databases {
      * @returns {Promise<Models.AttributeString>}
      * @deprecated Use the object parameter style method for a better developer experience.
      */
-    createStringAttribute(databaseId: string, collectionId: string, key: string, size: number, required: boolean, xdefault?: string, array?: boolean, encrypt?: boolean): Promise<Models.AttributeString>;
+    createStringAttribute(this: Databases<ServerAuth>, databaseId: string, collectionId: string, key: string, size: number, required: boolean, xdefault?: string, array?: boolean, encrypt?: boolean): Promise<Models.AttributeString>;
     createStringAttribute(
         paramsOrFirst: { databaseId: string, collectionId: string, key: string, size: number, required: boolean, xdefault?: string, array?: boolean, encrypt?: boolean } | string,
         ...rest: [(string)?, (string)?, (number)?, (boolean)?, (string)?, (boolean)?, (boolean)?]    
@@ -4049,7 +4058,7 @@ export class Databases {
      * @returns {Promise<Models.AttributeString>}
      * @deprecated This API has been deprecated since 1.8.0. Please use `TablesDB.updateStringColumn` instead.
      */
-    updateStringAttribute(params: { databaseId: string, collectionId: string, key: string, required: boolean, xdefault?: string, size?: number, newKey?: string }): Promise<Models.AttributeString>;
+    updateStringAttribute(this: Databases<ServerAuth>, params: { databaseId: string, collectionId: string, key: string, required: boolean, xdefault?: string, size?: number, newKey?: string }): Promise<Models.AttributeString>;
     /**
      * Update a string attribute. Changing the `default` value will not update already existing documents.
      * 
@@ -4065,7 +4074,7 @@ export class Databases {
      * @returns {Promise<Models.AttributeString>}
      * @deprecated Use the object parameter style method for a better developer experience.
      */
-    updateStringAttribute(databaseId: string, collectionId: string, key: string, required: boolean, xdefault?: string, size?: number, newKey?: string): Promise<Models.AttributeString>;
+    updateStringAttribute(this: Databases<ServerAuth>, databaseId: string, collectionId: string, key: string, required: boolean, xdefault?: string, size?: number, newKey?: string): Promise<Models.AttributeString>;
     updateStringAttribute(
         paramsOrFirst: { databaseId: string, collectionId: string, key: string, required: boolean, xdefault?: string, size?: number, newKey?: string } | string,
         ...rest: [(string)?, (string)?, (boolean)?, (string)?, (number)?, (string)?]    
@@ -4152,7 +4161,7 @@ export class Databases {
      * @throws {AppwriteException}
      * @returns {Promise<Models.AttributeText>}
      */
-    createTextAttribute(params: { databaseId: string, collectionId: string, key: string, required: boolean, xdefault?: string, array?: boolean, encrypt?: boolean }): Promise<Models.AttributeText>;
+    createTextAttribute(this: Databases<ServerAuth>, params: { databaseId: string, collectionId: string, key: string, required: boolean, xdefault?: string, array?: boolean, encrypt?: boolean }): Promise<Models.AttributeText>;
     /**
      * Create a text attribute.
      * 
@@ -4168,7 +4177,7 @@ export class Databases {
      * @returns {Promise<Models.AttributeText>}
      * @deprecated Use the object parameter style method for a better developer experience.
      */
-    createTextAttribute(databaseId: string, collectionId: string, key: string, required: boolean, xdefault?: string, array?: boolean, encrypt?: boolean): Promise<Models.AttributeText>;
+    createTextAttribute(this: Databases<ServerAuth>, databaseId: string, collectionId: string, key: string, required: boolean, xdefault?: string, array?: boolean, encrypt?: boolean): Promise<Models.AttributeText>;
     createTextAttribute(
         paramsOrFirst: { databaseId: string, collectionId: string, key: string, required: boolean, xdefault?: string, array?: boolean, encrypt?: boolean } | string,
         ...rest: [(string)?, (string)?, (boolean)?, (string)?, (boolean)?, (boolean)?]    
@@ -4254,7 +4263,7 @@ export class Databases {
      * @throws {AppwriteException}
      * @returns {Promise<Models.AttributeText>}
      */
-    updateTextAttribute(params: { databaseId: string, collectionId: string, key: string, required: boolean, xdefault?: string, newKey?: string }): Promise<Models.AttributeText>;
+    updateTextAttribute(this: Databases<ServerAuth>, params: { databaseId: string, collectionId: string, key: string, required: boolean, xdefault?: string, newKey?: string }): Promise<Models.AttributeText>;
     /**
      * Update a text attribute. Changing the `default` value will not update already existing documents.
      * 
@@ -4269,7 +4278,7 @@ export class Databases {
      * @returns {Promise<Models.AttributeText>}
      * @deprecated Use the object parameter style method for a better developer experience.
      */
-    updateTextAttribute(databaseId: string, collectionId: string, key: string, required: boolean, xdefault?: string, newKey?: string): Promise<Models.AttributeText>;
+    updateTextAttribute(this: Databases<ServerAuth>, databaseId: string, collectionId: string, key: string, required: boolean, xdefault?: string, newKey?: string): Promise<Models.AttributeText>;
     updateTextAttribute(
         paramsOrFirst: { databaseId: string, collectionId: string, key: string, required: boolean, xdefault?: string, newKey?: string } | string,
         ...rest: [(string)?, (string)?, (boolean)?, (string)?, (string)?]    
@@ -4351,7 +4360,7 @@ export class Databases {
      * @returns {Promise<Models.AttributeUrl>}
      * @deprecated This API has been deprecated since 1.8.0. Please use `TablesDB.createUrlColumn` instead.
      */
-    createUrlAttribute(params: { databaseId: string, collectionId: string, key: string, required: boolean, xdefault?: string, array?: boolean }): Promise<Models.AttributeUrl>;
+    createUrlAttribute(this: Databases<ServerAuth>, params: { databaseId: string, collectionId: string, key: string, required: boolean, xdefault?: string, array?: boolean }): Promise<Models.AttributeUrl>;
     /**
      * Create a URL attribute.
      * 
@@ -4366,7 +4375,7 @@ export class Databases {
      * @returns {Promise<Models.AttributeUrl>}
      * @deprecated Use the object parameter style method for a better developer experience.
      */
-    createUrlAttribute(databaseId: string, collectionId: string, key: string, required: boolean, xdefault?: string, array?: boolean): Promise<Models.AttributeUrl>;
+    createUrlAttribute(this: Databases<ServerAuth>, databaseId: string, collectionId: string, key: string, required: boolean, xdefault?: string, array?: boolean): Promise<Models.AttributeUrl>;
     createUrlAttribute(
         paramsOrFirst: { databaseId: string, collectionId: string, key: string, required: boolean, xdefault?: string, array?: boolean } | string,
         ...rest: [(string)?, (string)?, (boolean)?, (string)?, (boolean)?]    
@@ -4448,7 +4457,7 @@ export class Databases {
      * @returns {Promise<Models.AttributeUrl>}
      * @deprecated This API has been deprecated since 1.8.0. Please use `TablesDB.updateUrlColumn` instead.
      */
-    updateUrlAttribute(params: { databaseId: string, collectionId: string, key: string, required: boolean, xdefault?: string, newKey?: string }): Promise<Models.AttributeUrl>;
+    updateUrlAttribute(this: Databases<ServerAuth>, params: { databaseId: string, collectionId: string, key: string, required: boolean, xdefault?: string, newKey?: string }): Promise<Models.AttributeUrl>;
     /**
      * Update an url attribute. Changing the `default` value will not update already existing documents.
      * 
@@ -4463,7 +4472,7 @@ export class Databases {
      * @returns {Promise<Models.AttributeUrl>}
      * @deprecated Use the object parameter style method for a better developer experience.
      */
-    updateUrlAttribute(databaseId: string, collectionId: string, key: string, required: boolean, xdefault?: string, newKey?: string): Promise<Models.AttributeUrl>;
+    updateUrlAttribute(this: Databases<ServerAuth>, databaseId: string, collectionId: string, key: string, required: boolean, xdefault?: string, newKey?: string): Promise<Models.AttributeUrl>;
     updateUrlAttribute(
         paramsOrFirst: { databaseId: string, collectionId: string, key: string, required: boolean, xdefault?: string, newKey?: string } | string,
         ...rest: [(string)?, (string)?, (boolean)?, (string)?, (string)?]    
@@ -4546,7 +4555,7 @@ export class Databases {
      * @throws {AppwriteException}
      * @returns {Promise<Models.AttributeVarchar>}
      */
-    createVarcharAttribute(params: { databaseId: string, collectionId: string, key: string, size: number, required: boolean, xdefault?: string, array?: boolean, encrypt?: boolean }): Promise<Models.AttributeVarchar>;
+    createVarcharAttribute(this: Databases<ServerAuth>, params: { databaseId: string, collectionId: string, key: string, size: number, required: boolean, xdefault?: string, array?: boolean, encrypt?: boolean }): Promise<Models.AttributeVarchar>;
     /**
      * Create a varchar attribute.
      * 
@@ -4563,7 +4572,7 @@ export class Databases {
      * @returns {Promise<Models.AttributeVarchar>}
      * @deprecated Use the object parameter style method for a better developer experience.
      */
-    createVarcharAttribute(databaseId: string, collectionId: string, key: string, size: number, required: boolean, xdefault?: string, array?: boolean, encrypt?: boolean): Promise<Models.AttributeVarchar>;
+    createVarcharAttribute(this: Databases<ServerAuth>, databaseId: string, collectionId: string, key: string, size: number, required: boolean, xdefault?: string, array?: boolean, encrypt?: boolean): Promise<Models.AttributeVarchar>;
     createVarcharAttribute(
         paramsOrFirst: { databaseId: string, collectionId: string, key: string, size: number, required: boolean, xdefault?: string, array?: boolean, encrypt?: boolean } | string,
         ...rest: [(string)?, (string)?, (number)?, (boolean)?, (string)?, (boolean)?, (boolean)?]    
@@ -4658,7 +4667,7 @@ export class Databases {
      * @throws {AppwriteException}
      * @returns {Promise<Models.AttributeVarchar>}
      */
-    updateVarcharAttribute(params: { databaseId: string, collectionId: string, key: string, required: boolean, xdefault?: string, size?: number, newKey?: string }): Promise<Models.AttributeVarchar>;
+    updateVarcharAttribute(this: Databases<ServerAuth>, params: { databaseId: string, collectionId: string, key: string, required: boolean, xdefault?: string, size?: number, newKey?: string }): Promise<Models.AttributeVarchar>;
     /**
      * Update a varchar attribute. Changing the `default` value will not update already existing documents.
      * 
@@ -4674,7 +4683,7 @@ export class Databases {
      * @returns {Promise<Models.AttributeVarchar>}
      * @deprecated Use the object parameter style method for a better developer experience.
      */
-    updateVarcharAttribute(databaseId: string, collectionId: string, key: string, required: boolean, xdefault?: string, size?: number, newKey?: string): Promise<Models.AttributeVarchar>;
+    updateVarcharAttribute(this: Databases<ServerAuth>, databaseId: string, collectionId: string, key: string, required: boolean, xdefault?: string, size?: number, newKey?: string): Promise<Models.AttributeVarchar>;
     updateVarcharAttribute(
         paramsOrFirst: { databaseId: string, collectionId: string, key: string, required: boolean, xdefault?: string, size?: number, newKey?: string } | string,
         ...rest: [(string)?, (string)?, (boolean)?, (string)?, (number)?, (string)?]    
@@ -4757,7 +4766,7 @@ export class Databases {
      * @returns {Promise<Models.AttributeBoolean | Models.AttributeInteger | Models.AttributeFloat | Models.AttributeEmail | Models.AttributeEnum | Models.AttributeUrl | Models.AttributeIp | Models.AttributeDatetime | Models.AttributeRelationship | Models.AttributeString>}
      * @deprecated This API has been deprecated since 1.8.0. Please use `TablesDB.getColumn` instead.
      */
-    getAttribute(params: { databaseId: string, collectionId: string, key: string }): Promise<Models.AttributeBoolean | Models.AttributeInteger | Models.AttributeFloat | Models.AttributeEmail | Models.AttributeEnum | Models.AttributeUrl | Models.AttributeIp | Models.AttributeDatetime | Models.AttributeRelationship | Models.AttributeString>;
+    getAttribute(this: Databases<ServerAuth>, params: { databaseId: string, collectionId: string, key: string }): Promise<Models.AttributeBoolean | Models.AttributeInteger | Models.AttributeFloat | Models.AttributeEmail | Models.AttributeEnum | Models.AttributeUrl | Models.AttributeIp | Models.AttributeDatetime | Models.AttributeRelationship | Models.AttributeString>;
     /**
      * Get attribute by ID.
      *
@@ -4768,7 +4777,7 @@ export class Databases {
      * @returns {Promise<Models.AttributeBoolean | Models.AttributeInteger | Models.AttributeFloat | Models.AttributeEmail | Models.AttributeEnum | Models.AttributeUrl | Models.AttributeIp | Models.AttributeDatetime | Models.AttributeRelationship | Models.AttributeString>}
      * @deprecated Use the object parameter style method for a better developer experience.
      */
-    getAttribute(databaseId: string, collectionId: string, key: string): Promise<Models.AttributeBoolean | Models.AttributeInteger | Models.AttributeFloat | Models.AttributeEmail | Models.AttributeEnum | Models.AttributeUrl | Models.AttributeIp | Models.AttributeDatetime | Models.AttributeRelationship | Models.AttributeString>;
+    getAttribute(this: Databases<ServerAuth>, databaseId: string, collectionId: string, key: string): Promise<Models.AttributeBoolean | Models.AttributeInteger | Models.AttributeFloat | Models.AttributeEmail | Models.AttributeEnum | Models.AttributeUrl | Models.AttributeIp | Models.AttributeDatetime | Models.AttributeRelationship | Models.AttributeString>;
     getAttribute(
         paramsOrFirst: { databaseId: string, collectionId: string, key: string } | string,
         ...rest: [(string)?, (string)?]    
@@ -4824,7 +4833,7 @@ export class Databases {
      * @returns {Promise<{}>}
      * @deprecated This API has been deprecated since 1.8.0. Please use `TablesDB.deleteColumn` instead.
      */
-    deleteAttribute(params: { databaseId: string, collectionId: string, key: string }): Promise<{}>;
+    deleteAttribute(this: Databases<ServerAuth>, params: { databaseId: string, collectionId: string, key: string }): Promise<{}>;
     /**
      * Deletes an attribute.
      *
@@ -4835,7 +4844,7 @@ export class Databases {
      * @returns {Promise<{}>}
      * @deprecated Use the object parameter style method for a better developer experience.
      */
-    deleteAttribute(databaseId: string, collectionId: string, key: string): Promise<{}>;
+    deleteAttribute(this: Databases<ServerAuth>, databaseId: string, collectionId: string, key: string): Promise<{}>;
     deleteAttribute(
         paramsOrFirst: { databaseId: string, collectionId: string, key: string } | string,
         ...rest: [(string)?, (string)?]    
@@ -5155,7 +5164,7 @@ export class Databases {
      * @returns {Promise<Models.DocumentList<Document>>}
      * @deprecated This API has been deprecated since 1.8.0. Please use `TablesDB.upsertRows` instead.
      */
-    upsertDocuments<Document extends Models.Document = Models.DefaultDocument>(params: { databaseId: string, collectionId: string, documents: object[], transactionId?: string }): Promise<Models.DocumentList<Document>>;
+    upsertDocuments<Document extends Models.Document = Models.DefaultDocument>(this: Databases<ServerAuth>, params: { databaseId: string, collectionId: string, documents: object[], transactionId?: string }): Promise<Models.DocumentList<Document>>;
     /**
      * Create or update Documents. Before using this route, you should create a new collection resource using either a [server integration](https://appwrite.io/docs/server/databases#databasesCreateCollection) API or directly from your database console.
      * 
@@ -5168,7 +5177,7 @@ export class Databases {
      * @returns {Promise<Models.DocumentList<Document>>}
      * @deprecated Use the object parameter style method for a better developer experience.
      */
-    upsertDocuments<Document extends Models.Document = Models.DefaultDocument>(databaseId: string, collectionId: string, documents: object[], transactionId?: string): Promise<Models.DocumentList<Document>>;
+    upsertDocuments<Document extends Models.Document = Models.DefaultDocument>(this: Databases<ServerAuth>, databaseId: string, collectionId: string, documents: object[], transactionId?: string): Promise<Models.DocumentList<Document>>;
     upsertDocuments<Document extends Models.Document = Models.DefaultDocument>(
         paramsOrFirst: { databaseId: string, collectionId: string, documents: object[], transactionId?: string } | string,
         ...rest: [(string)?, (object[])?, (string)?]    
@@ -5235,7 +5244,7 @@ export class Databases {
      * @returns {Promise<Models.DocumentList<Document>>}
      * @deprecated This API has been deprecated since 1.8.0. Please use `TablesDB.updateRows` instead.
      */
-    updateDocuments<Document extends Models.Document = Models.DefaultDocument>(params: { databaseId: string, collectionId: string, data?: object, queries?: string[], transactionId?: string }): Promise<Models.DocumentList<Document>>;
+    updateDocuments<Document extends Models.Document = Models.DefaultDocument>(this: Databases<ServerAuth>, params: { databaseId: string, collectionId: string, data?: object, queries?: string[], transactionId?: string }): Promise<Models.DocumentList<Document>>;
     /**
      * Update all documents that match your queries, if no queries are submitted then all documents are updated. You can pass only specific fields to be updated.
      *
@@ -5248,7 +5257,7 @@ export class Databases {
      * @returns {Promise<Models.DocumentList<Document>>}
      * @deprecated Use the object parameter style method for a better developer experience.
      */
-    updateDocuments<Document extends Models.Document = Models.DefaultDocument>(databaseId: string, collectionId: string, data?: object, queries?: string[], transactionId?: string): Promise<Models.DocumentList<Document>>;
+    updateDocuments<Document extends Models.Document = Models.DefaultDocument>(this: Databases<ServerAuth>, databaseId: string, collectionId: string, data?: object, queries?: string[], transactionId?: string): Promise<Models.DocumentList<Document>>;
     updateDocuments<Document extends Models.Document = Models.DefaultDocument>(
         paramsOrFirst: { databaseId: string, collectionId: string, data?: object, queries?: string[], transactionId?: string } | string,
         ...rest: [(string)?, (object)?, (string[])?, (string)?]    
@@ -5316,7 +5325,7 @@ export class Databases {
      * @returns {Promise<Models.DocumentList<Document>>}
      * @deprecated This API has been deprecated since 1.8.0. Please use `TablesDB.deleteRows` instead.
      */
-    deleteDocuments<Document extends Models.Document = Models.DefaultDocument>(params: { databaseId: string, collectionId: string, queries?: string[], transactionId?: string }): Promise<Models.DocumentList<Document>>;
+    deleteDocuments<Document extends Models.Document = Models.DefaultDocument>(this: Databases<ServerAuth>, params: { databaseId: string, collectionId: string, queries?: string[], transactionId?: string }): Promise<Models.DocumentList<Document>>;
     /**
      * Bulk delete documents using queries, if no queries are passed then all documents are deleted.
      *
@@ -5328,7 +5337,7 @@ export class Databases {
      * @returns {Promise<Models.DocumentList<Document>>}
      * @deprecated Use the object parameter style method for a better developer experience.
      */
-    deleteDocuments<Document extends Models.Document = Models.DefaultDocument>(databaseId: string, collectionId: string, queries?: string[], transactionId?: string): Promise<Models.DocumentList<Document>>;
+    deleteDocuments<Document extends Models.Document = Models.DefaultDocument>(this: Databases<ServerAuth>, databaseId: string, collectionId: string, queries?: string[], transactionId?: string): Promise<Models.DocumentList<Document>>;
     deleteDocuments<Document extends Models.Document = Models.DefaultDocument>(
         paramsOrFirst: { databaseId: string, collectionId: string, queries?: string[], transactionId?: string } | string,
         ...rest: [(string)?, (string[])?, (string)?]    
@@ -5917,7 +5926,7 @@ export class Databases {
      * @returns {Promise<Models.IndexList>}
      * @deprecated This API has been deprecated since 1.8.0. Please use `TablesDB.listIndexes` instead.
      */
-    listIndexes(params: { databaseId: string, collectionId: string, queries?: string[], total?: boolean }): Promise<Models.IndexList>;
+    listIndexes(this: Databases<ServerAuth>, params: { databaseId: string, collectionId: string, queries?: string[], total?: boolean }): Promise<Models.IndexList>;
     /**
      * List indexes in the collection.
      *
@@ -5929,7 +5938,7 @@ export class Databases {
      * @returns {Promise<Models.IndexList>}
      * @deprecated Use the object parameter style method for a better developer experience.
      */
-    listIndexes(databaseId: string, collectionId: string, queries?: string[], total?: boolean): Promise<Models.IndexList>;
+    listIndexes(this: Databases<ServerAuth>, databaseId: string, collectionId: string, queries?: string[], total?: boolean): Promise<Models.IndexList>;
     listIndexes(
         paramsOrFirst: { databaseId: string, collectionId: string, queries?: string[], total?: boolean } | string,
         ...rest: [(string)?, (string[])?, (boolean)?]    
@@ -5995,7 +6004,7 @@ export class Databases {
      * @returns {Promise<Models.Index>}
      * @deprecated This API has been deprecated since 1.8.0. Please use `TablesDB.createIndex` instead.
      */
-    createIndex(params: { databaseId: string, collectionId: string, key: string, type: DatabasesIndexType, attributes: string[], orders?: OrderBy[], lengths?: number[] }): Promise<Models.Index>;
+    createIndex(this: Databases<ServerAuth>, params: { databaseId: string, collectionId: string, key: string, type: DatabasesIndexType, attributes: string[], orders?: OrderBy[], lengths?: number[] }): Promise<Models.Index>;
     /**
      * Creates an index on the attributes listed. Your index should include all the attributes you will query in a single request.
      * Attributes can be `key`, `fulltext`, and `unique`.
@@ -6011,7 +6020,7 @@ export class Databases {
      * @returns {Promise<Models.Index>}
      * @deprecated Use the object parameter style method for a better developer experience.
      */
-    createIndex(databaseId: string, collectionId: string, key: string, type: DatabasesIndexType, attributes: string[], orders?: OrderBy[], lengths?: number[]): Promise<Models.Index>;
+    createIndex(this: Databases<ServerAuth>, databaseId: string, collectionId: string, key: string, type: DatabasesIndexType, attributes: string[], orders?: OrderBy[], lengths?: number[]): Promise<Models.Index>;
     createIndex(
         paramsOrFirst: { databaseId: string, collectionId: string, key: string, type: DatabasesIndexType, attributes: string[], orders?: OrderBy[], lengths?: number[] } | string,
         ...rest: [(string)?, (string)?, (DatabasesIndexType)?, (string[])?, (OrderBy[])?, (number[])?]    
@@ -6097,7 +6106,7 @@ export class Databases {
      * @returns {Promise<Models.Index>}
      * @deprecated This API has been deprecated since 1.8.0. Please use `TablesDB.getIndex` instead.
      */
-    getIndex(params: { databaseId: string, collectionId: string, key: string }): Promise<Models.Index>;
+    getIndex(this: Databases<ServerAuth>, params: { databaseId: string, collectionId: string, key: string }): Promise<Models.Index>;
     /**
      * Get an index by its unique ID.
      *
@@ -6108,7 +6117,7 @@ export class Databases {
      * @returns {Promise<Models.Index>}
      * @deprecated Use the object parameter style method for a better developer experience.
      */
-    getIndex(databaseId: string, collectionId: string, key: string): Promise<Models.Index>;
+    getIndex(this: Databases<ServerAuth>, databaseId: string, collectionId: string, key: string): Promise<Models.Index>;
     getIndex(
         paramsOrFirst: { databaseId: string, collectionId: string, key: string } | string,
         ...rest: [(string)?, (string)?]    
@@ -6164,7 +6173,7 @@ export class Databases {
      * @returns {Promise<{}>}
      * @deprecated This API has been deprecated since 1.8.0. Please use `TablesDB.deleteIndex` instead.
      */
-    deleteIndex(params: { databaseId: string, collectionId: string, key: string }): Promise<{}>;
+    deleteIndex(this: Databases<ServerAuth>, params: { databaseId: string, collectionId: string, key: string }): Promise<{}>;
     /**
      * Delete an index.
      *
@@ -6175,7 +6184,7 @@ export class Databases {
      * @returns {Promise<{}>}
      * @deprecated Use the object parameter style method for a better developer experience.
      */
-    deleteIndex(databaseId: string, collectionId: string, key: string): Promise<{}>;
+    deleteIndex(this: Databases<ServerAuth>, databaseId: string, collectionId: string, key: string): Promise<{}>;
     deleteIndex(
         paramsOrFirst: { databaseId: string, collectionId: string, key: string } | string,
         ...rest: [(string)?, (string)?]    
@@ -6222,3 +6231,9 @@ export class Databases {
         );
     }
 }
+
+const Databases = DatabasesRuntime as unknown as {
+    new <TAuth extends ClientAuth | ServerAuth = ClientAuth | ServerAuth>(client: Client<TAuth>): Databases<TAuth>;
+};
+
+export { Databases };

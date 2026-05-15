@@ -1,14 +1,23 @@
-import { Service } from '../service';
-import { AppwriteException, Client, type Payload, UploadProgress } from '../client';
+import { AppwriteException, Client, type ClientAuth, type ServerAuth, type Payload } from '../client';
 import type { Models } from '../models';
 
 import { MessagePriority } from '../enums/message-priority';
 import { SmtpEncryption } from '../enums/smtp-encryption';
 
-export class Messaging {
-    client: Client;
+type MessagingServerOnlyMethod = 'listMessages' | 'createEmail' | 'updateEmail' | 'createPush' | 'updatePush' | 'createSms' | 'createSMS' | 'updateSms' | 'updateSMS' | 'getMessage' | 'delete' | 'listMessageLogs' | 'listTargets' | 'listProviders' | 'createApnsProvider' | 'createAPNSProvider' | 'updateApnsProvider' | 'updateAPNSProvider' | 'createFcmProvider' | 'createFCMProvider' | 'updateFcmProvider' | 'updateFCMProvider' | 'createMailgunProvider' | 'updateMailgunProvider' | 'createMsg91Provider' | 'updateMsg91Provider' | 'createResendProvider' | 'updateResendProvider' | 'createSendgridProvider' | 'updateSendgridProvider' | 'createSmtpProvider' | 'createSMTPProvider' | 'updateSmtpProvider' | 'updateSMTPProvider' | 'createTelesignProvider' | 'updateTelesignProvider' | 'createTextmagicProvider' | 'updateTextmagicProvider' | 'createTwilioProvider' | 'updateTwilioProvider' | 'createVonageProvider' | 'updateVonageProvider' | 'getProvider' | 'deleteProvider' | 'listProviderLogs' | 'listSubscriberLogs' | 'listTopics' | 'createTopic' | 'getTopic' | 'updateTopic' | 'deleteTopic' | 'listTopicLogs' | 'listSubscribers' | 'getSubscriber';
+type MessagingClientOnlyMethod = never;
 
-    constructor(client: Client) {
+export type Messaging<TAuth extends ClientAuth | ServerAuth = ClientAuth | ServerAuth> =
+    TAuth extends ClientAuth
+        ? Omit<MessagingRuntime<TAuth>, 'client' | MessagingServerOnlyMethod>
+        : TAuth extends ServerAuth
+            ? Omit<MessagingRuntime<TAuth>, 'client' | MessagingClientOnlyMethod>
+            : Omit<MessagingRuntime<TAuth>, 'client'>;
+
+class MessagingRuntime<TAuth extends ClientAuth | ServerAuth = ClientAuth | ServerAuth> {
+    client: Client<TAuth>;
+
+    constructor(client: Client<TAuth>) {
         this.client = client;
     }
 
@@ -21,7 +30,7 @@ export class Messaging {
      * @throws {AppwriteException}
      * @returns {Promise<Models.MessageList>}
      */
-    listMessages(params?: { queries?: string[], search?: string, total?: boolean }): Promise<Models.MessageList>;
+    listMessages(this: Messaging<ServerAuth>, params?: { queries?: string[], search?: string, total?: boolean }): Promise<Models.MessageList>;
     /**
      * Get a list of all messages from the current Appwrite project.
      *
@@ -32,7 +41,7 @@ export class Messaging {
      * @returns {Promise<Models.MessageList>}
      * @deprecated Use the object parameter style method for a better developer experience.
      */
-    listMessages(queries?: string[], search?: string, total?: boolean): Promise<Models.MessageList>;
+    listMessages(this: Messaging<ServerAuth>, queries?: string[], search?: string, total?: boolean): Promise<Models.MessageList>;
     listMessages(
         paramsOrFirst?: { queries?: string[], search?: string, total?: boolean } | string[],
         ...rest: [(string)?, (boolean)?]    
@@ -96,7 +105,7 @@ export class Messaging {
      * @throws {AppwriteException}
      * @returns {Promise<Models.Message>}
      */
-    createEmail(params: { messageId: string, subject: string, content: string, topics?: string[], users?: string[], targets?: string[], cc?: string[], bcc?: string[], attachments?: string[], draft?: boolean, html?: boolean, scheduledAt?: string }): Promise<Models.Message>;
+    createEmail(this: Messaging<ServerAuth>, params: { messageId: string, subject: string, content: string, topics?: string[], users?: string[], targets?: string[], cc?: string[], bcc?: string[], attachments?: string[], draft?: boolean, html?: boolean, scheduledAt?: string }): Promise<Models.Message>;
     /**
      * Create a new email message.
      *
@@ -116,7 +125,7 @@ export class Messaging {
      * @returns {Promise<Models.Message>}
      * @deprecated Use the object parameter style method for a better developer experience.
      */
-    createEmail(messageId: string, subject: string, content: string, topics?: string[], users?: string[], targets?: string[], cc?: string[], bcc?: string[], attachments?: string[], draft?: boolean, html?: boolean, scheduledAt?: string): Promise<Models.Message>;
+    createEmail(this: Messaging<ServerAuth>, messageId: string, subject: string, content: string, topics?: string[], users?: string[], targets?: string[], cc?: string[], bcc?: string[], attachments?: string[], draft?: boolean, html?: boolean, scheduledAt?: string): Promise<Models.Message>;
     createEmail(
         paramsOrFirst: { messageId: string, subject: string, content: string, topics?: string[], users?: string[], targets?: string[], cc?: string[], bcc?: string[], attachments?: string[], draft?: boolean, html?: boolean, scheduledAt?: string } | string,
         ...rest: [(string)?, (string)?, (string[])?, (string[])?, (string[])?, (string[])?, (string[])?, (string[])?, (boolean)?, (boolean)?, (string)?]    
@@ -236,7 +245,7 @@ export class Messaging {
      * @throws {AppwriteException}
      * @returns {Promise<Models.Message>}
      */
-    updateEmail(params: { messageId: string, topics?: string[], users?: string[], targets?: string[], subject?: string, content?: string, draft?: boolean, html?: boolean, cc?: string[], bcc?: string[], scheduledAt?: string, attachments?: string[] }): Promise<Models.Message>;
+    updateEmail(this: Messaging<ServerAuth>, params: { messageId: string, topics?: string[], users?: string[], targets?: string[], subject?: string, content?: string, draft?: boolean, html?: boolean, cc?: string[], bcc?: string[], scheduledAt?: string, attachments?: string[] }): Promise<Models.Message>;
     /**
      * Update an email message by its unique ID. This endpoint only works on messages that are in draft status. Messages that are already processing, sent, or failed cannot be updated.
      * 
@@ -257,7 +266,7 @@ export class Messaging {
      * @returns {Promise<Models.Message>}
      * @deprecated Use the object parameter style method for a better developer experience.
      */
-    updateEmail(messageId: string, topics?: string[], users?: string[], targets?: string[], subject?: string, content?: string, draft?: boolean, html?: boolean, cc?: string[], bcc?: string[], scheduledAt?: string, attachments?: string[]): Promise<Models.Message>;
+    updateEmail(this: Messaging<ServerAuth>, messageId: string, topics?: string[], users?: string[], targets?: string[], subject?: string, content?: string, draft?: boolean, html?: boolean, cc?: string[], bcc?: string[], scheduledAt?: string, attachments?: string[]): Promise<Models.Message>;
     updateEmail(
         paramsOrFirst: { messageId: string, topics?: string[], users?: string[], targets?: string[], subject?: string, content?: string, draft?: boolean, html?: boolean, cc?: string[], bcc?: string[], scheduledAt?: string, attachments?: string[] } | string,
         ...rest: [(string[])?, (string[])?, (string[])?, (string)?, (string)?, (boolean)?, (boolean)?, (string[])?, (string[])?, (string)?, (string[])?]    
@@ -374,7 +383,7 @@ export class Messaging {
      * @throws {AppwriteException}
      * @returns {Promise<Models.Message>}
      */
-    createPush(params: { messageId: string, title?: string, body?: string, topics?: string[], users?: string[], targets?: string[], data?: object, action?: string, image?: string, icon?: string, sound?: string, color?: string, tag?: string, badge?: number, draft?: boolean, scheduledAt?: string, contentAvailable?: boolean, critical?: boolean, priority?: MessagePriority }): Promise<Models.Message>;
+    createPush(this: Messaging<ServerAuth>, params: { messageId: string, title?: string, body?: string, topics?: string[], users?: string[], targets?: string[], data?: object, action?: string, image?: string, icon?: string, sound?: string, color?: string, tag?: string, badge?: number, draft?: boolean, scheduledAt?: string, contentAvailable?: boolean, critical?: boolean, priority?: MessagePriority }): Promise<Models.Message>;
     /**
      * Create a new push notification.
      *
@@ -401,7 +410,7 @@ export class Messaging {
      * @returns {Promise<Models.Message>}
      * @deprecated Use the object parameter style method for a better developer experience.
      */
-    createPush(messageId: string, title?: string, body?: string, topics?: string[], users?: string[], targets?: string[], data?: object, action?: string, image?: string, icon?: string, sound?: string, color?: string, tag?: string, badge?: number, draft?: boolean, scheduledAt?: string, contentAvailable?: boolean, critical?: boolean, priority?: MessagePriority): Promise<Models.Message>;
+    createPush(this: Messaging<ServerAuth>, messageId: string, title?: string, body?: string, topics?: string[], users?: string[], targets?: string[], data?: object, action?: string, image?: string, icon?: string, sound?: string, color?: string, tag?: string, badge?: number, draft?: boolean, scheduledAt?: string, contentAvailable?: boolean, critical?: boolean, priority?: MessagePriority): Promise<Models.Message>;
     createPush(
         paramsOrFirst: { messageId: string, title?: string, body?: string, topics?: string[], users?: string[], targets?: string[], data?: object, action?: string, image?: string, icon?: string, sound?: string, color?: string, tag?: string, badge?: number, draft?: boolean, scheduledAt?: string, contentAvailable?: boolean, critical?: boolean, priority?: MessagePriority } | string,
         ...rest: [(string)?, (string)?, (string[])?, (string[])?, (string[])?, (object)?, (string)?, (string)?, (string)?, (string)?, (string)?, (string)?, (number)?, (boolean)?, (string)?, (boolean)?, (boolean)?, (MessagePriority)?]    
@@ -557,7 +566,7 @@ export class Messaging {
      * @throws {AppwriteException}
      * @returns {Promise<Models.Message>}
      */
-    updatePush(params: { messageId: string, topics?: string[], users?: string[], targets?: string[], title?: string, body?: string, data?: object, action?: string, image?: string, icon?: string, sound?: string, color?: string, tag?: string, badge?: number, draft?: boolean, scheduledAt?: string, contentAvailable?: boolean, critical?: boolean, priority?: MessagePriority }): Promise<Models.Message>;
+    updatePush(this: Messaging<ServerAuth>, params: { messageId: string, topics?: string[], users?: string[], targets?: string[], title?: string, body?: string, data?: object, action?: string, image?: string, icon?: string, sound?: string, color?: string, tag?: string, badge?: number, draft?: boolean, scheduledAt?: string, contentAvailable?: boolean, critical?: boolean, priority?: MessagePriority }): Promise<Models.Message>;
     /**
      * Update a push notification by its unique ID. This endpoint only works on messages that are in draft status. Messages that are already processing, sent, or failed cannot be updated.
      * 
@@ -585,7 +594,7 @@ export class Messaging {
      * @returns {Promise<Models.Message>}
      * @deprecated Use the object parameter style method for a better developer experience.
      */
-    updatePush(messageId: string, topics?: string[], users?: string[], targets?: string[], title?: string, body?: string, data?: object, action?: string, image?: string, icon?: string, sound?: string, color?: string, tag?: string, badge?: number, draft?: boolean, scheduledAt?: string, contentAvailable?: boolean, critical?: boolean, priority?: MessagePriority): Promise<Models.Message>;
+    updatePush(this: Messaging<ServerAuth>, messageId: string, topics?: string[], users?: string[], targets?: string[], title?: string, body?: string, data?: object, action?: string, image?: string, icon?: string, sound?: string, color?: string, tag?: string, badge?: number, draft?: boolean, scheduledAt?: string, contentAvailable?: boolean, critical?: boolean, priority?: MessagePriority): Promise<Models.Message>;
     updatePush(
         paramsOrFirst: { messageId: string, topics?: string[], users?: string[], targets?: string[], title?: string, body?: string, data?: object, action?: string, image?: string, icon?: string, sound?: string, color?: string, tag?: string, badge?: number, draft?: boolean, scheduledAt?: string, contentAvailable?: boolean, critical?: boolean, priority?: MessagePriority } | string,
         ...rest: [(string[])?, (string[])?, (string[])?, (string)?, (string)?, (object)?, (string)?, (string)?, (string)?, (string)?, (string)?, (string)?, (number)?, (boolean)?, (string)?, (boolean)?, (boolean)?, (MessagePriority)?]    
@@ -726,7 +735,7 @@ export class Messaging {
      * @returns {Promise<Models.Message>}
      * @deprecated This API has been deprecated since 1.8.0. Please use `Messaging.createSMS` instead.
      */
-    createSms(params: { messageId: string, content: string, topics?: string[], users?: string[], targets?: string[], draft?: boolean, scheduledAt?: string }): Promise<Models.Message>;
+    createSms(this: Messaging<ServerAuth>, params: { messageId: string, content: string, topics?: string[], users?: string[], targets?: string[], draft?: boolean, scheduledAt?: string }): Promise<Models.Message>;
     /**
      * Create a new SMS message.
      *
@@ -741,7 +750,7 @@ export class Messaging {
      * @returns {Promise<Models.Message>}
      * @deprecated Use the object parameter style method for a better developer experience.
      */
-    createSms(messageId: string, content: string, topics?: string[], users?: string[], targets?: string[], draft?: boolean, scheduledAt?: string): Promise<Models.Message>;
+    createSms(this: Messaging<ServerAuth>, messageId: string, content: string, topics?: string[], users?: string[], targets?: string[], draft?: boolean, scheduledAt?: string): Promise<Models.Message>;
     createSms(
         paramsOrFirst: { messageId: string, content: string, topics?: string[], users?: string[], targets?: string[], draft?: boolean, scheduledAt?: string } | string,
         ...rest: [(string)?, (string[])?, (string[])?, (string[])?, (boolean)?, (string)?]    
@@ -827,7 +836,7 @@ export class Messaging {
      * @throws {AppwriteException}
      * @returns {Promise<Models.Message>}
      */
-    createSMS(params: { messageId: string, content: string, topics?: string[], users?: string[], targets?: string[], draft?: boolean, scheduledAt?: string }): Promise<Models.Message>;
+    createSMS(this: Messaging<ServerAuth>, params: { messageId: string, content: string, topics?: string[], users?: string[], targets?: string[], draft?: boolean, scheduledAt?: string }): Promise<Models.Message>;
     /**
      * Create a new SMS message.
      *
@@ -842,7 +851,7 @@ export class Messaging {
      * @returns {Promise<Models.Message>}
      * @deprecated Use the object parameter style method for a better developer experience.
      */
-    createSMS(messageId: string, content: string, topics?: string[], users?: string[], targets?: string[], draft?: boolean, scheduledAt?: string): Promise<Models.Message>;
+    createSMS(this: Messaging<ServerAuth>, messageId: string, content: string, topics?: string[], users?: string[], targets?: string[], draft?: boolean, scheduledAt?: string): Promise<Models.Message>;
     createSMS(
         paramsOrFirst: { messageId: string, content: string, topics?: string[], users?: string[], targets?: string[], draft?: boolean, scheduledAt?: string } | string,
         ...rest: [(string)?, (string[])?, (string[])?, (string[])?, (boolean)?, (string)?]    
@@ -930,7 +939,7 @@ export class Messaging {
      * @returns {Promise<Models.Message>}
      * @deprecated This API has been deprecated since 1.8.0. Please use `Messaging.updateSMS` instead.
      */
-    updateSms(params: { messageId: string, topics?: string[], users?: string[], targets?: string[], content?: string, draft?: boolean, scheduledAt?: string }): Promise<Models.Message>;
+    updateSms(this: Messaging<ServerAuth>, params: { messageId: string, topics?: string[], users?: string[], targets?: string[], content?: string, draft?: boolean, scheduledAt?: string }): Promise<Models.Message>;
     /**
      * Update an SMS message by its unique ID. This endpoint only works on messages that are in draft status. Messages that are already processing, sent, or failed cannot be updated.
      * 
@@ -946,7 +955,7 @@ export class Messaging {
      * @returns {Promise<Models.Message>}
      * @deprecated Use the object parameter style method for a better developer experience.
      */
-    updateSms(messageId: string, topics?: string[], users?: string[], targets?: string[], content?: string, draft?: boolean, scheduledAt?: string): Promise<Models.Message>;
+    updateSms(this: Messaging<ServerAuth>, messageId: string, topics?: string[], users?: string[], targets?: string[], content?: string, draft?: boolean, scheduledAt?: string): Promise<Models.Message>;
     updateSms(
         paramsOrFirst: { messageId: string, topics?: string[], users?: string[], targets?: string[], content?: string, draft?: boolean, scheduledAt?: string } | string,
         ...rest: [(string[])?, (string[])?, (string[])?, (string)?, (boolean)?, (string)?]    
@@ -1027,7 +1036,7 @@ export class Messaging {
      * @throws {AppwriteException}
      * @returns {Promise<Models.Message>}
      */
-    updateSMS(params: { messageId: string, topics?: string[], users?: string[], targets?: string[], content?: string, draft?: boolean, scheduledAt?: string }): Promise<Models.Message>;
+    updateSMS(this: Messaging<ServerAuth>, params: { messageId: string, topics?: string[], users?: string[], targets?: string[], content?: string, draft?: boolean, scheduledAt?: string }): Promise<Models.Message>;
     /**
      * Update an SMS message by its unique ID. This endpoint only works on messages that are in draft status. Messages that are already processing, sent, or failed cannot be updated.
      * 
@@ -1043,7 +1052,7 @@ export class Messaging {
      * @returns {Promise<Models.Message>}
      * @deprecated Use the object parameter style method for a better developer experience.
      */
-    updateSMS(messageId: string, topics?: string[], users?: string[], targets?: string[], content?: string, draft?: boolean, scheduledAt?: string): Promise<Models.Message>;
+    updateSMS(this: Messaging<ServerAuth>, messageId: string, topics?: string[], users?: string[], targets?: string[], content?: string, draft?: boolean, scheduledAt?: string): Promise<Models.Message>;
     updateSMS(
         paramsOrFirst: { messageId: string, topics?: string[], users?: string[], targets?: string[], content?: string, draft?: boolean, scheduledAt?: string } | string,
         ...rest: [(string[])?, (string[])?, (string[])?, (string)?, (boolean)?, (string)?]    
@@ -1118,7 +1127,7 @@ export class Messaging {
      * @throws {AppwriteException}
      * @returns {Promise<Models.Message>}
      */
-    getMessage(params: { messageId: string }): Promise<Models.Message>;
+    getMessage(this: Messaging<ServerAuth>, params: { messageId: string }): Promise<Models.Message>;
     /**
      * Get a message by its unique ID.
      * 
@@ -1128,7 +1137,7 @@ export class Messaging {
      * @returns {Promise<Models.Message>}
      * @deprecated Use the object parameter style method for a better developer experience.
      */
-    getMessage(messageId: string): Promise<Models.Message>;
+    getMessage(this: Messaging<ServerAuth>, messageId: string): Promise<Models.Message>;
     getMessage(
         paramsOrFirst: { messageId: string } | string    
     ): Promise<Models.Message> {
@@ -1170,7 +1179,7 @@ export class Messaging {
      * @throws {AppwriteException}
      * @returns {Promise<{}>}
      */
-    delete(params: { messageId: string }): Promise<{}>;
+    delete(this: Messaging<ServerAuth>, params: { messageId: string }): Promise<{}>;
     /**
      * Delete a message. If the message is not a draft or scheduled, but has been sent, this will not recall the message.
      *
@@ -1179,7 +1188,7 @@ export class Messaging {
      * @returns {Promise<{}>}
      * @deprecated Use the object parameter style method for a better developer experience.
      */
-    delete(messageId: string): Promise<{}>;
+    delete(this: Messaging<ServerAuth>, messageId: string): Promise<{}>;
     delete(
         paramsOrFirst: { messageId: string } | string    
     ): Promise<{}> {
@@ -1224,7 +1233,7 @@ export class Messaging {
      * @throws {AppwriteException}
      * @returns {Promise<Models.LogList>}
      */
-    listMessageLogs(params: { messageId: string, queries?: string[], total?: boolean }): Promise<Models.LogList>;
+    listMessageLogs(this: Messaging<ServerAuth>, params: { messageId: string, queries?: string[], total?: boolean }): Promise<Models.LogList>;
     /**
      * Get the message activity logs listed by its unique ID.
      *
@@ -1235,7 +1244,7 @@ export class Messaging {
      * @returns {Promise<Models.LogList>}
      * @deprecated Use the object parameter style method for a better developer experience.
      */
-    listMessageLogs(messageId: string, queries?: string[], total?: boolean): Promise<Models.LogList>;
+    listMessageLogs(this: Messaging<ServerAuth>, messageId: string, queries?: string[], total?: boolean): Promise<Models.LogList>;
     listMessageLogs(
         paramsOrFirst: { messageId: string, queries?: string[], total?: boolean } | string,
         ...rest: [(string[])?, (boolean)?]    
@@ -1290,7 +1299,7 @@ export class Messaging {
      * @throws {AppwriteException}
      * @returns {Promise<Models.TargetList>}
      */
-    listTargets(params: { messageId: string, queries?: string[], total?: boolean }): Promise<Models.TargetList>;
+    listTargets(this: Messaging<ServerAuth>, params: { messageId: string, queries?: string[], total?: boolean }): Promise<Models.TargetList>;
     /**
      * Get a list of the targets associated with a message.
      *
@@ -1301,7 +1310,7 @@ export class Messaging {
      * @returns {Promise<Models.TargetList>}
      * @deprecated Use the object parameter style method for a better developer experience.
      */
-    listTargets(messageId: string, queries?: string[], total?: boolean): Promise<Models.TargetList>;
+    listTargets(this: Messaging<ServerAuth>, messageId: string, queries?: string[], total?: boolean): Promise<Models.TargetList>;
     listTargets(
         paramsOrFirst: { messageId: string, queries?: string[], total?: boolean } | string,
         ...rest: [(string[])?, (boolean)?]    
@@ -1356,7 +1365,7 @@ export class Messaging {
      * @throws {AppwriteException}
      * @returns {Promise<Models.ProviderList>}
      */
-    listProviders(params?: { queries?: string[], search?: string, total?: boolean }): Promise<Models.ProviderList>;
+    listProviders(this: Messaging<ServerAuth>, params?: { queries?: string[], search?: string, total?: boolean }): Promise<Models.ProviderList>;
     /**
      * Get a list of all providers from the current Appwrite project.
      *
@@ -1367,7 +1376,7 @@ export class Messaging {
      * @returns {Promise<Models.ProviderList>}
      * @deprecated Use the object parameter style method for a better developer experience.
      */
-    listProviders(queries?: string[], search?: string, total?: boolean): Promise<Models.ProviderList>;
+    listProviders(this: Messaging<ServerAuth>, queries?: string[], search?: string, total?: boolean): Promise<Models.ProviderList>;
     listProviders(
         paramsOrFirst?: { queries?: string[], search?: string, total?: boolean } | string[],
         ...rest: [(string)?, (boolean)?]    
@@ -1428,7 +1437,7 @@ export class Messaging {
      * @returns {Promise<Models.Provider>}
      * @deprecated This API has been deprecated since 1.8.0. Please use `Messaging.createAPNSProvider` instead.
      */
-    createApnsProvider(params: { providerId: string, name: string, authKey?: string, authKeyId?: string, teamId?: string, bundleId?: string, sandbox?: boolean, enabled?: boolean }): Promise<Models.Provider>;
+    createApnsProvider(this: Messaging<ServerAuth>, params: { providerId: string, name: string, authKey?: string, authKeyId?: string, teamId?: string, bundleId?: string, sandbox?: boolean, enabled?: boolean }): Promise<Models.Provider>;
     /**
      * Create a new Apple Push Notification service provider.
      *
@@ -1444,7 +1453,7 @@ export class Messaging {
      * @returns {Promise<Models.Provider>}
      * @deprecated Use the object parameter style method for a better developer experience.
      */
-    createApnsProvider(providerId: string, name: string, authKey?: string, authKeyId?: string, teamId?: string, bundleId?: string, sandbox?: boolean, enabled?: boolean): Promise<Models.Provider>;
+    createApnsProvider(this: Messaging<ServerAuth>, providerId: string, name: string, authKey?: string, authKeyId?: string, teamId?: string, bundleId?: string, sandbox?: boolean, enabled?: boolean): Promise<Models.Provider>;
     createApnsProvider(
         paramsOrFirst: { providerId: string, name: string, authKey?: string, authKeyId?: string, teamId?: string, bundleId?: string, sandbox?: boolean, enabled?: boolean } | string,
         ...rest: [(string)?, (string)?, (string)?, (string)?, (string)?, (boolean)?, (boolean)?]    
@@ -1536,7 +1545,7 @@ export class Messaging {
      * @throws {AppwriteException}
      * @returns {Promise<Models.Provider>}
      */
-    createAPNSProvider(params: { providerId: string, name: string, authKey?: string, authKeyId?: string, teamId?: string, bundleId?: string, sandbox?: boolean, enabled?: boolean }): Promise<Models.Provider>;
+    createAPNSProvider(this: Messaging<ServerAuth>, params: { providerId: string, name: string, authKey?: string, authKeyId?: string, teamId?: string, bundleId?: string, sandbox?: boolean, enabled?: boolean }): Promise<Models.Provider>;
     /**
      * Create a new Apple Push Notification service provider.
      *
@@ -1552,7 +1561,7 @@ export class Messaging {
      * @returns {Promise<Models.Provider>}
      * @deprecated Use the object parameter style method for a better developer experience.
      */
-    createAPNSProvider(providerId: string, name: string, authKey?: string, authKeyId?: string, teamId?: string, bundleId?: string, sandbox?: boolean, enabled?: boolean): Promise<Models.Provider>;
+    createAPNSProvider(this: Messaging<ServerAuth>, providerId: string, name: string, authKey?: string, authKeyId?: string, teamId?: string, bundleId?: string, sandbox?: boolean, enabled?: boolean): Promise<Models.Provider>;
     createAPNSProvider(
         paramsOrFirst: { providerId: string, name: string, authKey?: string, authKeyId?: string, teamId?: string, bundleId?: string, sandbox?: boolean, enabled?: boolean } | string,
         ...rest: [(string)?, (string)?, (string)?, (string)?, (string)?, (boolean)?, (boolean)?]    
@@ -1645,7 +1654,7 @@ export class Messaging {
      * @returns {Promise<Models.Provider>}
      * @deprecated This API has been deprecated since 1.8.0. Please use `Messaging.updateAPNSProvider` instead.
      */
-    updateApnsProvider(params: { providerId: string, name?: string, enabled?: boolean, authKey?: string, authKeyId?: string, teamId?: string, bundleId?: string, sandbox?: boolean }): Promise<Models.Provider>;
+    updateApnsProvider(this: Messaging<ServerAuth>, params: { providerId: string, name?: string, enabled?: boolean, authKey?: string, authKeyId?: string, teamId?: string, bundleId?: string, sandbox?: boolean }): Promise<Models.Provider>;
     /**
      * Update a Apple Push Notification service provider by its unique ID.
      *
@@ -1661,7 +1670,7 @@ export class Messaging {
      * @returns {Promise<Models.Provider>}
      * @deprecated Use the object parameter style method for a better developer experience.
      */
-    updateApnsProvider(providerId: string, name?: string, enabled?: boolean, authKey?: string, authKeyId?: string, teamId?: string, bundleId?: string, sandbox?: boolean): Promise<Models.Provider>;
+    updateApnsProvider(this: Messaging<ServerAuth>, providerId: string, name?: string, enabled?: boolean, authKey?: string, authKeyId?: string, teamId?: string, bundleId?: string, sandbox?: boolean): Promise<Models.Provider>;
     updateApnsProvider(
         paramsOrFirst: { providerId: string, name?: string, enabled?: boolean, authKey?: string, authKeyId?: string, teamId?: string, bundleId?: string, sandbox?: boolean } | string,
         ...rest: [(string)?, (boolean)?, (string)?, (string)?, (string)?, (string)?, (boolean)?]    
@@ -1747,7 +1756,7 @@ export class Messaging {
      * @throws {AppwriteException}
      * @returns {Promise<Models.Provider>}
      */
-    updateAPNSProvider(params: { providerId: string, name?: string, enabled?: boolean, authKey?: string, authKeyId?: string, teamId?: string, bundleId?: string, sandbox?: boolean }): Promise<Models.Provider>;
+    updateAPNSProvider(this: Messaging<ServerAuth>, params: { providerId: string, name?: string, enabled?: boolean, authKey?: string, authKeyId?: string, teamId?: string, bundleId?: string, sandbox?: boolean }): Promise<Models.Provider>;
     /**
      * Update a Apple Push Notification service provider by its unique ID.
      *
@@ -1763,7 +1772,7 @@ export class Messaging {
      * @returns {Promise<Models.Provider>}
      * @deprecated Use the object parameter style method for a better developer experience.
      */
-    updateAPNSProvider(providerId: string, name?: string, enabled?: boolean, authKey?: string, authKeyId?: string, teamId?: string, bundleId?: string, sandbox?: boolean): Promise<Models.Provider>;
+    updateAPNSProvider(this: Messaging<ServerAuth>, providerId: string, name?: string, enabled?: boolean, authKey?: string, authKeyId?: string, teamId?: string, bundleId?: string, sandbox?: boolean): Promise<Models.Provider>;
     updateAPNSProvider(
         paramsOrFirst: { providerId: string, name?: string, enabled?: boolean, authKey?: string, authKeyId?: string, teamId?: string, bundleId?: string, sandbox?: boolean } | string,
         ...rest: [(string)?, (boolean)?, (string)?, (string)?, (string)?, (string)?, (boolean)?]    
@@ -1846,7 +1855,7 @@ export class Messaging {
      * @returns {Promise<Models.Provider>}
      * @deprecated This API has been deprecated since 1.8.0. Please use `Messaging.createFCMProvider` instead.
      */
-    createFcmProvider(params: { providerId: string, name: string, serviceAccountJSON?: object, enabled?: boolean }): Promise<Models.Provider>;
+    createFcmProvider(this: Messaging<ServerAuth>, params: { providerId: string, name: string, serviceAccountJSON?: object, enabled?: boolean }): Promise<Models.Provider>;
     /**
      * Create a new Firebase Cloud Messaging provider.
      *
@@ -1858,7 +1867,7 @@ export class Messaging {
      * @returns {Promise<Models.Provider>}
      * @deprecated Use the object parameter style method for a better developer experience.
      */
-    createFcmProvider(providerId: string, name: string, serviceAccountJSON?: object, enabled?: boolean): Promise<Models.Provider>;
+    createFcmProvider(this: Messaging<ServerAuth>, providerId: string, name: string, serviceAccountJSON?: object, enabled?: boolean): Promise<Models.Provider>;
     createFcmProvider(
         paramsOrFirst: { providerId: string, name: string, serviceAccountJSON?: object, enabled?: boolean } | string,
         ...rest: [(string)?, (object)?, (boolean)?]    
@@ -1926,7 +1935,7 @@ export class Messaging {
      * @throws {AppwriteException}
      * @returns {Promise<Models.Provider>}
      */
-    createFCMProvider(params: { providerId: string, name: string, serviceAccountJSON?: object, enabled?: boolean }): Promise<Models.Provider>;
+    createFCMProvider(this: Messaging<ServerAuth>, params: { providerId: string, name: string, serviceAccountJSON?: object, enabled?: boolean }): Promise<Models.Provider>;
     /**
      * Create a new Firebase Cloud Messaging provider.
      *
@@ -1938,7 +1947,7 @@ export class Messaging {
      * @returns {Promise<Models.Provider>}
      * @deprecated Use the object parameter style method for a better developer experience.
      */
-    createFCMProvider(providerId: string, name: string, serviceAccountJSON?: object, enabled?: boolean): Promise<Models.Provider>;
+    createFCMProvider(this: Messaging<ServerAuth>, providerId: string, name: string, serviceAccountJSON?: object, enabled?: boolean): Promise<Models.Provider>;
     createFCMProvider(
         paramsOrFirst: { providerId: string, name: string, serviceAccountJSON?: object, enabled?: boolean } | string,
         ...rest: [(string)?, (object)?, (boolean)?]    
@@ -2007,7 +2016,7 @@ export class Messaging {
      * @returns {Promise<Models.Provider>}
      * @deprecated This API has been deprecated since 1.8.0. Please use `Messaging.updateFCMProvider` instead.
      */
-    updateFcmProvider(params: { providerId: string, name?: string, enabled?: boolean, serviceAccountJSON?: object }): Promise<Models.Provider>;
+    updateFcmProvider(this: Messaging<ServerAuth>, params: { providerId: string, name?: string, enabled?: boolean, serviceAccountJSON?: object }): Promise<Models.Provider>;
     /**
      * Update a Firebase Cloud Messaging provider by its unique ID.
      *
@@ -2019,7 +2028,7 @@ export class Messaging {
      * @returns {Promise<Models.Provider>}
      * @deprecated Use the object parameter style method for a better developer experience.
      */
-    updateFcmProvider(providerId: string, name?: string, enabled?: boolean, serviceAccountJSON?: object): Promise<Models.Provider>;
+    updateFcmProvider(this: Messaging<ServerAuth>, providerId: string, name?: string, enabled?: boolean, serviceAccountJSON?: object): Promise<Models.Provider>;
     updateFcmProvider(
         paramsOrFirst: { providerId: string, name?: string, enabled?: boolean, serviceAccountJSON?: object } | string,
         ...rest: [(string)?, (boolean)?, (object)?]    
@@ -2081,7 +2090,7 @@ export class Messaging {
      * @throws {AppwriteException}
      * @returns {Promise<Models.Provider>}
      */
-    updateFCMProvider(params: { providerId: string, name?: string, enabled?: boolean, serviceAccountJSON?: object }): Promise<Models.Provider>;
+    updateFCMProvider(this: Messaging<ServerAuth>, params: { providerId: string, name?: string, enabled?: boolean, serviceAccountJSON?: object }): Promise<Models.Provider>;
     /**
      * Update a Firebase Cloud Messaging provider by its unique ID.
      *
@@ -2093,7 +2102,7 @@ export class Messaging {
      * @returns {Promise<Models.Provider>}
      * @deprecated Use the object parameter style method for a better developer experience.
      */
-    updateFCMProvider(providerId: string, name?: string, enabled?: boolean, serviceAccountJSON?: object): Promise<Models.Provider>;
+    updateFCMProvider(this: Messaging<ServerAuth>, providerId: string, name?: string, enabled?: boolean, serviceAccountJSON?: object): Promise<Models.Provider>;
     updateFCMProvider(
         paramsOrFirst: { providerId: string, name?: string, enabled?: boolean, serviceAccountJSON?: object } | string,
         ...rest: [(string)?, (boolean)?, (object)?]    
@@ -2161,7 +2170,7 @@ export class Messaging {
      * @throws {AppwriteException}
      * @returns {Promise<Models.Provider>}
      */
-    createMailgunProvider(params: { providerId: string, name: string, apiKey?: string, domain?: string, isEuRegion?: boolean, fromName?: string, fromEmail?: string, replyToName?: string, replyToEmail?: string, enabled?: boolean }): Promise<Models.Provider>;
+    createMailgunProvider(this: Messaging<ServerAuth>, params: { providerId: string, name: string, apiKey?: string, domain?: string, isEuRegion?: boolean, fromName?: string, fromEmail?: string, replyToName?: string, replyToEmail?: string, enabled?: boolean }): Promise<Models.Provider>;
     /**
      * Create a new Mailgun provider.
      *
@@ -2179,7 +2188,7 @@ export class Messaging {
      * @returns {Promise<Models.Provider>}
      * @deprecated Use the object parameter style method for a better developer experience.
      */
-    createMailgunProvider(providerId: string, name: string, apiKey?: string, domain?: string, isEuRegion?: boolean, fromName?: string, fromEmail?: string, replyToName?: string, replyToEmail?: string, enabled?: boolean): Promise<Models.Provider>;
+    createMailgunProvider(this: Messaging<ServerAuth>, providerId: string, name: string, apiKey?: string, domain?: string, isEuRegion?: boolean, fromName?: string, fromEmail?: string, replyToName?: string, replyToEmail?: string, enabled?: boolean): Promise<Models.Provider>;
     createMailgunProvider(
         paramsOrFirst: { providerId: string, name: string, apiKey?: string, domain?: string, isEuRegion?: boolean, fromName?: string, fromEmail?: string, replyToName?: string, replyToEmail?: string, enabled?: boolean } | string,
         ...rest: [(string)?, (string)?, (string)?, (boolean)?, (string)?, (string)?, (string)?, (string)?, (boolean)?]    
@@ -2283,7 +2292,7 @@ export class Messaging {
      * @throws {AppwriteException}
      * @returns {Promise<Models.Provider>}
      */
-    updateMailgunProvider(params: { providerId: string, name?: string, apiKey?: string, domain?: string, isEuRegion?: boolean, enabled?: boolean, fromName?: string, fromEmail?: string, replyToName?: string, replyToEmail?: string }): Promise<Models.Provider>;
+    updateMailgunProvider(this: Messaging<ServerAuth>, params: { providerId: string, name?: string, apiKey?: string, domain?: string, isEuRegion?: boolean, enabled?: boolean, fromName?: string, fromEmail?: string, replyToName?: string, replyToEmail?: string }): Promise<Models.Provider>;
     /**
      * Update a Mailgun provider by its unique ID.
      *
@@ -2301,7 +2310,7 @@ export class Messaging {
      * @returns {Promise<Models.Provider>}
      * @deprecated Use the object parameter style method for a better developer experience.
      */
-    updateMailgunProvider(providerId: string, name?: string, apiKey?: string, domain?: string, isEuRegion?: boolean, enabled?: boolean, fromName?: string, fromEmail?: string, replyToName?: string, replyToEmail?: string): Promise<Models.Provider>;
+    updateMailgunProvider(this: Messaging<ServerAuth>, providerId: string, name?: string, apiKey?: string, domain?: string, isEuRegion?: boolean, enabled?: boolean, fromName?: string, fromEmail?: string, replyToName?: string, replyToEmail?: string): Promise<Models.Provider>;
     updateMailgunProvider(
         paramsOrFirst: { providerId: string, name?: string, apiKey?: string, domain?: string, isEuRegion?: boolean, enabled?: boolean, fromName?: string, fromEmail?: string, replyToName?: string, replyToEmail?: string } | string,
         ...rest: [(string)?, (string)?, (string)?, (boolean)?, (boolean)?, (string)?, (string)?, (string)?, (string)?]    
@@ -2395,7 +2404,7 @@ export class Messaging {
      * @throws {AppwriteException}
      * @returns {Promise<Models.Provider>}
      */
-    createMsg91Provider(params: { providerId: string, name: string, templateId?: string, senderId?: string, authKey?: string, enabled?: boolean }): Promise<Models.Provider>;
+    createMsg91Provider(this: Messaging<ServerAuth>, params: { providerId: string, name: string, templateId?: string, senderId?: string, authKey?: string, enabled?: boolean }): Promise<Models.Provider>;
     /**
      * Create a new MSG91 provider.
      *
@@ -2409,7 +2418,7 @@ export class Messaging {
      * @returns {Promise<Models.Provider>}
      * @deprecated Use the object parameter style method for a better developer experience.
      */
-    createMsg91Provider(providerId: string, name: string, templateId?: string, senderId?: string, authKey?: string, enabled?: boolean): Promise<Models.Provider>;
+    createMsg91Provider(this: Messaging<ServerAuth>, providerId: string, name: string, templateId?: string, senderId?: string, authKey?: string, enabled?: boolean): Promise<Models.Provider>;
     createMsg91Provider(
         paramsOrFirst: { providerId: string, name: string, templateId?: string, senderId?: string, authKey?: string, enabled?: boolean } | string,
         ...rest: [(string)?, (string)?, (string)?, (string)?, (boolean)?]    
@@ -2489,7 +2498,7 @@ export class Messaging {
      * @throws {AppwriteException}
      * @returns {Promise<Models.Provider>}
      */
-    updateMsg91Provider(params: { providerId: string, name?: string, enabled?: boolean, templateId?: string, senderId?: string, authKey?: string }): Promise<Models.Provider>;
+    updateMsg91Provider(this: Messaging<ServerAuth>, params: { providerId: string, name?: string, enabled?: boolean, templateId?: string, senderId?: string, authKey?: string }): Promise<Models.Provider>;
     /**
      * Update a MSG91 provider by its unique ID.
      *
@@ -2503,7 +2512,7 @@ export class Messaging {
      * @returns {Promise<Models.Provider>}
      * @deprecated Use the object parameter style method for a better developer experience.
      */
-    updateMsg91Provider(providerId: string, name?: string, enabled?: boolean, templateId?: string, senderId?: string, authKey?: string): Promise<Models.Provider>;
+    updateMsg91Provider(this: Messaging<ServerAuth>, providerId: string, name?: string, enabled?: boolean, templateId?: string, senderId?: string, authKey?: string): Promise<Models.Provider>;
     updateMsg91Provider(
         paramsOrFirst: { providerId: string, name?: string, enabled?: boolean, templateId?: string, senderId?: string, authKey?: string } | string,
         ...rest: [(string)?, (boolean)?, (string)?, (string)?, (string)?]    
@@ -2579,7 +2588,7 @@ export class Messaging {
      * @throws {AppwriteException}
      * @returns {Promise<Models.Provider>}
      */
-    createResendProvider(params: { providerId: string, name: string, apiKey?: string, fromName?: string, fromEmail?: string, replyToName?: string, replyToEmail?: string, enabled?: boolean }): Promise<Models.Provider>;
+    createResendProvider(this: Messaging<ServerAuth>, params: { providerId: string, name: string, apiKey?: string, fromName?: string, fromEmail?: string, replyToName?: string, replyToEmail?: string, enabled?: boolean }): Promise<Models.Provider>;
     /**
      * Create a new Resend provider.
      *
@@ -2595,7 +2604,7 @@ export class Messaging {
      * @returns {Promise<Models.Provider>}
      * @deprecated Use the object parameter style method for a better developer experience.
      */
-    createResendProvider(providerId: string, name: string, apiKey?: string, fromName?: string, fromEmail?: string, replyToName?: string, replyToEmail?: string, enabled?: boolean): Promise<Models.Provider>;
+    createResendProvider(this: Messaging<ServerAuth>, providerId: string, name: string, apiKey?: string, fromName?: string, fromEmail?: string, replyToName?: string, replyToEmail?: string, enabled?: boolean): Promise<Models.Provider>;
     createResendProvider(
         paramsOrFirst: { providerId: string, name: string, apiKey?: string, fromName?: string, fromEmail?: string, replyToName?: string, replyToEmail?: string, enabled?: boolean } | string,
         ...rest: [(string)?, (string)?, (string)?, (string)?, (string)?, (string)?, (boolean)?]    
@@ -2687,7 +2696,7 @@ export class Messaging {
      * @throws {AppwriteException}
      * @returns {Promise<Models.Provider>}
      */
-    updateResendProvider(params: { providerId: string, name?: string, enabled?: boolean, apiKey?: string, fromName?: string, fromEmail?: string, replyToName?: string, replyToEmail?: string }): Promise<Models.Provider>;
+    updateResendProvider(this: Messaging<ServerAuth>, params: { providerId: string, name?: string, enabled?: boolean, apiKey?: string, fromName?: string, fromEmail?: string, replyToName?: string, replyToEmail?: string }): Promise<Models.Provider>;
     /**
      * Update a Resend provider by its unique ID.
      *
@@ -2703,7 +2712,7 @@ export class Messaging {
      * @returns {Promise<Models.Provider>}
      * @deprecated Use the object parameter style method for a better developer experience.
      */
-    updateResendProvider(providerId: string, name?: string, enabled?: boolean, apiKey?: string, fromName?: string, fromEmail?: string, replyToName?: string, replyToEmail?: string): Promise<Models.Provider>;
+    updateResendProvider(this: Messaging<ServerAuth>, providerId: string, name?: string, enabled?: boolean, apiKey?: string, fromName?: string, fromEmail?: string, replyToName?: string, replyToEmail?: string): Promise<Models.Provider>;
     updateResendProvider(
         paramsOrFirst: { providerId: string, name?: string, enabled?: boolean, apiKey?: string, fromName?: string, fromEmail?: string, replyToName?: string, replyToEmail?: string } | string,
         ...rest: [(string)?, (boolean)?, (string)?, (string)?, (string)?, (string)?, (string)?]    
@@ -2789,7 +2798,7 @@ export class Messaging {
      * @throws {AppwriteException}
      * @returns {Promise<Models.Provider>}
      */
-    createSendgridProvider(params: { providerId: string, name: string, apiKey?: string, fromName?: string, fromEmail?: string, replyToName?: string, replyToEmail?: string, enabled?: boolean }): Promise<Models.Provider>;
+    createSendgridProvider(this: Messaging<ServerAuth>, params: { providerId: string, name: string, apiKey?: string, fromName?: string, fromEmail?: string, replyToName?: string, replyToEmail?: string, enabled?: boolean }): Promise<Models.Provider>;
     /**
      * Create a new Sendgrid provider.
      *
@@ -2805,7 +2814,7 @@ export class Messaging {
      * @returns {Promise<Models.Provider>}
      * @deprecated Use the object parameter style method for a better developer experience.
      */
-    createSendgridProvider(providerId: string, name: string, apiKey?: string, fromName?: string, fromEmail?: string, replyToName?: string, replyToEmail?: string, enabled?: boolean): Promise<Models.Provider>;
+    createSendgridProvider(this: Messaging<ServerAuth>, providerId: string, name: string, apiKey?: string, fromName?: string, fromEmail?: string, replyToName?: string, replyToEmail?: string, enabled?: boolean): Promise<Models.Provider>;
     createSendgridProvider(
         paramsOrFirst: { providerId: string, name: string, apiKey?: string, fromName?: string, fromEmail?: string, replyToName?: string, replyToEmail?: string, enabled?: boolean } | string,
         ...rest: [(string)?, (string)?, (string)?, (string)?, (string)?, (string)?, (boolean)?]    
@@ -2897,7 +2906,7 @@ export class Messaging {
      * @throws {AppwriteException}
      * @returns {Promise<Models.Provider>}
      */
-    updateSendgridProvider(params: { providerId: string, name?: string, enabled?: boolean, apiKey?: string, fromName?: string, fromEmail?: string, replyToName?: string, replyToEmail?: string }): Promise<Models.Provider>;
+    updateSendgridProvider(this: Messaging<ServerAuth>, params: { providerId: string, name?: string, enabled?: boolean, apiKey?: string, fromName?: string, fromEmail?: string, replyToName?: string, replyToEmail?: string }): Promise<Models.Provider>;
     /**
      * Update a Sendgrid provider by its unique ID.
      *
@@ -2913,7 +2922,7 @@ export class Messaging {
      * @returns {Promise<Models.Provider>}
      * @deprecated Use the object parameter style method for a better developer experience.
      */
-    updateSendgridProvider(providerId: string, name?: string, enabled?: boolean, apiKey?: string, fromName?: string, fromEmail?: string, replyToName?: string, replyToEmail?: string): Promise<Models.Provider>;
+    updateSendgridProvider(this: Messaging<ServerAuth>, providerId: string, name?: string, enabled?: boolean, apiKey?: string, fromName?: string, fromEmail?: string, replyToName?: string, replyToEmail?: string): Promise<Models.Provider>;
     updateSendgridProvider(
         paramsOrFirst: { providerId: string, name?: string, enabled?: boolean, apiKey?: string, fromName?: string, fromEmail?: string, replyToName?: string, replyToEmail?: string } | string,
         ...rest: [(string)?, (boolean)?, (string)?, (string)?, (string)?, (string)?, (string)?]    
@@ -3006,7 +3015,7 @@ export class Messaging {
      * @returns {Promise<Models.Provider>}
      * @deprecated This API has been deprecated since 1.8.0. Please use `Messaging.createSMTPProvider` instead.
      */
-    createSmtpProvider(params: { providerId: string, name: string, host: string, port?: number, username?: string, password?: string, encryption?: SmtpEncryption, autoTLS?: boolean, mailer?: string, fromName?: string, fromEmail?: string, replyToName?: string, replyToEmail?: string, enabled?: boolean }): Promise<Models.Provider>;
+    createSmtpProvider(this: Messaging<ServerAuth>, params: { providerId: string, name: string, host: string, port?: number, username?: string, password?: string, encryption?: SmtpEncryption, autoTLS?: boolean, mailer?: string, fromName?: string, fromEmail?: string, replyToName?: string, replyToEmail?: string, enabled?: boolean }): Promise<Models.Provider>;
     /**
      * Create a new SMTP provider.
      *
@@ -3028,7 +3037,7 @@ export class Messaging {
      * @returns {Promise<Models.Provider>}
      * @deprecated Use the object parameter style method for a better developer experience.
      */
-    createSmtpProvider(providerId: string, name: string, host: string, port?: number, username?: string, password?: string, encryption?: SmtpEncryption, autoTLS?: boolean, mailer?: string, fromName?: string, fromEmail?: string, replyToName?: string, replyToEmail?: string, enabled?: boolean): Promise<Models.Provider>;
+    createSmtpProvider(this: Messaging<ServerAuth>, providerId: string, name: string, host: string, port?: number, username?: string, password?: string, encryption?: SmtpEncryption, autoTLS?: boolean, mailer?: string, fromName?: string, fromEmail?: string, replyToName?: string, replyToEmail?: string, enabled?: boolean): Promise<Models.Provider>;
     createSmtpProvider(
         paramsOrFirst: { providerId: string, name: string, host: string, port?: number, username?: string, password?: string, encryption?: SmtpEncryption, autoTLS?: boolean, mailer?: string, fromName?: string, fromEmail?: string, replyToName?: string, replyToEmail?: string, enabled?: boolean } | string,
         ...rest: [(string)?, (string)?, (number)?, (string)?, (string)?, (SmtpEncryption)?, (boolean)?, (string)?, (string)?, (string)?, (string)?, (string)?, (boolean)?]    
@@ -3159,7 +3168,7 @@ export class Messaging {
      * @throws {AppwriteException}
      * @returns {Promise<Models.Provider>}
      */
-    createSMTPProvider(params: { providerId: string, name: string, host: string, port?: number, username?: string, password?: string, encryption?: SmtpEncryption, autoTLS?: boolean, mailer?: string, fromName?: string, fromEmail?: string, replyToName?: string, replyToEmail?: string, enabled?: boolean }): Promise<Models.Provider>;
+    createSMTPProvider(this: Messaging<ServerAuth>, params: { providerId: string, name: string, host: string, port?: number, username?: string, password?: string, encryption?: SmtpEncryption, autoTLS?: boolean, mailer?: string, fromName?: string, fromEmail?: string, replyToName?: string, replyToEmail?: string, enabled?: boolean }): Promise<Models.Provider>;
     /**
      * Create a new SMTP provider.
      *
@@ -3181,7 +3190,7 @@ export class Messaging {
      * @returns {Promise<Models.Provider>}
      * @deprecated Use the object parameter style method for a better developer experience.
      */
-    createSMTPProvider(providerId: string, name: string, host: string, port?: number, username?: string, password?: string, encryption?: SmtpEncryption, autoTLS?: boolean, mailer?: string, fromName?: string, fromEmail?: string, replyToName?: string, replyToEmail?: string, enabled?: boolean): Promise<Models.Provider>;
+    createSMTPProvider(this: Messaging<ServerAuth>, providerId: string, name: string, host: string, port?: number, username?: string, password?: string, encryption?: SmtpEncryption, autoTLS?: boolean, mailer?: string, fromName?: string, fromEmail?: string, replyToName?: string, replyToEmail?: string, enabled?: boolean): Promise<Models.Provider>;
     createSMTPProvider(
         paramsOrFirst: { providerId: string, name: string, host: string, port?: number, username?: string, password?: string, encryption?: SmtpEncryption, autoTLS?: boolean, mailer?: string, fromName?: string, fromEmail?: string, replyToName?: string, replyToEmail?: string, enabled?: boolean } | string,
         ...rest: [(string)?, (string)?, (number)?, (string)?, (string)?, (SmtpEncryption)?, (boolean)?, (string)?, (string)?, (string)?, (string)?, (string)?, (boolean)?]    
@@ -3313,7 +3322,7 @@ export class Messaging {
      * @returns {Promise<Models.Provider>}
      * @deprecated This API has been deprecated since 1.8.0. Please use `Messaging.updateSMTPProvider` instead.
      */
-    updateSmtpProvider(params: { providerId: string, name?: string, host?: string, port?: number, username?: string, password?: string, encryption?: SmtpEncryption, autoTLS?: boolean, mailer?: string, fromName?: string, fromEmail?: string, replyToName?: string, replyToEmail?: string, enabled?: boolean }): Promise<Models.Provider>;
+    updateSmtpProvider(this: Messaging<ServerAuth>, params: { providerId: string, name?: string, host?: string, port?: number, username?: string, password?: string, encryption?: SmtpEncryption, autoTLS?: boolean, mailer?: string, fromName?: string, fromEmail?: string, replyToName?: string, replyToEmail?: string, enabled?: boolean }): Promise<Models.Provider>;
     /**
      * Update a SMTP provider by its unique ID.
      *
@@ -3335,7 +3344,7 @@ export class Messaging {
      * @returns {Promise<Models.Provider>}
      * @deprecated Use the object parameter style method for a better developer experience.
      */
-    updateSmtpProvider(providerId: string, name?: string, host?: string, port?: number, username?: string, password?: string, encryption?: SmtpEncryption, autoTLS?: boolean, mailer?: string, fromName?: string, fromEmail?: string, replyToName?: string, replyToEmail?: string, enabled?: boolean): Promise<Models.Provider>;
+    updateSmtpProvider(this: Messaging<ServerAuth>, providerId: string, name?: string, host?: string, port?: number, username?: string, password?: string, encryption?: SmtpEncryption, autoTLS?: boolean, mailer?: string, fromName?: string, fromEmail?: string, replyToName?: string, replyToEmail?: string, enabled?: boolean): Promise<Models.Provider>;
     updateSmtpProvider(
         paramsOrFirst: { providerId: string, name?: string, host?: string, port?: number, username?: string, password?: string, encryption?: SmtpEncryption, autoTLS?: boolean, mailer?: string, fromName?: string, fromEmail?: string, replyToName?: string, replyToEmail?: string, enabled?: boolean } | string,
         ...rest: [(string)?, (string)?, (number)?, (string)?, (string)?, (SmtpEncryption)?, (boolean)?, (string)?, (string)?, (string)?, (string)?, (string)?, (boolean)?]    
@@ -3457,7 +3466,7 @@ export class Messaging {
      * @throws {AppwriteException}
      * @returns {Promise<Models.Provider>}
      */
-    updateSMTPProvider(params: { providerId: string, name?: string, host?: string, port?: number, username?: string, password?: string, encryption?: SmtpEncryption, autoTLS?: boolean, mailer?: string, fromName?: string, fromEmail?: string, replyToName?: string, replyToEmail?: string, enabled?: boolean }): Promise<Models.Provider>;
+    updateSMTPProvider(this: Messaging<ServerAuth>, params: { providerId: string, name?: string, host?: string, port?: number, username?: string, password?: string, encryption?: SmtpEncryption, autoTLS?: boolean, mailer?: string, fromName?: string, fromEmail?: string, replyToName?: string, replyToEmail?: string, enabled?: boolean }): Promise<Models.Provider>;
     /**
      * Update a SMTP provider by its unique ID.
      *
@@ -3479,7 +3488,7 @@ export class Messaging {
      * @returns {Promise<Models.Provider>}
      * @deprecated Use the object parameter style method for a better developer experience.
      */
-    updateSMTPProvider(providerId: string, name?: string, host?: string, port?: number, username?: string, password?: string, encryption?: SmtpEncryption, autoTLS?: boolean, mailer?: string, fromName?: string, fromEmail?: string, replyToName?: string, replyToEmail?: string, enabled?: boolean): Promise<Models.Provider>;
+    updateSMTPProvider(this: Messaging<ServerAuth>, providerId: string, name?: string, host?: string, port?: number, username?: string, password?: string, encryption?: SmtpEncryption, autoTLS?: boolean, mailer?: string, fromName?: string, fromEmail?: string, replyToName?: string, replyToEmail?: string, enabled?: boolean): Promise<Models.Provider>;
     updateSMTPProvider(
         paramsOrFirst: { providerId: string, name?: string, host?: string, port?: number, username?: string, password?: string, encryption?: SmtpEncryption, autoTLS?: boolean, mailer?: string, fromName?: string, fromEmail?: string, replyToName?: string, replyToEmail?: string, enabled?: boolean } | string,
         ...rest: [(string)?, (string)?, (number)?, (string)?, (string)?, (SmtpEncryption)?, (boolean)?, (string)?, (string)?, (string)?, (string)?, (string)?, (boolean)?]    
@@ -3593,7 +3602,7 @@ export class Messaging {
      * @throws {AppwriteException}
      * @returns {Promise<Models.Provider>}
      */
-    createTelesignProvider(params: { providerId: string, name: string, from?: string, customerId?: string, apiKey?: string, enabled?: boolean }): Promise<Models.Provider>;
+    createTelesignProvider(this: Messaging<ServerAuth>, params: { providerId: string, name: string, from?: string, customerId?: string, apiKey?: string, enabled?: boolean }): Promise<Models.Provider>;
     /**
      * Create a new Telesign provider.
      *
@@ -3607,7 +3616,7 @@ export class Messaging {
      * @returns {Promise<Models.Provider>}
      * @deprecated Use the object parameter style method for a better developer experience.
      */
-    createTelesignProvider(providerId: string, name: string, from?: string, customerId?: string, apiKey?: string, enabled?: boolean): Promise<Models.Provider>;
+    createTelesignProvider(this: Messaging<ServerAuth>, providerId: string, name: string, from?: string, customerId?: string, apiKey?: string, enabled?: boolean): Promise<Models.Provider>;
     createTelesignProvider(
         paramsOrFirst: { providerId: string, name: string, from?: string, customerId?: string, apiKey?: string, enabled?: boolean } | string,
         ...rest: [(string)?, (string)?, (string)?, (string)?, (boolean)?]    
@@ -3687,7 +3696,7 @@ export class Messaging {
      * @throws {AppwriteException}
      * @returns {Promise<Models.Provider>}
      */
-    updateTelesignProvider(params: { providerId: string, name?: string, enabled?: boolean, customerId?: string, apiKey?: string, from?: string }): Promise<Models.Provider>;
+    updateTelesignProvider(this: Messaging<ServerAuth>, params: { providerId: string, name?: string, enabled?: boolean, customerId?: string, apiKey?: string, from?: string }): Promise<Models.Provider>;
     /**
      * Update a Telesign provider by its unique ID.
      *
@@ -3701,7 +3710,7 @@ export class Messaging {
      * @returns {Promise<Models.Provider>}
      * @deprecated Use the object parameter style method for a better developer experience.
      */
-    updateTelesignProvider(providerId: string, name?: string, enabled?: boolean, customerId?: string, apiKey?: string, from?: string): Promise<Models.Provider>;
+    updateTelesignProvider(this: Messaging<ServerAuth>, providerId: string, name?: string, enabled?: boolean, customerId?: string, apiKey?: string, from?: string): Promise<Models.Provider>;
     updateTelesignProvider(
         paramsOrFirst: { providerId: string, name?: string, enabled?: boolean, customerId?: string, apiKey?: string, from?: string } | string,
         ...rest: [(string)?, (boolean)?, (string)?, (string)?, (string)?]    
@@ -3775,7 +3784,7 @@ export class Messaging {
      * @throws {AppwriteException}
      * @returns {Promise<Models.Provider>}
      */
-    createTextmagicProvider(params: { providerId: string, name: string, from?: string, username?: string, apiKey?: string, enabled?: boolean }): Promise<Models.Provider>;
+    createTextmagicProvider(this: Messaging<ServerAuth>, params: { providerId: string, name: string, from?: string, username?: string, apiKey?: string, enabled?: boolean }): Promise<Models.Provider>;
     /**
      * Create a new Textmagic provider.
      *
@@ -3789,7 +3798,7 @@ export class Messaging {
      * @returns {Promise<Models.Provider>}
      * @deprecated Use the object parameter style method for a better developer experience.
      */
-    createTextmagicProvider(providerId: string, name: string, from?: string, username?: string, apiKey?: string, enabled?: boolean): Promise<Models.Provider>;
+    createTextmagicProvider(this: Messaging<ServerAuth>, providerId: string, name: string, from?: string, username?: string, apiKey?: string, enabled?: boolean): Promise<Models.Provider>;
     createTextmagicProvider(
         paramsOrFirst: { providerId: string, name: string, from?: string, username?: string, apiKey?: string, enabled?: boolean } | string,
         ...rest: [(string)?, (string)?, (string)?, (string)?, (boolean)?]    
@@ -3869,7 +3878,7 @@ export class Messaging {
      * @throws {AppwriteException}
      * @returns {Promise<Models.Provider>}
      */
-    updateTextmagicProvider(params: { providerId: string, name?: string, enabled?: boolean, username?: string, apiKey?: string, from?: string }): Promise<Models.Provider>;
+    updateTextmagicProvider(this: Messaging<ServerAuth>, params: { providerId: string, name?: string, enabled?: boolean, username?: string, apiKey?: string, from?: string }): Promise<Models.Provider>;
     /**
      * Update a Textmagic provider by its unique ID.
      *
@@ -3883,7 +3892,7 @@ export class Messaging {
      * @returns {Promise<Models.Provider>}
      * @deprecated Use the object parameter style method for a better developer experience.
      */
-    updateTextmagicProvider(providerId: string, name?: string, enabled?: boolean, username?: string, apiKey?: string, from?: string): Promise<Models.Provider>;
+    updateTextmagicProvider(this: Messaging<ServerAuth>, providerId: string, name?: string, enabled?: boolean, username?: string, apiKey?: string, from?: string): Promise<Models.Provider>;
     updateTextmagicProvider(
         paramsOrFirst: { providerId: string, name?: string, enabled?: boolean, username?: string, apiKey?: string, from?: string } | string,
         ...rest: [(string)?, (boolean)?, (string)?, (string)?, (string)?]    
@@ -3957,7 +3966,7 @@ export class Messaging {
      * @throws {AppwriteException}
      * @returns {Promise<Models.Provider>}
      */
-    createTwilioProvider(params: { providerId: string, name: string, from?: string, accountSid?: string, authToken?: string, enabled?: boolean }): Promise<Models.Provider>;
+    createTwilioProvider(this: Messaging<ServerAuth>, params: { providerId: string, name: string, from?: string, accountSid?: string, authToken?: string, enabled?: boolean }): Promise<Models.Provider>;
     /**
      * Create a new Twilio provider.
      *
@@ -3971,7 +3980,7 @@ export class Messaging {
      * @returns {Promise<Models.Provider>}
      * @deprecated Use the object parameter style method for a better developer experience.
      */
-    createTwilioProvider(providerId: string, name: string, from?: string, accountSid?: string, authToken?: string, enabled?: boolean): Promise<Models.Provider>;
+    createTwilioProvider(this: Messaging<ServerAuth>, providerId: string, name: string, from?: string, accountSid?: string, authToken?: string, enabled?: boolean): Promise<Models.Provider>;
     createTwilioProvider(
         paramsOrFirst: { providerId: string, name: string, from?: string, accountSid?: string, authToken?: string, enabled?: boolean } | string,
         ...rest: [(string)?, (string)?, (string)?, (string)?, (boolean)?]    
@@ -4051,7 +4060,7 @@ export class Messaging {
      * @throws {AppwriteException}
      * @returns {Promise<Models.Provider>}
      */
-    updateTwilioProvider(params: { providerId: string, name?: string, enabled?: boolean, accountSid?: string, authToken?: string, from?: string }): Promise<Models.Provider>;
+    updateTwilioProvider(this: Messaging<ServerAuth>, params: { providerId: string, name?: string, enabled?: boolean, accountSid?: string, authToken?: string, from?: string }): Promise<Models.Provider>;
     /**
      * Update a Twilio provider by its unique ID.
      *
@@ -4065,7 +4074,7 @@ export class Messaging {
      * @returns {Promise<Models.Provider>}
      * @deprecated Use the object parameter style method for a better developer experience.
      */
-    updateTwilioProvider(providerId: string, name?: string, enabled?: boolean, accountSid?: string, authToken?: string, from?: string): Promise<Models.Provider>;
+    updateTwilioProvider(this: Messaging<ServerAuth>, providerId: string, name?: string, enabled?: boolean, accountSid?: string, authToken?: string, from?: string): Promise<Models.Provider>;
     updateTwilioProvider(
         paramsOrFirst: { providerId: string, name?: string, enabled?: boolean, accountSid?: string, authToken?: string, from?: string } | string,
         ...rest: [(string)?, (boolean)?, (string)?, (string)?, (string)?]    
@@ -4139,7 +4148,7 @@ export class Messaging {
      * @throws {AppwriteException}
      * @returns {Promise<Models.Provider>}
      */
-    createVonageProvider(params: { providerId: string, name: string, from?: string, apiKey?: string, apiSecret?: string, enabled?: boolean }): Promise<Models.Provider>;
+    createVonageProvider(this: Messaging<ServerAuth>, params: { providerId: string, name: string, from?: string, apiKey?: string, apiSecret?: string, enabled?: boolean }): Promise<Models.Provider>;
     /**
      * Create a new Vonage provider.
      *
@@ -4153,7 +4162,7 @@ export class Messaging {
      * @returns {Promise<Models.Provider>}
      * @deprecated Use the object parameter style method for a better developer experience.
      */
-    createVonageProvider(providerId: string, name: string, from?: string, apiKey?: string, apiSecret?: string, enabled?: boolean): Promise<Models.Provider>;
+    createVonageProvider(this: Messaging<ServerAuth>, providerId: string, name: string, from?: string, apiKey?: string, apiSecret?: string, enabled?: boolean): Promise<Models.Provider>;
     createVonageProvider(
         paramsOrFirst: { providerId: string, name: string, from?: string, apiKey?: string, apiSecret?: string, enabled?: boolean } | string,
         ...rest: [(string)?, (string)?, (string)?, (string)?, (boolean)?]    
@@ -4233,7 +4242,7 @@ export class Messaging {
      * @throws {AppwriteException}
      * @returns {Promise<Models.Provider>}
      */
-    updateVonageProvider(params: { providerId: string, name?: string, enabled?: boolean, apiKey?: string, apiSecret?: string, from?: string }): Promise<Models.Provider>;
+    updateVonageProvider(this: Messaging<ServerAuth>, params: { providerId: string, name?: string, enabled?: boolean, apiKey?: string, apiSecret?: string, from?: string }): Promise<Models.Provider>;
     /**
      * Update a Vonage provider by its unique ID.
      *
@@ -4247,7 +4256,7 @@ export class Messaging {
      * @returns {Promise<Models.Provider>}
      * @deprecated Use the object parameter style method for a better developer experience.
      */
-    updateVonageProvider(providerId: string, name?: string, enabled?: boolean, apiKey?: string, apiSecret?: string, from?: string): Promise<Models.Provider>;
+    updateVonageProvider(this: Messaging<ServerAuth>, providerId: string, name?: string, enabled?: boolean, apiKey?: string, apiSecret?: string, from?: string): Promise<Models.Provider>;
     updateVonageProvider(
         paramsOrFirst: { providerId: string, name?: string, enabled?: boolean, apiKey?: string, apiSecret?: string, from?: string } | string,
         ...rest: [(string)?, (boolean)?, (string)?, (string)?, (string)?]    
@@ -4317,7 +4326,7 @@ export class Messaging {
      * @throws {AppwriteException}
      * @returns {Promise<Models.Provider>}
      */
-    getProvider(params: { providerId: string }): Promise<Models.Provider>;
+    getProvider(this: Messaging<ServerAuth>, params: { providerId: string }): Promise<Models.Provider>;
     /**
      * Get a provider by its unique ID.
      * 
@@ -4327,7 +4336,7 @@ export class Messaging {
      * @returns {Promise<Models.Provider>}
      * @deprecated Use the object parameter style method for a better developer experience.
      */
-    getProvider(providerId: string): Promise<Models.Provider>;
+    getProvider(this: Messaging<ServerAuth>, providerId: string): Promise<Models.Provider>;
     getProvider(
         paramsOrFirst: { providerId: string } | string    
     ): Promise<Models.Provider> {
@@ -4369,7 +4378,7 @@ export class Messaging {
      * @throws {AppwriteException}
      * @returns {Promise<{}>}
      */
-    deleteProvider(params: { providerId: string }): Promise<{}>;
+    deleteProvider(this: Messaging<ServerAuth>, params: { providerId: string }): Promise<{}>;
     /**
      * Delete a provider by its unique ID.
      *
@@ -4378,7 +4387,7 @@ export class Messaging {
      * @returns {Promise<{}>}
      * @deprecated Use the object parameter style method for a better developer experience.
      */
-    deleteProvider(providerId: string): Promise<{}>;
+    deleteProvider(this: Messaging<ServerAuth>, providerId: string): Promise<{}>;
     deleteProvider(
         paramsOrFirst: { providerId: string } | string    
     ): Promise<{}> {
@@ -4423,7 +4432,7 @@ export class Messaging {
      * @throws {AppwriteException}
      * @returns {Promise<Models.LogList>}
      */
-    listProviderLogs(params: { providerId: string, queries?: string[], total?: boolean }): Promise<Models.LogList>;
+    listProviderLogs(this: Messaging<ServerAuth>, params: { providerId: string, queries?: string[], total?: boolean }): Promise<Models.LogList>;
     /**
      * Get the provider activity logs listed by its unique ID.
      *
@@ -4434,7 +4443,7 @@ export class Messaging {
      * @returns {Promise<Models.LogList>}
      * @deprecated Use the object parameter style method for a better developer experience.
      */
-    listProviderLogs(providerId: string, queries?: string[], total?: boolean): Promise<Models.LogList>;
+    listProviderLogs(this: Messaging<ServerAuth>, providerId: string, queries?: string[], total?: boolean): Promise<Models.LogList>;
     listProviderLogs(
         paramsOrFirst: { providerId: string, queries?: string[], total?: boolean } | string,
         ...rest: [(string[])?, (boolean)?]    
@@ -4489,7 +4498,7 @@ export class Messaging {
      * @throws {AppwriteException}
      * @returns {Promise<Models.LogList>}
      */
-    listSubscriberLogs(params: { subscriberId: string, queries?: string[], total?: boolean }): Promise<Models.LogList>;
+    listSubscriberLogs(this: Messaging<ServerAuth>, params: { subscriberId: string, queries?: string[], total?: boolean }): Promise<Models.LogList>;
     /**
      * Get the subscriber activity logs listed by its unique ID.
      *
@@ -4500,7 +4509,7 @@ export class Messaging {
      * @returns {Promise<Models.LogList>}
      * @deprecated Use the object parameter style method for a better developer experience.
      */
-    listSubscriberLogs(subscriberId: string, queries?: string[], total?: boolean): Promise<Models.LogList>;
+    listSubscriberLogs(this: Messaging<ServerAuth>, subscriberId: string, queries?: string[], total?: boolean): Promise<Models.LogList>;
     listSubscriberLogs(
         paramsOrFirst: { subscriberId: string, queries?: string[], total?: boolean } | string,
         ...rest: [(string[])?, (boolean)?]    
@@ -4555,7 +4564,7 @@ export class Messaging {
      * @throws {AppwriteException}
      * @returns {Promise<Models.TopicList>}
      */
-    listTopics(params?: { queries?: string[], search?: string, total?: boolean }): Promise<Models.TopicList>;
+    listTopics(this: Messaging<ServerAuth>, params?: { queries?: string[], search?: string, total?: boolean }): Promise<Models.TopicList>;
     /**
      * Get a list of all topics from the current Appwrite project.
      *
@@ -4566,7 +4575,7 @@ export class Messaging {
      * @returns {Promise<Models.TopicList>}
      * @deprecated Use the object parameter style method for a better developer experience.
      */
-    listTopics(queries?: string[], search?: string, total?: boolean): Promise<Models.TopicList>;
+    listTopics(this: Messaging<ServerAuth>, queries?: string[], search?: string, total?: boolean): Promise<Models.TopicList>;
     listTopics(
         paramsOrFirst?: { queries?: string[], search?: string, total?: boolean } | string[],
         ...rest: [(string)?, (boolean)?]    
@@ -4621,7 +4630,7 @@ export class Messaging {
      * @throws {AppwriteException}
      * @returns {Promise<Models.Topic>}
      */
-    createTopic(params: { topicId: string, name: string, subscribe?: string[] }): Promise<Models.Topic>;
+    createTopic(this: Messaging<ServerAuth>, params: { topicId: string, name: string, subscribe?: string[] }): Promise<Models.Topic>;
     /**
      * Create a new topic.
      *
@@ -4632,7 +4641,7 @@ export class Messaging {
      * @returns {Promise<Models.Topic>}
      * @deprecated Use the object parameter style method for a better developer experience.
      */
-    createTopic(topicId: string, name: string, subscribe?: string[]): Promise<Models.Topic>;
+    createTopic(this: Messaging<ServerAuth>, topicId: string, name: string, subscribe?: string[]): Promise<Models.Topic>;
     createTopic(
         paramsOrFirst: { topicId: string, name: string, subscribe?: string[] } | string,
         ...rest: [(string)?, (string[])?]    
@@ -4693,7 +4702,7 @@ export class Messaging {
      * @throws {AppwriteException}
      * @returns {Promise<Models.Topic>}
      */
-    getTopic(params: { topicId: string }): Promise<Models.Topic>;
+    getTopic(this: Messaging<ServerAuth>, params: { topicId: string }): Promise<Models.Topic>;
     /**
      * Get a topic by its unique ID.
      * 
@@ -4703,7 +4712,7 @@ export class Messaging {
      * @returns {Promise<Models.Topic>}
      * @deprecated Use the object parameter style method for a better developer experience.
      */
-    getTopic(topicId: string): Promise<Models.Topic>;
+    getTopic(this: Messaging<ServerAuth>, topicId: string): Promise<Models.Topic>;
     getTopic(
         paramsOrFirst: { topicId: string } | string    
     ): Promise<Models.Topic> {
@@ -4748,7 +4757,7 @@ export class Messaging {
      * @throws {AppwriteException}
      * @returns {Promise<Models.Topic>}
      */
-    updateTopic(params: { topicId: string, name?: string, subscribe?: string[] }): Promise<Models.Topic>;
+    updateTopic(this: Messaging<ServerAuth>, params: { topicId: string, name?: string, subscribe?: string[] }): Promise<Models.Topic>;
     /**
      * Update a topic by its unique ID.
      * 
@@ -4760,7 +4769,7 @@ export class Messaging {
      * @returns {Promise<Models.Topic>}
      * @deprecated Use the object parameter style method for a better developer experience.
      */
-    updateTopic(topicId: string, name?: string, subscribe?: string[]): Promise<Models.Topic>;
+    updateTopic(this: Messaging<ServerAuth>, topicId: string, name?: string, subscribe?: string[]): Promise<Models.Topic>;
     updateTopic(
         paramsOrFirst: { topicId: string, name?: string, subscribe?: string[] } | string,
         ...rest: [(string)?, (string[])?]    
@@ -4814,7 +4823,7 @@ export class Messaging {
      * @throws {AppwriteException}
      * @returns {Promise<{}>}
      */
-    deleteTopic(params: { topicId: string }): Promise<{}>;
+    deleteTopic(this: Messaging<ServerAuth>, params: { topicId: string }): Promise<{}>;
     /**
      * Delete a topic by its unique ID.
      *
@@ -4823,7 +4832,7 @@ export class Messaging {
      * @returns {Promise<{}>}
      * @deprecated Use the object parameter style method for a better developer experience.
      */
-    deleteTopic(topicId: string): Promise<{}>;
+    deleteTopic(this: Messaging<ServerAuth>, topicId: string): Promise<{}>;
     deleteTopic(
         paramsOrFirst: { topicId: string } | string    
     ): Promise<{}> {
@@ -4868,7 +4877,7 @@ export class Messaging {
      * @throws {AppwriteException}
      * @returns {Promise<Models.LogList>}
      */
-    listTopicLogs(params: { topicId: string, queries?: string[], total?: boolean }): Promise<Models.LogList>;
+    listTopicLogs(this: Messaging<ServerAuth>, params: { topicId: string, queries?: string[], total?: boolean }): Promise<Models.LogList>;
     /**
      * Get the topic activity logs listed by its unique ID.
      *
@@ -4879,7 +4888,7 @@ export class Messaging {
      * @returns {Promise<Models.LogList>}
      * @deprecated Use the object parameter style method for a better developer experience.
      */
-    listTopicLogs(topicId: string, queries?: string[], total?: boolean): Promise<Models.LogList>;
+    listTopicLogs(this: Messaging<ServerAuth>, topicId: string, queries?: string[], total?: boolean): Promise<Models.LogList>;
     listTopicLogs(
         paramsOrFirst: { topicId: string, queries?: string[], total?: boolean } | string,
         ...rest: [(string[])?, (boolean)?]    
@@ -4935,7 +4944,7 @@ export class Messaging {
      * @throws {AppwriteException}
      * @returns {Promise<Models.SubscriberList>}
      */
-    listSubscribers(params: { topicId: string, queries?: string[], search?: string, total?: boolean }): Promise<Models.SubscriberList>;
+    listSubscribers(this: Messaging<ServerAuth>, params: { topicId: string, queries?: string[], search?: string, total?: boolean }): Promise<Models.SubscriberList>;
     /**
      * Get a list of all subscribers from the current Appwrite project.
      *
@@ -4947,7 +4956,7 @@ export class Messaging {
      * @returns {Promise<Models.SubscriberList>}
      * @deprecated Use the object parameter style method for a better developer experience.
      */
-    listSubscribers(topicId: string, queries?: string[], search?: string, total?: boolean): Promise<Models.SubscriberList>;
+    listSubscribers(this: Messaging<ServerAuth>, topicId: string, queries?: string[], search?: string, total?: boolean): Promise<Models.SubscriberList>;
     listSubscribers(
         paramsOrFirst: { topicId: string, queries?: string[], search?: string, total?: boolean } | string,
         ...rest: [(string[])?, (string)?, (boolean)?]    
@@ -5080,7 +5089,7 @@ export class Messaging {
      * @throws {AppwriteException}
      * @returns {Promise<Models.Subscriber>}
      */
-    getSubscriber(params: { topicId: string, subscriberId: string }): Promise<Models.Subscriber>;
+    getSubscriber(this: Messaging<ServerAuth>, params: { topicId: string, subscriberId: string }): Promise<Models.Subscriber>;
     /**
      * Get a subscriber by its unique ID.
      * 
@@ -5091,7 +5100,7 @@ export class Messaging {
      * @returns {Promise<Models.Subscriber>}
      * @deprecated Use the object parameter style method for a better developer experience.
      */
-    getSubscriber(topicId: string, subscriberId: string): Promise<Models.Subscriber>;
+    getSubscriber(this: Messaging<ServerAuth>, topicId: string, subscriberId: string): Promise<Models.Subscriber>;
     getSubscriber(
         paramsOrFirst: { topicId: string, subscriberId: string } | string,
         ...rest: [(string)?]    
@@ -5192,3 +5201,9 @@ export class Messaging {
         );
     }
 }
+
+const Messaging = MessagingRuntime as unknown as {
+    new <TAuth extends ClientAuth | ServerAuth = ClientAuth | ServerAuth>(client: Client<TAuth>): Messaging<TAuth>;
+};
+
+export { Messaging };

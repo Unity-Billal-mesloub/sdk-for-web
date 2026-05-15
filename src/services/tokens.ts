@@ -1,12 +1,13 @@
-import { Service } from '../service';
-import { AppwriteException, Client, type Payload, UploadProgress } from '../client';
+import { AppwriteException, Client, type ServerAuth, type Payload } from '../client';
 import type { Models } from '../models';
 
 
-export class Tokens {
-    client: Client;
+export type Tokens = Omit<TokensRuntime, 'client'>;
 
-    constructor(client: Client) {
+class TokensRuntime {
+    client: Client<ServerAuth>;
+
+    constructor(client: Client<ServerAuth>) {
         this.client = client;
     }
 
@@ -313,3 +314,9 @@ export class Tokens {
         );
     }
 }
+
+const Tokens = TokensRuntime as unknown as {
+    new (client: Client<ServerAuth>): Tokens;
+};
+
+export { Tokens };

@@ -1,12 +1,13 @@
-import { Service } from '../service';
-import { AppwriteException, Client, type Payload, UploadProgress } from '../client';
+import { AppwriteException, Client, type ServerAuth, type Payload } from '../client';
 import type { Models } from '../models';
 
 
-export class Webhooks {
-    client: Client;
+export type Webhooks = Omit<WebhooksRuntime, 'client'>;
 
-    constructor(client: Client) {
+class WebhooksRuntime {
+    client: Client<ServerAuth>;
+
+    constructor(client: Client<ServerAuth>) {
         this.client = client;
     }
 
@@ -464,3 +465,9 @@ export class Webhooks {
         );
     }
 }
+
+const Webhooks = WebhooksRuntime as unknown as {
+    new (client: Client<ServerAuth>): Webhooks;
+};
+
+export { Webhooks };

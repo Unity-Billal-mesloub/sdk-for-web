@@ -1,14 +1,15 @@
-import { Service } from '../service';
-import { AppwriteException, Client, type Payload, UploadProgress } from '../client';
+import { AppwriteException, Client, type ServerAuth, type Payload } from '../client';
 import type { Models } from '../models';
 
 import { StatusCode } from '../enums/status-code';
 import { ProxyResourceType } from '../enums/proxy-resource-type';
 
-export class Proxy {
-    client: Client;
+export type Proxy = Omit<ProxyRuntime, 'client'>;
 
-    constructor(client: Client) {
+class ProxyRuntime {
+    client: Client<ServerAuth>;
+
+    constructor(client: Client<ServerAuth>) {
         this.client = client;
     }
 
@@ -539,3 +540,9 @@ export class Proxy {
         );
     }
 }
+
+const Proxy = ProxyRuntime as unknown as {
+    new (client: Client<ServerAuth>): Proxy;
+};
+
+export { Proxy };

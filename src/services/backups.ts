@@ -1,13 +1,14 @@
-import { Service } from '../service';
-import { AppwriteException, Client, type Payload, UploadProgress } from '../client';
+import { AppwriteException, Client, type ServerAuth, type Payload } from '../client';
 import type { Models } from '../models';
 
 import { BackupServices } from '../enums/backup-services';
 
-export class Backups {
-    client: Client;
+export type Backups = Omit<BackupsRuntime, 'client'>;
 
-    constructor(client: Client) {
+class BackupsRuntime {
+    client: Client<ServerAuth>;
+
+    constructor(client: Client<ServerAuth>) {
         this.client = client;
     }
 
@@ -752,3 +753,9 @@ export class Backups {
         );
     }
 }
+
+const Backups = BackupsRuntime as unknown as {
+    new (client: Client<ServerAuth>): Backups;
+};
+
+export { Backups };

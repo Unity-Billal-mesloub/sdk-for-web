@@ -1,13 +1,14 @@
-import { Service } from '../service';
-import { AppwriteException, Client, type Payload, UploadProgress } from '../client';
+import { AppwriteException, Client, type ServerAuth, type Payload } from '../client';
 import type { Models } from '../models';
 
 import { Name } from '../enums/name';
 
-export class Health {
-    client: Client;
+export type Health = Omit<HealthRuntime, 'client'>;
 
-    constructor(client: Client) {
+class HealthRuntime {
+    client: Client<ServerAuth>;
+
+    constructor(client: Client<ServerAuth>) {
         this.client = client;
     }
 
@@ -1041,3 +1042,9 @@ export class Health {
         );
     }
 }
+
+const Health = HealthRuntime as unknown as {
+    new (client: Client<ServerAuth>): Health;
+};
+
+export { Health };

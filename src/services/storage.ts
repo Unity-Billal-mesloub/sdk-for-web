@@ -1,15 +1,25 @@
 import { Service } from '../service';
-import { AppwriteException, Client, type Payload, UploadProgress } from '../client';
+import { AppwriteException, Client, type ClientAuth, type ServerAuth, type Payload, UploadProgress } from '../client';
 import type { Models } from '../models';
 
 import { Compression } from '../enums/compression';
 import { ImageGravity } from '../enums/image-gravity';
 import { ImageFormat } from '../enums/image-format';
 
-export class Storage {
-    client: Client;
+type StorageServerOnlyMethod = 'listBuckets' | 'createBucket' | 'getBucket' | 'updateBucket' | 'deleteBucket';
+type StorageClientOnlyMethod = never;
 
-    constructor(client: Client) {
+export type Storage<TAuth extends ClientAuth | ServerAuth = ClientAuth | ServerAuth> =
+    TAuth extends ClientAuth
+        ? Omit<StorageRuntime<TAuth>, 'client' | StorageServerOnlyMethod>
+        : TAuth extends ServerAuth
+            ? Omit<StorageRuntime<TAuth>, 'client' | StorageClientOnlyMethod>
+            : Omit<StorageRuntime<TAuth>, 'client'>;
+
+class StorageRuntime<TAuth extends ClientAuth | ServerAuth = ClientAuth | ServerAuth> {
+    client: Client<TAuth>;
+
+    constructor(client: Client<TAuth>) {
         this.client = client;
     }
 
@@ -22,7 +32,7 @@ export class Storage {
      * @throws {AppwriteException}
      * @returns {Promise<Models.BucketList>}
      */
-    listBuckets(params?: { queries?: string[], search?: string, total?: boolean }): Promise<Models.BucketList>;
+    listBuckets(this: Storage<ServerAuth>, params?: { queries?: string[], search?: string, total?: boolean }): Promise<Models.BucketList>;
     /**
      * Get a list of all the storage buckets. You can use the query params to filter your results.
      *
@@ -33,7 +43,7 @@ export class Storage {
      * @returns {Promise<Models.BucketList>}
      * @deprecated Use the object parameter style method for a better developer experience.
      */
-    listBuckets(queries?: string[], search?: string, total?: boolean): Promise<Models.BucketList>;
+    listBuckets(this: Storage<ServerAuth>, queries?: string[], search?: string, total?: boolean): Promise<Models.BucketList>;
     listBuckets(
         paramsOrFirst?: { queries?: string[], search?: string, total?: boolean } | string[],
         ...rest: [(string)?, (boolean)?]    
@@ -96,7 +106,7 @@ export class Storage {
      * @throws {AppwriteException}
      * @returns {Promise<Models.Bucket>}
      */
-    createBucket(params: { bucketId: string, name: string, permissions?: string[], fileSecurity?: boolean, enabled?: boolean, maximumFileSize?: number, allowedFileExtensions?: string[], compression?: Compression, encryption?: boolean, antivirus?: boolean, transformations?: boolean }): Promise<Models.Bucket>;
+    createBucket(this: Storage<ServerAuth>, params: { bucketId: string, name: string, permissions?: string[], fileSecurity?: boolean, enabled?: boolean, maximumFileSize?: number, allowedFileExtensions?: string[], compression?: Compression, encryption?: boolean, antivirus?: boolean, transformations?: boolean }): Promise<Models.Bucket>;
     /**
      * Create a new storage bucket.
      *
@@ -115,7 +125,7 @@ export class Storage {
      * @returns {Promise<Models.Bucket>}
      * @deprecated Use the object parameter style method for a better developer experience.
      */
-    createBucket(bucketId: string, name: string, permissions?: string[], fileSecurity?: boolean, enabled?: boolean, maximumFileSize?: number, allowedFileExtensions?: string[], compression?: Compression, encryption?: boolean, antivirus?: boolean, transformations?: boolean): Promise<Models.Bucket>;
+    createBucket(this: Storage<ServerAuth>, bucketId: string, name: string, permissions?: string[], fileSecurity?: boolean, enabled?: boolean, maximumFileSize?: number, allowedFileExtensions?: string[], compression?: Compression, encryption?: boolean, antivirus?: boolean, transformations?: boolean): Promise<Models.Bucket>;
     createBucket(
         paramsOrFirst: { bucketId: string, name: string, permissions?: string[], fileSecurity?: boolean, enabled?: boolean, maximumFileSize?: number, allowedFileExtensions?: string[], compression?: Compression, encryption?: boolean, antivirus?: boolean, transformations?: boolean } | string,
         ...rest: [(string)?, (string[])?, (boolean)?, (boolean)?, (number)?, (string[])?, (Compression)?, (boolean)?, (boolean)?, (boolean)?]    
@@ -215,7 +225,7 @@ export class Storage {
      * @throws {AppwriteException}
      * @returns {Promise<Models.Bucket>}
      */
-    getBucket(params: { bucketId: string }): Promise<Models.Bucket>;
+    getBucket(this: Storage<ServerAuth>, params: { bucketId: string }): Promise<Models.Bucket>;
     /**
      * Get a storage bucket by its unique ID. This endpoint response returns a JSON object with the storage bucket metadata.
      *
@@ -224,7 +234,7 @@ export class Storage {
      * @returns {Promise<Models.Bucket>}
      * @deprecated Use the object parameter style method for a better developer experience.
      */
-    getBucket(bucketId: string): Promise<Models.Bucket>;
+    getBucket(this: Storage<ServerAuth>, bucketId: string): Promise<Models.Bucket>;
     getBucket(
         paramsOrFirst: { bucketId: string } | string    
     ): Promise<Models.Bucket> {
@@ -276,7 +286,7 @@ export class Storage {
      * @throws {AppwriteException}
      * @returns {Promise<Models.Bucket>}
      */
-    updateBucket(params: { bucketId: string, name: string, permissions?: string[], fileSecurity?: boolean, enabled?: boolean, maximumFileSize?: number, allowedFileExtensions?: string[], compression?: Compression, encryption?: boolean, antivirus?: boolean, transformations?: boolean }): Promise<Models.Bucket>;
+    updateBucket(this: Storage<ServerAuth>, params: { bucketId: string, name: string, permissions?: string[], fileSecurity?: boolean, enabled?: boolean, maximumFileSize?: number, allowedFileExtensions?: string[], compression?: Compression, encryption?: boolean, antivirus?: boolean, transformations?: boolean }): Promise<Models.Bucket>;
     /**
      * Update a storage bucket by its unique ID.
      *
@@ -295,7 +305,7 @@ export class Storage {
      * @returns {Promise<Models.Bucket>}
      * @deprecated Use the object parameter style method for a better developer experience.
      */
-    updateBucket(bucketId: string, name: string, permissions?: string[], fileSecurity?: boolean, enabled?: boolean, maximumFileSize?: number, allowedFileExtensions?: string[], compression?: Compression, encryption?: boolean, antivirus?: boolean, transformations?: boolean): Promise<Models.Bucket>;
+    updateBucket(this: Storage<ServerAuth>, bucketId: string, name: string, permissions?: string[], fileSecurity?: boolean, enabled?: boolean, maximumFileSize?: number, allowedFileExtensions?: string[], compression?: Compression, encryption?: boolean, antivirus?: boolean, transformations?: boolean): Promise<Models.Bucket>;
     updateBucket(
         paramsOrFirst: { bucketId: string, name: string, permissions?: string[], fileSecurity?: boolean, enabled?: boolean, maximumFileSize?: number, allowedFileExtensions?: string[], compression?: Compression, encryption?: boolean, antivirus?: boolean, transformations?: boolean } | string,
         ...rest: [(string)?, (string[])?, (boolean)?, (boolean)?, (number)?, (string[])?, (Compression)?, (boolean)?, (boolean)?, (boolean)?]    
@@ -392,7 +402,7 @@ export class Storage {
      * @throws {AppwriteException}
      * @returns {Promise<{}>}
      */
-    deleteBucket(params: { bucketId: string }): Promise<{}>;
+    deleteBucket(this: Storage<ServerAuth>, params: { bucketId: string }): Promise<{}>;
     /**
      * Delete a storage bucket by its unique ID.
      *
@@ -401,7 +411,7 @@ export class Storage {
      * @returns {Promise<{}>}
      * @deprecated Use the object parameter style method for a better developer experience.
      */
-    deleteBucket(bucketId: string): Promise<{}>;
+    deleteBucket(this: Storage<ServerAuth>, bucketId: string): Promise<{}>;
     deleteBucket(
         paramsOrFirst: { bucketId: string } | string    
     ): Promise<{}> {
@@ -859,8 +869,8 @@ export class Storage {
         const apiHeaders: { [header: string]: string } = {
         }
 
-        payload['project'] = this.client.config.project;
-        payload['session'] = this.client.config.session;
+        payload['project'] = (this.client.config as unknown as Record<string, string>)['project'];
+        payload['session'] = (this.client.config as unknown as Record<string, string>)['session'];
 
         for (const [key, value] of Object.entries(Service.flatten(payload))) {
             uri.searchParams.append(key, value);
@@ -1004,8 +1014,8 @@ export class Storage {
         const apiHeaders: { [header: string]: string } = {
         }
 
-        payload['project'] = this.client.config.project;
-        payload['session'] = this.client.config.session;
+        payload['project'] = (this.client.config as unknown as Record<string, string>)['project'];
+        payload['session'] = (this.client.config as unknown as Record<string, string>)['session'];
 
         for (const [key, value] of Object.entries(Service.flatten(payload))) {
             uri.searchParams.append(key, value);
@@ -1072,8 +1082,8 @@ export class Storage {
         const apiHeaders: { [header: string]: string } = {
         }
 
-        payload['project'] = this.client.config.project;
-        payload['session'] = this.client.config.session;
+        payload['project'] = (this.client.config as unknown as Record<string, string>)['project'];
+        payload['session'] = (this.client.config as unknown as Record<string, string>)['session'];
 
         for (const [key, value] of Object.entries(Service.flatten(payload))) {
             uri.searchParams.append(key, value);
@@ -1082,3 +1092,9 @@ export class Storage {
         return uri.toString();
     }
 }
+
+const Storage = StorageRuntime as unknown as {
+    new <TAuth extends ClientAuth | ServerAuth = ClientAuth | ServerAuth>(client: Client<TAuth>): Storage<TAuth>;
+};
+
+export { Storage };

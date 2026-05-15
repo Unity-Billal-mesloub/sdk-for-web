@@ -26,7 +26,7 @@ export { Tokens } from './services/tokens';
 export { Users } from './services/users';
 export { Webhooks } from './services/webhooks';
 export { Realtime } from './services/realtime';
-export type { Models, Payload, RealtimeResponseEvent, UploadProgress } from './client';
+export type { Models, Payload, RealtimeResponseEvent, UploadProgress, SDKPlatform, ClientAuth, ServerAuth } from './client';
 export type { RealtimeSubscription } from './services/realtime';
 export type { QueryTypes, QueryTypesList } from './query';
 export { Permission } from './permission';

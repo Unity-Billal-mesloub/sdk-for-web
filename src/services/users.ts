@@ -1,15 +1,16 @@
-import { Service } from '../service';
-import { AppwriteException, Client, type Payload, UploadProgress } from '../client';
+import { AppwriteException, Client, type ServerAuth, type Payload } from '../client';
 import type { Models } from '../models';
 
 import { PasswordHash } from '../enums/password-hash';
 import { AuthenticatorType } from '../enums/authenticator-type';
 import { MessagingProviderType } from '../enums/messaging-provider-type';
 
-export class Users {
-    client: Client;
+export type Users = Omit<UsersRuntime, 'client'>;
 
-    constructor(client: Client) {
+class UsersRuntime {
+    client: Client<ServerAuth>;
+
+    constructor(client: Client<ServerAuth>) {
         this.client = client;
     }
 
@@ -3268,3 +3269,9 @@ export class Users {
         );
     }
 }
+
+const Users = UsersRuntime as unknown as {
+    new (client: Client<ServerAuth>): Users;
+};
+
+export { Users };

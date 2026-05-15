@@ -1,5 +1,4 @@
-import { Service } from '../service';
-import { AppwriteException, Client, type Payload, UploadProgress } from '../client';
+import { AppwriteException, Client, type ClientAuth, type ServerAuth, type Payload } from '../client';
 import type { Models } from '../models';
 
 import { RelationshipType } from '../enums/relationship-type';
@@ -7,10 +6,20 @@ import { RelationMutate } from '../enums/relation-mutate';
 import { TablesDBIndexType } from '../enums/tables-db-index-type';
 import { OrderBy } from '../enums/order-by';
 
-export class TablesDB {
-    client: Client;
+type TablesDBServerOnlyMethod = 'list' | 'create' | 'get' | 'update' | 'delete' | 'listTables' | 'createTable' | 'getTable' | 'updateTable' | 'deleteTable' | 'listColumns' | 'createBigIntColumn' | 'updateBigIntColumn' | 'createBooleanColumn' | 'updateBooleanColumn' | 'createDatetimeColumn' | 'updateDatetimeColumn' | 'createEmailColumn' | 'updateEmailColumn' | 'createEnumColumn' | 'updateEnumColumn' | 'createFloatColumn' | 'updateFloatColumn' | 'createIntegerColumn' | 'updateIntegerColumn' | 'createIpColumn' | 'updateIpColumn' | 'createLineColumn' | 'updateLineColumn' | 'createLongtextColumn' | 'updateLongtextColumn' | 'createMediumtextColumn' | 'updateMediumtextColumn' | 'createPointColumn' | 'updatePointColumn' | 'createPolygonColumn' | 'updatePolygonColumn' | 'createRelationshipColumn' | 'createStringColumn' | 'updateStringColumn' | 'createTextColumn' | 'updateTextColumn' | 'createUrlColumn' | 'updateUrlColumn' | 'createVarcharColumn' | 'updateVarcharColumn' | 'getColumn' | 'deleteColumn' | 'updateRelationshipColumn' | 'listIndexes' | 'createIndex' | 'getIndex' | 'deleteIndex' | 'upsertRows' | 'updateRows' | 'deleteRows';
+type TablesDBClientOnlyMethod = never;
 
-    constructor(client: Client) {
+export type TablesDB<TAuth extends ClientAuth | ServerAuth = ClientAuth | ServerAuth> =
+    TAuth extends ClientAuth
+        ? Omit<TablesDBRuntime<TAuth>, 'client' | TablesDBServerOnlyMethod>
+        : TAuth extends ServerAuth
+            ? Omit<TablesDBRuntime<TAuth>, 'client' | TablesDBClientOnlyMethod>
+            : Omit<TablesDBRuntime<TAuth>, 'client'>;
+
+class TablesDBRuntime<TAuth extends ClientAuth | ServerAuth = ClientAuth | ServerAuth> {
+    client: Client<TAuth>;
+
+    constructor(client: Client<TAuth>) {
         this.client = client;
     }
 
@@ -23,7 +32,7 @@ export class TablesDB {
      * @throws {AppwriteException}
      * @returns {Promise<Models.DatabaseList>}
      */
-    list(params?: { queries?: string[], search?: string, total?: boolean }): Promise<Models.DatabaseList>;
+    list(this: TablesDB<ServerAuth>, params?: { queries?: string[], search?: string, total?: boolean }): Promise<Models.DatabaseList>;
     /**
      * Get a list of all databases from the current Appwrite project. You can use the search parameter to filter your results.
      *
@@ -34,7 +43,7 @@ export class TablesDB {
      * @returns {Promise<Models.DatabaseList>}
      * @deprecated Use the object parameter style method for a better developer experience.
      */
-    list(queries?: string[], search?: string, total?: boolean): Promise<Models.DatabaseList>;
+    list(this: TablesDB<ServerAuth>, queries?: string[], search?: string, total?: boolean): Promise<Models.DatabaseList>;
     list(
         paramsOrFirst?: { queries?: string[], search?: string, total?: boolean } | string[],
         ...rest: [(string)?, (boolean)?]    
@@ -90,7 +99,7 @@ export class TablesDB {
      * @throws {AppwriteException}
      * @returns {Promise<Models.Database>}
      */
-    create(params: { databaseId: string, name: string, enabled?: boolean }): Promise<Models.Database>;
+    create(this: TablesDB<ServerAuth>, params: { databaseId: string, name: string, enabled?: boolean }): Promise<Models.Database>;
     /**
      * Create a new Database.
      * 
@@ -102,7 +111,7 @@ export class TablesDB {
      * @returns {Promise<Models.Database>}
      * @deprecated Use the object parameter style method for a better developer experience.
      */
-    create(databaseId: string, name: string, enabled?: boolean): Promise<Models.Database>;
+    create(this: TablesDB<ServerAuth>, databaseId: string, name: string, enabled?: boolean): Promise<Models.Database>;
     create(
         paramsOrFirst: { databaseId: string, name: string, enabled?: boolean } | string,
         ...rest: [(string)?, (boolean)?]    
@@ -495,7 +504,7 @@ export class TablesDB {
      * @throws {AppwriteException}
      * @returns {Promise<Models.Database>}
      */
-    get(params: { databaseId: string }): Promise<Models.Database>;
+    get(this: TablesDB<ServerAuth>, params: { databaseId: string }): Promise<Models.Database>;
     /**
      * Get a database by its unique ID. This endpoint response returns a JSON object with the database metadata.
      *
@@ -504,7 +513,7 @@ export class TablesDB {
      * @returns {Promise<Models.Database>}
      * @deprecated Use the object parameter style method for a better developer experience.
      */
-    get(databaseId: string): Promise<Models.Database>;
+    get(this: TablesDB<ServerAuth>, databaseId: string): Promise<Models.Database>;
     get(
         paramsOrFirst: { databaseId: string } | string    
     ): Promise<Models.Database> {
@@ -548,7 +557,7 @@ export class TablesDB {
      * @throws {AppwriteException}
      * @returns {Promise<Models.Database>}
      */
-    update(params: { databaseId: string, name?: string, enabled?: boolean }): Promise<Models.Database>;
+    update(this: TablesDB<ServerAuth>, params: { databaseId: string, name?: string, enabled?: boolean }): Promise<Models.Database>;
     /**
      * Update a database by its unique ID.
      *
@@ -559,7 +568,7 @@ export class TablesDB {
      * @returns {Promise<Models.Database>}
      * @deprecated Use the object parameter style method for a better developer experience.
      */
-    update(databaseId: string, name?: string, enabled?: boolean): Promise<Models.Database>;
+    update(this: TablesDB<ServerAuth>, databaseId: string, name?: string, enabled?: boolean): Promise<Models.Database>;
     update(
         paramsOrFirst: { databaseId: string, name?: string, enabled?: boolean } | string,
         ...rest: [(string)?, (boolean)?]    
@@ -613,7 +622,7 @@ export class TablesDB {
      * @throws {AppwriteException}
      * @returns {Promise<{}>}
      */
-    delete(params: { databaseId: string }): Promise<{}>;
+    delete(this: TablesDB<ServerAuth>, params: { databaseId: string }): Promise<{}>;
     /**
      * Delete a database by its unique ID. Only API keys with with databases.write scope can delete a database.
      *
@@ -622,7 +631,7 @@ export class TablesDB {
      * @returns {Promise<{}>}
      * @deprecated Use the object parameter style method for a better developer experience.
      */
-    delete(databaseId: string): Promise<{}>;
+    delete(this: TablesDB<ServerAuth>, databaseId: string): Promise<{}>;
     delete(
         paramsOrFirst: { databaseId: string } | string    
     ): Promise<{}> {
@@ -668,7 +677,7 @@ export class TablesDB {
      * @throws {AppwriteException}
      * @returns {Promise<Models.TableList>}
      */
-    listTables(params: { databaseId: string, queries?: string[], search?: string, total?: boolean }): Promise<Models.TableList>;
+    listTables(this: TablesDB<ServerAuth>, params: { databaseId: string, queries?: string[], search?: string, total?: boolean }): Promise<Models.TableList>;
     /**
      * Get a list of all tables that belong to the provided databaseId. You can use the search parameter to filter your results.
      *
@@ -680,7 +689,7 @@ export class TablesDB {
      * @returns {Promise<Models.TableList>}
      * @deprecated Use the object parameter style method for a better developer experience.
      */
-    listTables(databaseId: string, queries?: string[], search?: string, total?: boolean): Promise<Models.TableList>;
+    listTables(this: TablesDB<ServerAuth>, databaseId: string, queries?: string[], search?: string, total?: boolean): Promise<Models.TableList>;
     listTables(
         paramsOrFirst: { databaseId: string, queries?: string[], search?: string, total?: boolean } | string,
         ...rest: [(string[])?, (string)?, (boolean)?]    
@@ -745,7 +754,7 @@ export class TablesDB {
      * @throws {AppwriteException}
      * @returns {Promise<Models.Table>}
      */
-    createTable(params: { databaseId: string, tableId: string, name: string, permissions?: string[], rowSecurity?: boolean, enabled?: boolean, columns?: object[], indexes?: object[] }): Promise<Models.Table>;
+    createTable(this: TablesDB<ServerAuth>, params: { databaseId: string, tableId: string, name: string, permissions?: string[], rowSecurity?: boolean, enabled?: boolean, columns?: object[], indexes?: object[] }): Promise<Models.Table>;
     /**
      * Create a new Table. Before using this route, you should create a new database resource using either a [server integration](https://appwrite.io/docs/references/cloud/server-dart/tablesDB#createTable) API or directly from your database console.
      *
@@ -761,7 +770,7 @@ export class TablesDB {
      * @returns {Promise<Models.Table>}
      * @deprecated Use the object parameter style method for a better developer experience.
      */
-    createTable(databaseId: string, tableId: string, name: string, permissions?: string[], rowSecurity?: boolean, enabled?: boolean, columns?: object[], indexes?: object[]): Promise<Models.Table>;
+    createTable(this: TablesDB<ServerAuth>, databaseId: string, tableId: string, name: string, permissions?: string[], rowSecurity?: boolean, enabled?: boolean, columns?: object[], indexes?: object[]): Promise<Models.Table>;
     createTable(
         paramsOrFirst: { databaseId: string, tableId: string, name: string, permissions?: string[], rowSecurity?: boolean, enabled?: boolean, columns?: object[], indexes?: object[] } | string,
         ...rest: [(string)?, (string)?, (string[])?, (boolean)?, (boolean)?, (object[])?, (object[])?]    
@@ -847,7 +856,7 @@ export class TablesDB {
      * @throws {AppwriteException}
      * @returns {Promise<Models.Table>}
      */
-    getTable(params: { databaseId: string, tableId: string }): Promise<Models.Table>;
+    getTable(this: TablesDB<ServerAuth>, params: { databaseId: string, tableId: string }): Promise<Models.Table>;
     /**
      * Get a table by its unique ID. This endpoint response returns a JSON object with the table metadata.
      *
@@ -857,7 +866,7 @@ export class TablesDB {
      * @returns {Promise<Models.Table>}
      * @deprecated Use the object parameter style method for a better developer experience.
      */
-    getTable(databaseId: string, tableId: string): Promise<Models.Table>;
+    getTable(this: TablesDB<ServerAuth>, databaseId: string, tableId: string): Promise<Models.Table>;
     getTable(
         paramsOrFirst: { databaseId: string, tableId: string } | string,
         ...rest: [(string)?]    
@@ -911,7 +920,7 @@ export class TablesDB {
      * @throws {AppwriteException}
      * @returns {Promise<Models.Table>}
      */
-    updateTable(params: { databaseId: string, tableId: string, name?: string, permissions?: string[], rowSecurity?: boolean, enabled?: boolean, purge?: boolean }): Promise<Models.Table>;
+    updateTable(this: TablesDB<ServerAuth>, params: { databaseId: string, tableId: string, name?: string, permissions?: string[], rowSecurity?: boolean, enabled?: boolean, purge?: boolean }): Promise<Models.Table>;
     /**
      * Update a table by its unique ID.
      *
@@ -926,7 +935,7 @@ export class TablesDB {
      * @returns {Promise<Models.Table>}
      * @deprecated Use the object parameter style method for a better developer experience.
      */
-    updateTable(databaseId: string, tableId: string, name?: string, permissions?: string[], rowSecurity?: boolean, enabled?: boolean, purge?: boolean): Promise<Models.Table>;
+    updateTable(this: TablesDB<ServerAuth>, databaseId: string, tableId: string, name?: string, permissions?: string[], rowSecurity?: boolean, enabled?: boolean, purge?: boolean): Promise<Models.Table>;
     updateTable(
         paramsOrFirst: { databaseId: string, tableId: string, name?: string, permissions?: string[], rowSecurity?: boolean, enabled?: boolean, purge?: boolean } | string,
         ...rest: [(string)?, (string)?, (string[])?, (boolean)?, (boolean)?, (boolean)?]    
@@ -1001,7 +1010,7 @@ export class TablesDB {
      * @throws {AppwriteException}
      * @returns {Promise<{}>}
      */
-    deleteTable(params: { databaseId: string, tableId: string }): Promise<{}>;
+    deleteTable(this: TablesDB<ServerAuth>, params: { databaseId: string, tableId: string }): Promise<{}>;
     /**
      * Delete a table by its unique ID. Only users with write permissions have access to delete this resource.
      *
@@ -1011,7 +1020,7 @@ export class TablesDB {
      * @returns {Promise<{}>}
      * @deprecated Use the object parameter style method for a better developer experience.
      */
-    deleteTable(databaseId: string, tableId: string): Promise<{}>;
+    deleteTable(this: TablesDB<ServerAuth>, databaseId: string, tableId: string): Promise<{}>;
     deleteTable(
         paramsOrFirst: { databaseId: string, tableId: string } | string,
         ...rest: [(string)?]    
@@ -1063,7 +1072,7 @@ export class TablesDB {
      * @throws {AppwriteException}
      * @returns {Promise<Models.ColumnList>}
      */
-    listColumns(params: { databaseId: string, tableId: string, queries?: string[], total?: boolean }): Promise<Models.ColumnList>;
+    listColumns(this: TablesDB<ServerAuth>, params: { databaseId: string, tableId: string, queries?: string[], total?: boolean }): Promise<Models.ColumnList>;
     /**
      * List columns in the table.
      *
@@ -1075,7 +1084,7 @@ export class TablesDB {
      * @returns {Promise<Models.ColumnList>}
      * @deprecated Use the object parameter style method for a better developer experience.
      */
-    listColumns(databaseId: string, tableId: string, queries?: string[], total?: boolean): Promise<Models.ColumnList>;
+    listColumns(this: TablesDB<ServerAuth>, databaseId: string, tableId: string, queries?: string[], total?: boolean): Promise<Models.ColumnList>;
     listColumns(
         paramsOrFirst: { databaseId: string, tableId: string, queries?: string[], total?: boolean } | string,
         ...rest: [(string)?, (string[])?, (boolean)?]    
@@ -1141,7 +1150,7 @@ export class TablesDB {
      * @throws {AppwriteException}
      * @returns {Promise<Models.ColumnBigint>}
      */
-    createBigIntColumn(params: { databaseId: string, tableId: string, key: string, required: boolean, min?: number | bigint, max?: number | bigint, xdefault?: number | bigint, array?: boolean }): Promise<Models.ColumnBigint>;
+    createBigIntColumn(this: TablesDB<ServerAuth>, params: { databaseId: string, tableId: string, key: string, required: boolean, min?: number | bigint, max?: number | bigint, xdefault?: number | bigint, array?: boolean }): Promise<Models.ColumnBigint>;
     /**
      * Create a bigint column. Optionally, minimum and maximum values can be provided.
      * 
@@ -1158,7 +1167,7 @@ export class TablesDB {
      * @returns {Promise<Models.ColumnBigint>}
      * @deprecated Use the object parameter style method for a better developer experience.
      */
-    createBigIntColumn(databaseId: string, tableId: string, key: string, required: boolean, min?: number | bigint, max?: number | bigint, xdefault?: number | bigint, array?: boolean): Promise<Models.ColumnBigint>;
+    createBigIntColumn(this: TablesDB<ServerAuth>, databaseId: string, tableId: string, key: string, required: boolean, min?: number | bigint, max?: number | bigint, xdefault?: number | bigint, array?: boolean): Promise<Models.ColumnBigint>;
     createBigIntColumn(
         paramsOrFirst: { databaseId: string, tableId: string, key: string, required: boolean, min?: number | bigint, max?: number | bigint, xdefault?: number | bigint, array?: boolean } | string,
         ...rest: [(string)?, (string)?, (boolean)?, (number | bigint)?, (number | bigint)?, (number | bigint)?, (boolean)?]    
@@ -1251,7 +1260,7 @@ export class TablesDB {
      * @throws {AppwriteException}
      * @returns {Promise<Models.ColumnBigint>}
      */
-    updateBigIntColumn(params: { databaseId: string, tableId: string, key: string, required: boolean, xdefault?: number | bigint, min?: number | bigint, max?: number | bigint, newKey?: string }): Promise<Models.ColumnBigint>;
+    updateBigIntColumn(this: TablesDB<ServerAuth>, params: { databaseId: string, tableId: string, key: string, required: boolean, xdefault?: number | bigint, min?: number | bigint, max?: number | bigint, newKey?: string }): Promise<Models.ColumnBigint>;
     /**
      * Update a bigint column. Changing the `default` value will not update already existing rows.
      * 
@@ -1268,7 +1277,7 @@ export class TablesDB {
      * @returns {Promise<Models.ColumnBigint>}
      * @deprecated Use the object parameter style method for a better developer experience.
      */
-    updateBigIntColumn(databaseId: string, tableId: string, key: string, required: boolean, xdefault?: number | bigint, min?: number | bigint, max?: number | bigint, newKey?: string): Promise<Models.ColumnBigint>;
+    updateBigIntColumn(this: TablesDB<ServerAuth>, databaseId: string, tableId: string, key: string, required: boolean, xdefault?: number | bigint, min?: number | bigint, max?: number | bigint, newKey?: string): Promise<Models.ColumnBigint>;
     updateBigIntColumn(
         paramsOrFirst: { databaseId: string, tableId: string, key: string, required: boolean, xdefault?: number | bigint, min?: number | bigint, max?: number | bigint, newKey?: string } | string,
         ...rest: [(string)?, (string)?, (boolean)?, (number | bigint)?, (number | bigint)?, (number | bigint)?, (string)?]    
@@ -1359,7 +1368,7 @@ export class TablesDB {
      * @throws {AppwriteException}
      * @returns {Promise<Models.ColumnBoolean>}
      */
-    createBooleanColumn(params: { databaseId: string, tableId: string, key: string, required: boolean, xdefault?: boolean, array?: boolean }): Promise<Models.ColumnBoolean>;
+    createBooleanColumn(this: TablesDB<ServerAuth>, params: { databaseId: string, tableId: string, key: string, required: boolean, xdefault?: boolean, array?: boolean }): Promise<Models.ColumnBoolean>;
     /**
      * Create a boolean column.
      * 
@@ -1374,7 +1383,7 @@ export class TablesDB {
      * @returns {Promise<Models.ColumnBoolean>}
      * @deprecated Use the object parameter style method for a better developer experience.
      */
-    createBooleanColumn(databaseId: string, tableId: string, key: string, required: boolean, xdefault?: boolean, array?: boolean): Promise<Models.ColumnBoolean>;
+    createBooleanColumn(this: TablesDB<ServerAuth>, databaseId: string, tableId: string, key: string, required: boolean, xdefault?: boolean, array?: boolean): Promise<Models.ColumnBoolean>;
     createBooleanColumn(
         paramsOrFirst: { databaseId: string, tableId: string, key: string, required: boolean, xdefault?: boolean, array?: boolean } | string,
         ...rest: [(string)?, (string)?, (boolean)?, (boolean)?, (boolean)?]    
@@ -1454,7 +1463,7 @@ export class TablesDB {
      * @throws {AppwriteException}
      * @returns {Promise<Models.ColumnBoolean>}
      */
-    updateBooleanColumn(params: { databaseId: string, tableId: string, key: string, required: boolean, xdefault?: boolean, newKey?: string }): Promise<Models.ColumnBoolean>;
+    updateBooleanColumn(this: TablesDB<ServerAuth>, params: { databaseId: string, tableId: string, key: string, required: boolean, xdefault?: boolean, newKey?: string }): Promise<Models.ColumnBoolean>;
     /**
      * Update a boolean column. Changing the `default` value will not update already existing rows.
      *
@@ -1468,7 +1477,7 @@ export class TablesDB {
      * @returns {Promise<Models.ColumnBoolean>}
      * @deprecated Use the object parameter style method for a better developer experience.
      */
-    updateBooleanColumn(databaseId: string, tableId: string, key: string, required: boolean, xdefault?: boolean, newKey?: string): Promise<Models.ColumnBoolean>;
+    updateBooleanColumn(this: TablesDB<ServerAuth>, databaseId: string, tableId: string, key: string, required: boolean, xdefault?: boolean, newKey?: string): Promise<Models.ColumnBoolean>;
     updateBooleanColumn(
         paramsOrFirst: { databaseId: string, tableId: string, key: string, required: boolean, xdefault?: boolean, newKey?: string } | string,
         ...rest: [(string)?, (string)?, (boolean)?, (boolean)?, (string)?]    
@@ -1548,7 +1557,7 @@ export class TablesDB {
      * @throws {AppwriteException}
      * @returns {Promise<Models.ColumnDatetime>}
      */
-    createDatetimeColumn(params: { databaseId: string, tableId: string, key: string, required: boolean, xdefault?: string, array?: boolean }): Promise<Models.ColumnDatetime>;
+    createDatetimeColumn(this: TablesDB<ServerAuth>, params: { databaseId: string, tableId: string, key: string, required: boolean, xdefault?: string, array?: boolean }): Promise<Models.ColumnDatetime>;
     /**
      * Create a date time column according to the ISO 8601 standard.
      *
@@ -1562,7 +1571,7 @@ export class TablesDB {
      * @returns {Promise<Models.ColumnDatetime>}
      * @deprecated Use the object parameter style method for a better developer experience.
      */
-    createDatetimeColumn(databaseId: string, tableId: string, key: string, required: boolean, xdefault?: string, array?: boolean): Promise<Models.ColumnDatetime>;
+    createDatetimeColumn(this: TablesDB<ServerAuth>, databaseId: string, tableId: string, key: string, required: boolean, xdefault?: string, array?: boolean): Promise<Models.ColumnDatetime>;
     createDatetimeColumn(
         paramsOrFirst: { databaseId: string, tableId: string, key: string, required: boolean, xdefault?: string, array?: boolean } | string,
         ...rest: [(string)?, (string)?, (boolean)?, (string)?, (boolean)?]    
@@ -1642,7 +1651,7 @@ export class TablesDB {
      * @throws {AppwriteException}
      * @returns {Promise<Models.ColumnDatetime>}
      */
-    updateDatetimeColumn(params: { databaseId: string, tableId: string, key: string, required: boolean, xdefault?: string, newKey?: string }): Promise<Models.ColumnDatetime>;
+    updateDatetimeColumn(this: TablesDB<ServerAuth>, params: { databaseId: string, tableId: string, key: string, required: boolean, xdefault?: string, newKey?: string }): Promise<Models.ColumnDatetime>;
     /**
      * Update a date time column. Changing the `default` value will not update already existing rows.
      *
@@ -1656,7 +1665,7 @@ export class TablesDB {
      * @returns {Promise<Models.ColumnDatetime>}
      * @deprecated Use the object parameter style method for a better developer experience.
      */
-    updateDatetimeColumn(databaseId: string, tableId: string, key: string, required: boolean, xdefault?: string, newKey?: string): Promise<Models.ColumnDatetime>;
+    updateDatetimeColumn(this: TablesDB<ServerAuth>, databaseId: string, tableId: string, key: string, required: boolean, xdefault?: string, newKey?: string): Promise<Models.ColumnDatetime>;
     updateDatetimeColumn(
         paramsOrFirst: { databaseId: string, tableId: string, key: string, required: boolean, xdefault?: string, newKey?: string } | string,
         ...rest: [(string)?, (string)?, (boolean)?, (string)?, (string)?]    
@@ -1737,7 +1746,7 @@ export class TablesDB {
      * @throws {AppwriteException}
      * @returns {Promise<Models.ColumnEmail>}
      */
-    createEmailColumn(params: { databaseId: string, tableId: string, key: string, required: boolean, xdefault?: string, array?: boolean }): Promise<Models.ColumnEmail>;
+    createEmailColumn(this: TablesDB<ServerAuth>, params: { databaseId: string, tableId: string, key: string, required: boolean, xdefault?: string, array?: boolean }): Promise<Models.ColumnEmail>;
     /**
      * Create an email column.
      * 
@@ -1752,7 +1761,7 @@ export class TablesDB {
      * @returns {Promise<Models.ColumnEmail>}
      * @deprecated Use the object parameter style method for a better developer experience.
      */
-    createEmailColumn(databaseId: string, tableId: string, key: string, required: boolean, xdefault?: string, array?: boolean): Promise<Models.ColumnEmail>;
+    createEmailColumn(this: TablesDB<ServerAuth>, databaseId: string, tableId: string, key: string, required: boolean, xdefault?: string, array?: boolean): Promise<Models.ColumnEmail>;
     createEmailColumn(
         paramsOrFirst: { databaseId: string, tableId: string, key: string, required: boolean, xdefault?: string, array?: boolean } | string,
         ...rest: [(string)?, (string)?, (boolean)?, (string)?, (boolean)?]    
@@ -1833,7 +1842,7 @@ export class TablesDB {
      * @throws {AppwriteException}
      * @returns {Promise<Models.ColumnEmail>}
      */
-    updateEmailColumn(params: { databaseId: string, tableId: string, key: string, required: boolean, xdefault?: string, newKey?: string }): Promise<Models.ColumnEmail>;
+    updateEmailColumn(this: TablesDB<ServerAuth>, params: { databaseId: string, tableId: string, key: string, required: boolean, xdefault?: string, newKey?: string }): Promise<Models.ColumnEmail>;
     /**
      * Update an email column. Changing the `default` value will not update already existing rows.
      * 
@@ -1848,7 +1857,7 @@ export class TablesDB {
      * @returns {Promise<Models.ColumnEmail>}
      * @deprecated Use the object parameter style method for a better developer experience.
      */
-    updateEmailColumn(databaseId: string, tableId: string, key: string, required: boolean, xdefault?: string, newKey?: string): Promise<Models.ColumnEmail>;
+    updateEmailColumn(this: TablesDB<ServerAuth>, databaseId: string, tableId: string, key: string, required: boolean, xdefault?: string, newKey?: string): Promise<Models.ColumnEmail>;
     updateEmailColumn(
         paramsOrFirst: { databaseId: string, tableId: string, key: string, required: boolean, xdefault?: string, newKey?: string } | string,
         ...rest: [(string)?, (string)?, (boolean)?, (string)?, (string)?]    
@@ -1929,7 +1938,7 @@ export class TablesDB {
      * @throws {AppwriteException}
      * @returns {Promise<Models.ColumnEnum>}
      */
-    createEnumColumn(params: { databaseId: string, tableId: string, key: string, elements: string[], required: boolean, xdefault?: string, array?: boolean }): Promise<Models.ColumnEnum>;
+    createEnumColumn(this: TablesDB<ServerAuth>, params: { databaseId: string, tableId: string, key: string, elements: string[], required: boolean, xdefault?: string, array?: boolean }): Promise<Models.ColumnEnum>;
     /**
      * Create an enumeration column. The `elements` param acts as a white-list of accepted values for this column.
      *
@@ -1944,7 +1953,7 @@ export class TablesDB {
      * @returns {Promise<Models.ColumnEnum>}
      * @deprecated Use the object parameter style method for a better developer experience.
      */
-    createEnumColumn(databaseId: string, tableId: string, key: string, elements: string[], required: boolean, xdefault?: string, array?: boolean): Promise<Models.ColumnEnum>;
+    createEnumColumn(this: TablesDB<ServerAuth>, databaseId: string, tableId: string, key: string, elements: string[], required: boolean, xdefault?: string, array?: boolean): Promise<Models.ColumnEnum>;
     createEnumColumn(
         paramsOrFirst: { databaseId: string, tableId: string, key: string, elements: string[], required: boolean, xdefault?: string, array?: boolean } | string,
         ...rest: [(string)?, (string)?, (string[])?, (boolean)?, (string)?, (boolean)?]    
@@ -2034,7 +2043,7 @@ export class TablesDB {
      * @throws {AppwriteException}
      * @returns {Promise<Models.ColumnEnum>}
      */
-    updateEnumColumn(params: { databaseId: string, tableId: string, key: string, elements: string[], required: boolean, xdefault?: string, newKey?: string }): Promise<Models.ColumnEnum>;
+    updateEnumColumn(this: TablesDB<ServerAuth>, params: { databaseId: string, tableId: string, key: string, elements: string[], required: boolean, xdefault?: string, newKey?: string }): Promise<Models.ColumnEnum>;
     /**
      * Update an enum column. Changing the `default` value will not update already existing rows.
      * 
@@ -2050,7 +2059,7 @@ export class TablesDB {
      * @returns {Promise<Models.ColumnEnum>}
      * @deprecated Use the object parameter style method for a better developer experience.
      */
-    updateEnumColumn(databaseId: string, tableId: string, key: string, elements: string[], required: boolean, xdefault?: string, newKey?: string): Promise<Models.ColumnEnum>;
+    updateEnumColumn(this: TablesDB<ServerAuth>, databaseId: string, tableId: string, key: string, elements: string[], required: boolean, xdefault?: string, newKey?: string): Promise<Models.ColumnEnum>;
     updateEnumColumn(
         paramsOrFirst: { databaseId: string, tableId: string, key: string, elements: string[], required: boolean, xdefault?: string, newKey?: string } | string,
         ...rest: [(string)?, (string)?, (string[])?, (boolean)?, (string)?, (string)?]    
@@ -2141,7 +2150,7 @@ export class TablesDB {
      * @throws {AppwriteException}
      * @returns {Promise<Models.ColumnFloat>}
      */
-    createFloatColumn(params: { databaseId: string, tableId: string, key: string, required: boolean, min?: number, max?: number, xdefault?: number, array?: boolean }): Promise<Models.ColumnFloat>;
+    createFloatColumn(this: TablesDB<ServerAuth>, params: { databaseId: string, tableId: string, key: string, required: boolean, min?: number, max?: number, xdefault?: number, array?: boolean }): Promise<Models.ColumnFloat>;
     /**
      * Create a float column. Optionally, minimum and maximum values can be provided.
      * 
@@ -2158,7 +2167,7 @@ export class TablesDB {
      * @returns {Promise<Models.ColumnFloat>}
      * @deprecated Use the object parameter style method for a better developer experience.
      */
-    createFloatColumn(databaseId: string, tableId: string, key: string, required: boolean, min?: number, max?: number, xdefault?: number, array?: boolean): Promise<Models.ColumnFloat>;
+    createFloatColumn(this: TablesDB<ServerAuth>, databaseId: string, tableId: string, key: string, required: boolean, min?: number, max?: number, xdefault?: number, array?: boolean): Promise<Models.ColumnFloat>;
     createFloatColumn(
         paramsOrFirst: { databaseId: string, tableId: string, key: string, required: boolean, min?: number, max?: number, xdefault?: number, array?: boolean } | string,
         ...rest: [(string)?, (string)?, (boolean)?, (number)?, (number)?, (number)?, (boolean)?]    
@@ -2251,7 +2260,7 @@ export class TablesDB {
      * @throws {AppwriteException}
      * @returns {Promise<Models.ColumnFloat>}
      */
-    updateFloatColumn(params: { databaseId: string, tableId: string, key: string, required: boolean, xdefault?: number, min?: number, max?: number, newKey?: string }): Promise<Models.ColumnFloat>;
+    updateFloatColumn(this: TablesDB<ServerAuth>, params: { databaseId: string, tableId: string, key: string, required: boolean, xdefault?: number, min?: number, max?: number, newKey?: string }): Promise<Models.ColumnFloat>;
     /**
      * Update a float column. Changing the `default` value will not update already existing rows.
      * 
@@ -2268,7 +2277,7 @@ export class TablesDB {
      * @returns {Promise<Models.ColumnFloat>}
      * @deprecated Use the object parameter style method for a better developer experience.
      */
-    updateFloatColumn(databaseId: string, tableId: string, key: string, required: boolean, xdefault?: number, min?: number, max?: number, newKey?: string): Promise<Models.ColumnFloat>;
+    updateFloatColumn(this: TablesDB<ServerAuth>, databaseId: string, tableId: string, key: string, required: boolean, xdefault?: number, min?: number, max?: number, newKey?: string): Promise<Models.ColumnFloat>;
     updateFloatColumn(
         paramsOrFirst: { databaseId: string, tableId: string, key: string, required: boolean, xdefault?: number, min?: number, max?: number, newKey?: string } | string,
         ...rest: [(string)?, (string)?, (boolean)?, (number)?, (number)?, (number)?, (string)?]    
@@ -2361,7 +2370,7 @@ export class TablesDB {
      * @throws {AppwriteException}
      * @returns {Promise<Models.ColumnInteger>}
      */
-    createIntegerColumn(params: { databaseId: string, tableId: string, key: string, required: boolean, min?: number | bigint, max?: number | bigint, xdefault?: number | bigint, array?: boolean }): Promise<Models.ColumnInteger>;
+    createIntegerColumn(this: TablesDB<ServerAuth>, params: { databaseId: string, tableId: string, key: string, required: boolean, min?: number | bigint, max?: number | bigint, xdefault?: number | bigint, array?: boolean }): Promise<Models.ColumnInteger>;
     /**
      * Create an integer column. Optionally, minimum and maximum values can be provided.
      * 
@@ -2378,7 +2387,7 @@ export class TablesDB {
      * @returns {Promise<Models.ColumnInteger>}
      * @deprecated Use the object parameter style method for a better developer experience.
      */
-    createIntegerColumn(databaseId: string, tableId: string, key: string, required: boolean, min?: number | bigint, max?: number | bigint, xdefault?: number | bigint, array?: boolean): Promise<Models.ColumnInteger>;
+    createIntegerColumn(this: TablesDB<ServerAuth>, databaseId: string, tableId: string, key: string, required: boolean, min?: number | bigint, max?: number | bigint, xdefault?: number | bigint, array?: boolean): Promise<Models.ColumnInteger>;
     createIntegerColumn(
         paramsOrFirst: { databaseId: string, tableId: string, key: string, required: boolean, min?: number | bigint, max?: number | bigint, xdefault?: number | bigint, array?: boolean } | string,
         ...rest: [(string)?, (string)?, (boolean)?, (number | bigint)?, (number | bigint)?, (number | bigint)?, (boolean)?]    
@@ -2471,7 +2480,7 @@ export class TablesDB {
      * @throws {AppwriteException}
      * @returns {Promise<Models.ColumnInteger>}
      */
-    updateIntegerColumn(params: { databaseId: string, tableId: string, key: string, required: boolean, xdefault?: number | bigint, min?: number | bigint, max?: number | bigint, newKey?: string }): Promise<Models.ColumnInteger>;
+    updateIntegerColumn(this: TablesDB<ServerAuth>, params: { databaseId: string, tableId: string, key: string, required: boolean, xdefault?: number | bigint, min?: number | bigint, max?: number | bigint, newKey?: string }): Promise<Models.ColumnInteger>;
     /**
      * Update an integer column. Changing the `default` value will not update already existing rows.
      * 
@@ -2488,7 +2497,7 @@ export class TablesDB {
      * @returns {Promise<Models.ColumnInteger>}
      * @deprecated Use the object parameter style method for a better developer experience.
      */
-    updateIntegerColumn(databaseId: string, tableId: string, key: string, required: boolean, xdefault?: number | bigint, min?: number | bigint, max?: number | bigint, newKey?: string): Promise<Models.ColumnInteger>;
+    updateIntegerColumn(this: TablesDB<ServerAuth>, databaseId: string, tableId: string, key: string, required: boolean, xdefault?: number | bigint, min?: number | bigint, max?: number | bigint, newKey?: string): Promise<Models.ColumnInteger>;
     updateIntegerColumn(
         paramsOrFirst: { databaseId: string, tableId: string, key: string, required: boolean, xdefault?: number | bigint, min?: number | bigint, max?: number | bigint, newKey?: string } | string,
         ...rest: [(string)?, (string)?, (boolean)?, (number | bigint)?, (number | bigint)?, (number | bigint)?, (string)?]    
@@ -2579,7 +2588,7 @@ export class TablesDB {
      * @throws {AppwriteException}
      * @returns {Promise<Models.ColumnIp>}
      */
-    createIpColumn(params: { databaseId: string, tableId: string, key: string, required: boolean, xdefault?: string, array?: boolean }): Promise<Models.ColumnIp>;
+    createIpColumn(this: TablesDB<ServerAuth>, params: { databaseId: string, tableId: string, key: string, required: boolean, xdefault?: string, array?: boolean }): Promise<Models.ColumnIp>;
     /**
      * Create IP address column.
      * 
@@ -2594,7 +2603,7 @@ export class TablesDB {
      * @returns {Promise<Models.ColumnIp>}
      * @deprecated Use the object parameter style method for a better developer experience.
      */
-    createIpColumn(databaseId: string, tableId: string, key: string, required: boolean, xdefault?: string, array?: boolean): Promise<Models.ColumnIp>;
+    createIpColumn(this: TablesDB<ServerAuth>, databaseId: string, tableId: string, key: string, required: boolean, xdefault?: string, array?: boolean): Promise<Models.ColumnIp>;
     createIpColumn(
         paramsOrFirst: { databaseId: string, tableId: string, key: string, required: boolean, xdefault?: string, array?: boolean } | string,
         ...rest: [(string)?, (string)?, (boolean)?, (string)?, (boolean)?]    
@@ -2675,7 +2684,7 @@ export class TablesDB {
      * @throws {AppwriteException}
      * @returns {Promise<Models.ColumnIp>}
      */
-    updateIpColumn(params: { databaseId: string, tableId: string, key: string, required: boolean, xdefault?: string, newKey?: string }): Promise<Models.ColumnIp>;
+    updateIpColumn(this: TablesDB<ServerAuth>, params: { databaseId: string, tableId: string, key: string, required: boolean, xdefault?: string, newKey?: string }): Promise<Models.ColumnIp>;
     /**
      * Update an ip column. Changing the `default` value will not update already existing rows.
      * 
@@ -2690,7 +2699,7 @@ export class TablesDB {
      * @returns {Promise<Models.ColumnIp>}
      * @deprecated Use the object parameter style method for a better developer experience.
      */
-    updateIpColumn(databaseId: string, tableId: string, key: string, required: boolean, xdefault?: string, newKey?: string): Promise<Models.ColumnIp>;
+    updateIpColumn(this: TablesDB<ServerAuth>, databaseId: string, tableId: string, key: string, required: boolean, xdefault?: string, newKey?: string): Promise<Models.ColumnIp>;
     updateIpColumn(
         paramsOrFirst: { databaseId: string, tableId: string, key: string, required: boolean, xdefault?: string, newKey?: string } | string,
         ...rest: [(string)?, (string)?, (boolean)?, (string)?, (string)?]    
@@ -2769,7 +2778,7 @@ export class TablesDB {
      * @throws {AppwriteException}
      * @returns {Promise<Models.ColumnLine>}
      */
-    createLineColumn(params: { databaseId: string, tableId: string, key: string, required: boolean, xdefault?: any[] }): Promise<Models.ColumnLine>;
+    createLineColumn(this: TablesDB<ServerAuth>, params: { databaseId: string, tableId: string, key: string, required: boolean, xdefault?: any[] }): Promise<Models.ColumnLine>;
     /**
      * Create a geometric line column.
      *
@@ -2782,7 +2791,7 @@ export class TablesDB {
      * @returns {Promise<Models.ColumnLine>}
      * @deprecated Use the object parameter style method for a better developer experience.
      */
-    createLineColumn(databaseId: string, tableId: string, key: string, required: boolean, xdefault?: any[]): Promise<Models.ColumnLine>;
+    createLineColumn(this: TablesDB<ServerAuth>, databaseId: string, tableId: string, key: string, required: boolean, xdefault?: any[]): Promise<Models.ColumnLine>;
     createLineColumn(
         paramsOrFirst: { databaseId: string, tableId: string, key: string, required: boolean, xdefault?: any[] } | string,
         ...rest: [(string)?, (string)?, (boolean)?, (any[])?]    
@@ -2857,7 +2866,7 @@ export class TablesDB {
      * @throws {AppwriteException}
      * @returns {Promise<Models.ColumnLine>}
      */
-    updateLineColumn(params: { databaseId: string, tableId: string, key: string, required: boolean, xdefault?: any[], newKey?: string }): Promise<Models.ColumnLine>;
+    updateLineColumn(this: TablesDB<ServerAuth>, params: { databaseId: string, tableId: string, key: string, required: boolean, xdefault?: any[], newKey?: string }): Promise<Models.ColumnLine>;
     /**
      * Update a line column. Changing the `default` value will not update already existing rows.
      *
@@ -2871,7 +2880,7 @@ export class TablesDB {
      * @returns {Promise<Models.ColumnLine>}
      * @deprecated Use the object parameter style method for a better developer experience.
      */
-    updateLineColumn(databaseId: string, tableId: string, key: string, required: boolean, xdefault?: any[], newKey?: string): Promise<Models.ColumnLine>;
+    updateLineColumn(this: TablesDB<ServerAuth>, databaseId: string, tableId: string, key: string, required: boolean, xdefault?: any[], newKey?: string): Promise<Models.ColumnLine>;
     updateLineColumn(
         paramsOrFirst: { databaseId: string, tableId: string, key: string, required: boolean, xdefault?: any[], newKey?: string } | string,
         ...rest: [(string)?, (string)?, (boolean)?, (any[])?, (string)?]    
@@ -2950,7 +2959,7 @@ export class TablesDB {
      * @throws {AppwriteException}
      * @returns {Promise<Models.ColumnLongtext>}
      */
-    createLongtextColumn(params: { databaseId: string, tableId: string, key: string, required: boolean, xdefault?: string, array?: boolean, encrypt?: boolean }): Promise<Models.ColumnLongtext>;
+    createLongtextColumn(this: TablesDB<ServerAuth>, params: { databaseId: string, tableId: string, key: string, required: boolean, xdefault?: string, array?: boolean, encrypt?: boolean }): Promise<Models.ColumnLongtext>;
     /**
      * Create a longtext column.
      * 
@@ -2966,7 +2975,7 @@ export class TablesDB {
      * @returns {Promise<Models.ColumnLongtext>}
      * @deprecated Use the object parameter style method for a better developer experience.
      */
-    createLongtextColumn(databaseId: string, tableId: string, key: string, required: boolean, xdefault?: string, array?: boolean, encrypt?: boolean): Promise<Models.ColumnLongtext>;
+    createLongtextColumn(this: TablesDB<ServerAuth>, databaseId: string, tableId: string, key: string, required: boolean, xdefault?: string, array?: boolean, encrypt?: boolean): Promise<Models.ColumnLongtext>;
     createLongtextColumn(
         paramsOrFirst: { databaseId: string, tableId: string, key: string, required: boolean, xdefault?: string, array?: boolean, encrypt?: boolean } | string,
         ...rest: [(string)?, (string)?, (boolean)?, (string)?, (boolean)?, (boolean)?]    
@@ -3052,7 +3061,7 @@ export class TablesDB {
      * @throws {AppwriteException}
      * @returns {Promise<Models.ColumnLongtext>}
      */
-    updateLongtextColumn(params: { databaseId: string, tableId: string, key: string, required: boolean, xdefault?: string, newKey?: string }): Promise<Models.ColumnLongtext>;
+    updateLongtextColumn(this: TablesDB<ServerAuth>, params: { databaseId: string, tableId: string, key: string, required: boolean, xdefault?: string, newKey?: string }): Promise<Models.ColumnLongtext>;
     /**
      * Update a longtext column. Changing the `default` value will not update already existing rows.
      * 
@@ -3067,7 +3076,7 @@ export class TablesDB {
      * @returns {Promise<Models.ColumnLongtext>}
      * @deprecated Use the object parameter style method for a better developer experience.
      */
-    updateLongtextColumn(databaseId: string, tableId: string, key: string, required: boolean, xdefault?: string, newKey?: string): Promise<Models.ColumnLongtext>;
+    updateLongtextColumn(this: TablesDB<ServerAuth>, databaseId: string, tableId: string, key: string, required: boolean, xdefault?: string, newKey?: string): Promise<Models.ColumnLongtext>;
     updateLongtextColumn(
         paramsOrFirst: { databaseId: string, tableId: string, key: string, required: boolean, xdefault?: string, newKey?: string } | string,
         ...rest: [(string)?, (string)?, (boolean)?, (string)?, (string)?]    
@@ -3149,7 +3158,7 @@ export class TablesDB {
      * @throws {AppwriteException}
      * @returns {Promise<Models.ColumnMediumtext>}
      */
-    createMediumtextColumn(params: { databaseId: string, tableId: string, key: string, required: boolean, xdefault?: string, array?: boolean, encrypt?: boolean }): Promise<Models.ColumnMediumtext>;
+    createMediumtextColumn(this: TablesDB<ServerAuth>, params: { databaseId: string, tableId: string, key: string, required: boolean, xdefault?: string, array?: boolean, encrypt?: boolean }): Promise<Models.ColumnMediumtext>;
     /**
      * Create a mediumtext column.
      * 
@@ -3165,7 +3174,7 @@ export class TablesDB {
      * @returns {Promise<Models.ColumnMediumtext>}
      * @deprecated Use the object parameter style method for a better developer experience.
      */
-    createMediumtextColumn(databaseId: string, tableId: string, key: string, required: boolean, xdefault?: string, array?: boolean, encrypt?: boolean): Promise<Models.ColumnMediumtext>;
+    createMediumtextColumn(this: TablesDB<ServerAuth>, databaseId: string, tableId: string, key: string, required: boolean, xdefault?: string, array?: boolean, encrypt?: boolean): Promise<Models.ColumnMediumtext>;
     createMediumtextColumn(
         paramsOrFirst: { databaseId: string, tableId: string, key: string, required: boolean, xdefault?: string, array?: boolean, encrypt?: boolean } | string,
         ...rest: [(string)?, (string)?, (boolean)?, (string)?, (boolean)?, (boolean)?]    
@@ -3251,7 +3260,7 @@ export class TablesDB {
      * @throws {AppwriteException}
      * @returns {Promise<Models.ColumnMediumtext>}
      */
-    updateMediumtextColumn(params: { databaseId: string, tableId: string, key: string, required: boolean, xdefault?: string, newKey?: string }): Promise<Models.ColumnMediumtext>;
+    updateMediumtextColumn(this: TablesDB<ServerAuth>, params: { databaseId: string, tableId: string, key: string, required: boolean, xdefault?: string, newKey?: string }): Promise<Models.ColumnMediumtext>;
     /**
      * Update a mediumtext column. Changing the `default` value will not update already existing rows.
      * 
@@ -3266,7 +3275,7 @@ export class TablesDB {
      * @returns {Promise<Models.ColumnMediumtext>}
      * @deprecated Use the object parameter style method for a better developer experience.
      */
-    updateMediumtextColumn(databaseId: string, tableId: string, key: string, required: boolean, xdefault?: string, newKey?: string): Promise<Models.ColumnMediumtext>;
+    updateMediumtextColumn(this: TablesDB<ServerAuth>, databaseId: string, tableId: string, key: string, required: boolean, xdefault?: string, newKey?: string): Promise<Models.ColumnMediumtext>;
     updateMediumtextColumn(
         paramsOrFirst: { databaseId: string, tableId: string, key: string, required: boolean, xdefault?: string, newKey?: string } | string,
         ...rest: [(string)?, (string)?, (boolean)?, (string)?, (string)?]    
@@ -3345,7 +3354,7 @@ export class TablesDB {
      * @throws {AppwriteException}
      * @returns {Promise<Models.ColumnPoint>}
      */
-    createPointColumn(params: { databaseId: string, tableId: string, key: string, required: boolean, xdefault?: any[] }): Promise<Models.ColumnPoint>;
+    createPointColumn(this: TablesDB<ServerAuth>, params: { databaseId: string, tableId: string, key: string, required: boolean, xdefault?: any[] }): Promise<Models.ColumnPoint>;
     /**
      * Create a geometric point column.
      *
@@ -3358,7 +3367,7 @@ export class TablesDB {
      * @returns {Promise<Models.ColumnPoint>}
      * @deprecated Use the object parameter style method for a better developer experience.
      */
-    createPointColumn(databaseId: string, tableId: string, key: string, required: boolean, xdefault?: any[]): Promise<Models.ColumnPoint>;
+    createPointColumn(this: TablesDB<ServerAuth>, databaseId: string, tableId: string, key: string, required: boolean, xdefault?: any[]): Promise<Models.ColumnPoint>;
     createPointColumn(
         paramsOrFirst: { databaseId: string, tableId: string, key: string, required: boolean, xdefault?: any[] } | string,
         ...rest: [(string)?, (string)?, (boolean)?, (any[])?]    
@@ -3433,7 +3442,7 @@ export class TablesDB {
      * @throws {AppwriteException}
      * @returns {Promise<Models.ColumnPoint>}
      */
-    updatePointColumn(params: { databaseId: string, tableId: string, key: string, required: boolean, xdefault?: any[], newKey?: string }): Promise<Models.ColumnPoint>;
+    updatePointColumn(this: TablesDB<ServerAuth>, params: { databaseId: string, tableId: string, key: string, required: boolean, xdefault?: any[], newKey?: string }): Promise<Models.ColumnPoint>;
     /**
      * Update a point column. Changing the `default` value will not update already existing rows.
      *
@@ -3447,7 +3456,7 @@ export class TablesDB {
      * @returns {Promise<Models.ColumnPoint>}
      * @deprecated Use the object parameter style method for a better developer experience.
      */
-    updatePointColumn(databaseId: string, tableId: string, key: string, required: boolean, xdefault?: any[], newKey?: string): Promise<Models.ColumnPoint>;
+    updatePointColumn(this: TablesDB<ServerAuth>, databaseId: string, tableId: string, key: string, required: boolean, xdefault?: any[], newKey?: string): Promise<Models.ColumnPoint>;
     updatePointColumn(
         paramsOrFirst: { databaseId: string, tableId: string, key: string, required: boolean, xdefault?: any[], newKey?: string } | string,
         ...rest: [(string)?, (string)?, (boolean)?, (any[])?, (string)?]    
@@ -3523,7 +3532,7 @@ export class TablesDB {
      * @throws {AppwriteException}
      * @returns {Promise<Models.ColumnPolygon>}
      */
-    createPolygonColumn(params: { databaseId: string, tableId: string, key: string, required: boolean, xdefault?: any[] }): Promise<Models.ColumnPolygon>;
+    createPolygonColumn(this: TablesDB<ServerAuth>, params: { databaseId: string, tableId: string, key: string, required: boolean, xdefault?: any[] }): Promise<Models.ColumnPolygon>;
     /**
      * Create a geometric polygon column.
      *
@@ -3536,7 +3545,7 @@ export class TablesDB {
      * @returns {Promise<Models.ColumnPolygon>}
      * @deprecated Use the object parameter style method for a better developer experience.
      */
-    createPolygonColumn(databaseId: string, tableId: string, key: string, required: boolean, xdefault?: any[]): Promise<Models.ColumnPolygon>;
+    createPolygonColumn(this: TablesDB<ServerAuth>, databaseId: string, tableId: string, key: string, required: boolean, xdefault?: any[]): Promise<Models.ColumnPolygon>;
     createPolygonColumn(
         paramsOrFirst: { databaseId: string, tableId: string, key: string, required: boolean, xdefault?: any[] } | string,
         ...rest: [(string)?, (string)?, (boolean)?, (any[])?]    
@@ -3611,7 +3620,7 @@ export class TablesDB {
      * @throws {AppwriteException}
      * @returns {Promise<Models.ColumnPolygon>}
      */
-    updatePolygonColumn(params: { databaseId: string, tableId: string, key: string, required: boolean, xdefault?: any[], newKey?: string }): Promise<Models.ColumnPolygon>;
+    updatePolygonColumn(this: TablesDB<ServerAuth>, params: { databaseId: string, tableId: string, key: string, required: boolean, xdefault?: any[], newKey?: string }): Promise<Models.ColumnPolygon>;
     /**
      * Update a polygon column. Changing the `default` value will not update already existing rows.
      *
@@ -3625,7 +3634,7 @@ export class TablesDB {
      * @returns {Promise<Models.ColumnPolygon>}
      * @deprecated Use the object parameter style method for a better developer experience.
      */
-    updatePolygonColumn(databaseId: string, tableId: string, key: string, required: boolean, xdefault?: any[], newKey?: string): Promise<Models.ColumnPolygon>;
+    updatePolygonColumn(this: TablesDB<ServerAuth>, databaseId: string, tableId: string, key: string, required: boolean, xdefault?: any[], newKey?: string): Promise<Models.ColumnPolygon>;
     updatePolygonColumn(
         paramsOrFirst: { databaseId: string, tableId: string, key: string, required: boolean, xdefault?: any[], newKey?: string } | string,
         ...rest: [(string)?, (string)?, (boolean)?, (any[])?, (string)?]    
@@ -3705,7 +3714,7 @@ export class TablesDB {
      * @throws {AppwriteException}
      * @returns {Promise<Models.ColumnRelationship>}
      */
-    createRelationshipColumn(params: { databaseId: string, tableId: string, relatedTableId: string, type: RelationshipType, twoWay?: boolean, key?: string, twoWayKey?: string, onDelete?: RelationMutate }): Promise<Models.ColumnRelationship>;
+    createRelationshipColumn(this: TablesDB<ServerAuth>, params: { databaseId: string, tableId: string, relatedTableId: string, type: RelationshipType, twoWay?: boolean, key?: string, twoWayKey?: string, onDelete?: RelationMutate }): Promise<Models.ColumnRelationship>;
     /**
      * Create relationship column. [Learn more about relationship columns](https://appwrite.io/docs/databases-relationships#relationship-columns).
      * 
@@ -3722,7 +3731,7 @@ export class TablesDB {
      * @returns {Promise<Models.ColumnRelationship>}
      * @deprecated Use the object parameter style method for a better developer experience.
      */
-    createRelationshipColumn(databaseId: string, tableId: string, relatedTableId: string, type: RelationshipType, twoWay?: boolean, key?: string, twoWayKey?: string, onDelete?: RelationMutate): Promise<Models.ColumnRelationship>;
+    createRelationshipColumn(this: TablesDB<ServerAuth>, databaseId: string, tableId: string, relatedTableId: string, type: RelationshipType, twoWay?: boolean, key?: string, twoWayKey?: string, onDelete?: RelationMutate): Promise<Models.ColumnRelationship>;
     createRelationshipColumn(
         paramsOrFirst: { databaseId: string, tableId: string, relatedTableId: string, type: RelationshipType, twoWay?: boolean, key?: string, twoWayKey?: string, onDelete?: RelationMutate } | string,
         ...rest: [(string)?, (string)?, (RelationshipType)?, (boolean)?, (string)?, (string)?, (RelationMutate)?]    
@@ -3816,7 +3825,7 @@ export class TablesDB {
      * @returns {Promise<Models.ColumnString>}
      * @deprecated This API has been deprecated since 1.9.0. Please use `TablesDB.createTextColumn` instead.
      */
-    createStringColumn(params: { databaseId: string, tableId: string, key: string, size: number, required: boolean, xdefault?: string, array?: boolean, encrypt?: boolean }): Promise<Models.ColumnString>;
+    createStringColumn(this: TablesDB<ServerAuth>, params: { databaseId: string, tableId: string, key: string, size: number, required: boolean, xdefault?: string, array?: boolean, encrypt?: boolean }): Promise<Models.ColumnString>;
     /**
      * Create a string column.
      * 
@@ -3833,7 +3842,7 @@ export class TablesDB {
      * @returns {Promise<Models.ColumnString>}
      * @deprecated Use the object parameter style method for a better developer experience.
      */
-    createStringColumn(databaseId: string, tableId: string, key: string, size: number, required: boolean, xdefault?: string, array?: boolean, encrypt?: boolean): Promise<Models.ColumnString>;
+    createStringColumn(this: TablesDB<ServerAuth>, databaseId: string, tableId: string, key: string, size: number, required: boolean, xdefault?: string, array?: boolean, encrypt?: boolean): Promise<Models.ColumnString>;
     createStringColumn(
         paramsOrFirst: { databaseId: string, tableId: string, key: string, size: number, required: boolean, xdefault?: string, array?: boolean, encrypt?: boolean } | string,
         ...rest: [(string)?, (string)?, (number)?, (boolean)?, (string)?, (boolean)?, (boolean)?]    
@@ -3929,7 +3938,7 @@ export class TablesDB {
      * @returns {Promise<Models.ColumnString>}
      * @deprecated This API has been deprecated since 1.8.0. Please use `TablesDB.updateTextColumn` instead.
      */
-    updateStringColumn(params: { databaseId: string, tableId: string, key: string, required: boolean, xdefault?: string, size?: number, newKey?: string }): Promise<Models.ColumnString>;
+    updateStringColumn(this: TablesDB<ServerAuth>, params: { databaseId: string, tableId: string, key: string, required: boolean, xdefault?: string, size?: number, newKey?: string }): Promise<Models.ColumnString>;
     /**
      * Update a string column. Changing the `default` value will not update already existing rows.
      * 
@@ -3945,7 +3954,7 @@ export class TablesDB {
      * @returns {Promise<Models.ColumnString>}
      * @deprecated Use the object parameter style method for a better developer experience.
      */
-    updateStringColumn(databaseId: string, tableId: string, key: string, required: boolean, xdefault?: string, size?: number, newKey?: string): Promise<Models.ColumnString>;
+    updateStringColumn(this: TablesDB<ServerAuth>, databaseId: string, tableId: string, key: string, required: boolean, xdefault?: string, size?: number, newKey?: string): Promise<Models.ColumnString>;
     updateStringColumn(
         paramsOrFirst: { databaseId: string, tableId: string, key: string, required: boolean, xdefault?: string, size?: number, newKey?: string } | string,
         ...rest: [(string)?, (string)?, (boolean)?, (string)?, (number)?, (string)?]    
@@ -4032,7 +4041,7 @@ export class TablesDB {
      * @throws {AppwriteException}
      * @returns {Promise<Models.ColumnText>}
      */
-    createTextColumn(params: { databaseId: string, tableId: string, key: string, required: boolean, xdefault?: string, array?: boolean, encrypt?: boolean }): Promise<Models.ColumnText>;
+    createTextColumn(this: TablesDB<ServerAuth>, params: { databaseId: string, tableId: string, key: string, required: boolean, xdefault?: string, array?: boolean, encrypt?: boolean }): Promise<Models.ColumnText>;
     /**
      * Create a text column.
      * 
@@ -4048,7 +4057,7 @@ export class TablesDB {
      * @returns {Promise<Models.ColumnText>}
      * @deprecated Use the object parameter style method for a better developer experience.
      */
-    createTextColumn(databaseId: string, tableId: string, key: string, required: boolean, xdefault?: string, array?: boolean, encrypt?: boolean): Promise<Models.ColumnText>;
+    createTextColumn(this: TablesDB<ServerAuth>, databaseId: string, tableId: string, key: string, required: boolean, xdefault?: string, array?: boolean, encrypt?: boolean): Promise<Models.ColumnText>;
     createTextColumn(
         paramsOrFirst: { databaseId: string, tableId: string, key: string, required: boolean, xdefault?: string, array?: boolean, encrypt?: boolean } | string,
         ...rest: [(string)?, (string)?, (boolean)?, (string)?, (boolean)?, (boolean)?]    
@@ -4134,7 +4143,7 @@ export class TablesDB {
      * @throws {AppwriteException}
      * @returns {Promise<Models.ColumnText>}
      */
-    updateTextColumn(params: { databaseId: string, tableId: string, key: string, required: boolean, xdefault?: string, newKey?: string }): Promise<Models.ColumnText>;
+    updateTextColumn(this: TablesDB<ServerAuth>, params: { databaseId: string, tableId: string, key: string, required: boolean, xdefault?: string, newKey?: string }): Promise<Models.ColumnText>;
     /**
      * Update a text column. Changing the `default` value will not update already existing rows.
      * 
@@ -4149,7 +4158,7 @@ export class TablesDB {
      * @returns {Promise<Models.ColumnText>}
      * @deprecated Use the object parameter style method for a better developer experience.
      */
-    updateTextColumn(databaseId: string, tableId: string, key: string, required: boolean, xdefault?: string, newKey?: string): Promise<Models.ColumnText>;
+    updateTextColumn(this: TablesDB<ServerAuth>, databaseId: string, tableId: string, key: string, required: boolean, xdefault?: string, newKey?: string): Promise<Models.ColumnText>;
     updateTextColumn(
         paramsOrFirst: { databaseId: string, tableId: string, key: string, required: boolean, xdefault?: string, newKey?: string } | string,
         ...rest: [(string)?, (string)?, (boolean)?, (string)?, (string)?]    
@@ -4230,7 +4239,7 @@ export class TablesDB {
      * @throws {AppwriteException}
      * @returns {Promise<Models.ColumnUrl>}
      */
-    createUrlColumn(params: { databaseId: string, tableId: string, key: string, required: boolean, xdefault?: string, array?: boolean }): Promise<Models.ColumnUrl>;
+    createUrlColumn(this: TablesDB<ServerAuth>, params: { databaseId: string, tableId: string, key: string, required: boolean, xdefault?: string, array?: boolean }): Promise<Models.ColumnUrl>;
     /**
      * Create a URL column.
      * 
@@ -4245,7 +4254,7 @@ export class TablesDB {
      * @returns {Promise<Models.ColumnUrl>}
      * @deprecated Use the object parameter style method for a better developer experience.
      */
-    createUrlColumn(databaseId: string, tableId: string, key: string, required: boolean, xdefault?: string, array?: boolean): Promise<Models.ColumnUrl>;
+    createUrlColumn(this: TablesDB<ServerAuth>, databaseId: string, tableId: string, key: string, required: boolean, xdefault?: string, array?: boolean): Promise<Models.ColumnUrl>;
     createUrlColumn(
         paramsOrFirst: { databaseId: string, tableId: string, key: string, required: boolean, xdefault?: string, array?: boolean } | string,
         ...rest: [(string)?, (string)?, (boolean)?, (string)?, (boolean)?]    
@@ -4326,7 +4335,7 @@ export class TablesDB {
      * @throws {AppwriteException}
      * @returns {Promise<Models.ColumnUrl>}
      */
-    updateUrlColumn(params: { databaseId: string, tableId: string, key: string, required: boolean, xdefault?: string, newKey?: string }): Promise<Models.ColumnUrl>;
+    updateUrlColumn(this: TablesDB<ServerAuth>, params: { databaseId: string, tableId: string, key: string, required: boolean, xdefault?: string, newKey?: string }): Promise<Models.ColumnUrl>;
     /**
      * Update an url column. Changing the `default` value will not update already existing rows.
      * 
@@ -4341,7 +4350,7 @@ export class TablesDB {
      * @returns {Promise<Models.ColumnUrl>}
      * @deprecated Use the object parameter style method for a better developer experience.
      */
-    updateUrlColumn(databaseId: string, tableId: string, key: string, required: boolean, xdefault?: string, newKey?: string): Promise<Models.ColumnUrl>;
+    updateUrlColumn(this: TablesDB<ServerAuth>, databaseId: string, tableId: string, key: string, required: boolean, xdefault?: string, newKey?: string): Promise<Models.ColumnUrl>;
     updateUrlColumn(
         paramsOrFirst: { databaseId: string, tableId: string, key: string, required: boolean, xdefault?: string, newKey?: string } | string,
         ...rest: [(string)?, (string)?, (boolean)?, (string)?, (string)?]    
@@ -4424,7 +4433,7 @@ export class TablesDB {
      * @throws {AppwriteException}
      * @returns {Promise<Models.ColumnVarchar>}
      */
-    createVarcharColumn(params: { databaseId: string, tableId: string, key: string, size: number, required: boolean, xdefault?: string, array?: boolean, encrypt?: boolean }): Promise<Models.ColumnVarchar>;
+    createVarcharColumn(this: TablesDB<ServerAuth>, params: { databaseId: string, tableId: string, key: string, size: number, required: boolean, xdefault?: string, array?: boolean, encrypt?: boolean }): Promise<Models.ColumnVarchar>;
     /**
      * Create a varchar column.
      * 
@@ -4441,7 +4450,7 @@ export class TablesDB {
      * @returns {Promise<Models.ColumnVarchar>}
      * @deprecated Use the object parameter style method for a better developer experience.
      */
-    createVarcharColumn(databaseId: string, tableId: string, key: string, size: number, required: boolean, xdefault?: string, array?: boolean, encrypt?: boolean): Promise<Models.ColumnVarchar>;
+    createVarcharColumn(this: TablesDB<ServerAuth>, databaseId: string, tableId: string, key: string, size: number, required: boolean, xdefault?: string, array?: boolean, encrypt?: boolean): Promise<Models.ColumnVarchar>;
     createVarcharColumn(
         paramsOrFirst: { databaseId: string, tableId: string, key: string, size: number, required: boolean, xdefault?: string, array?: boolean, encrypt?: boolean } | string,
         ...rest: [(string)?, (string)?, (number)?, (boolean)?, (string)?, (boolean)?, (boolean)?]    
@@ -4536,7 +4545,7 @@ export class TablesDB {
      * @throws {AppwriteException}
      * @returns {Promise<Models.ColumnVarchar>}
      */
-    updateVarcharColumn(params: { databaseId: string, tableId: string, key: string, required: boolean, xdefault?: string, size?: number, newKey?: string }): Promise<Models.ColumnVarchar>;
+    updateVarcharColumn(this: TablesDB<ServerAuth>, params: { databaseId: string, tableId: string, key: string, required: boolean, xdefault?: string, size?: number, newKey?: string }): Promise<Models.ColumnVarchar>;
     /**
      * Update a varchar column. Changing the `default` value will not update already existing rows.
      * 
@@ -4552,7 +4561,7 @@ export class TablesDB {
      * @returns {Promise<Models.ColumnVarchar>}
      * @deprecated Use the object parameter style method for a better developer experience.
      */
-    updateVarcharColumn(databaseId: string, tableId: string, key: string, required: boolean, xdefault?: string, size?: number, newKey?: string): Promise<Models.ColumnVarchar>;
+    updateVarcharColumn(this: TablesDB<ServerAuth>, databaseId: string, tableId: string, key: string, required: boolean, xdefault?: string, size?: number, newKey?: string): Promise<Models.ColumnVarchar>;
     updateVarcharColumn(
         paramsOrFirst: { databaseId: string, tableId: string, key: string, required: boolean, xdefault?: string, size?: number, newKey?: string } | string,
         ...rest: [(string)?, (string)?, (boolean)?, (string)?, (number)?, (string)?]    
@@ -4634,7 +4643,7 @@ export class TablesDB {
      * @throws {AppwriteException}
      * @returns {Promise<Models.ColumnBoolean | Models.ColumnInteger | Models.ColumnFloat | Models.ColumnEmail | Models.ColumnEnum | Models.ColumnUrl | Models.ColumnIp | Models.ColumnDatetime | Models.ColumnRelationship | Models.ColumnString>}
      */
-    getColumn(params: { databaseId: string, tableId: string, key: string }): Promise<Models.ColumnBoolean | Models.ColumnInteger | Models.ColumnFloat | Models.ColumnEmail | Models.ColumnEnum | Models.ColumnUrl | Models.ColumnIp | Models.ColumnDatetime | Models.ColumnRelationship | Models.ColumnString>;
+    getColumn(this: TablesDB<ServerAuth>, params: { databaseId: string, tableId: string, key: string }): Promise<Models.ColumnBoolean | Models.ColumnInteger | Models.ColumnFloat | Models.ColumnEmail | Models.ColumnEnum | Models.ColumnUrl | Models.ColumnIp | Models.ColumnDatetime | Models.ColumnRelationship | Models.ColumnString>;
     /**
      * Get column by ID.
      *
@@ -4645,7 +4654,7 @@ export class TablesDB {
      * @returns {Promise<Models.ColumnBoolean | Models.ColumnInteger | Models.ColumnFloat | Models.ColumnEmail | Models.ColumnEnum | Models.ColumnUrl | Models.ColumnIp | Models.ColumnDatetime | Models.ColumnRelationship | Models.ColumnString>}
      * @deprecated Use the object parameter style method for a better developer experience.
      */
-    getColumn(databaseId: string, tableId: string, key: string): Promise<Models.ColumnBoolean | Models.ColumnInteger | Models.ColumnFloat | Models.ColumnEmail | Models.ColumnEnum | Models.ColumnUrl | Models.ColumnIp | Models.ColumnDatetime | Models.ColumnRelationship | Models.ColumnString>;
+    getColumn(this: TablesDB<ServerAuth>, databaseId: string, tableId: string, key: string): Promise<Models.ColumnBoolean | Models.ColumnInteger | Models.ColumnFloat | Models.ColumnEmail | Models.ColumnEnum | Models.ColumnUrl | Models.ColumnIp | Models.ColumnDatetime | Models.ColumnRelationship | Models.ColumnString>;
     getColumn(
         paramsOrFirst: { databaseId: string, tableId: string, key: string } | string,
         ...rest: [(string)?, (string)?]    
@@ -4700,7 +4709,7 @@ export class TablesDB {
      * @throws {AppwriteException}
      * @returns {Promise<{}>}
      */
-    deleteColumn(params: { databaseId: string, tableId: string, key: string }): Promise<{}>;
+    deleteColumn(this: TablesDB<ServerAuth>, params: { databaseId: string, tableId: string, key: string }): Promise<{}>;
     /**
      * Deletes a column.
      *
@@ -4711,7 +4720,7 @@ export class TablesDB {
      * @returns {Promise<{}>}
      * @deprecated Use the object parameter style method for a better developer experience.
      */
-    deleteColumn(databaseId: string, tableId: string, key: string): Promise<{}>;
+    deleteColumn(this: TablesDB<ServerAuth>, databaseId: string, tableId: string, key: string): Promise<{}>;
     deleteColumn(
         paramsOrFirst: { databaseId: string, tableId: string, key: string } | string,
         ...rest: [(string)?, (string)?]    
@@ -4770,7 +4779,7 @@ export class TablesDB {
      * @throws {AppwriteException}
      * @returns {Promise<Models.ColumnRelationship>}
      */
-    updateRelationshipColumn(params: { databaseId: string, tableId: string, key: string, onDelete?: RelationMutate, newKey?: string }): Promise<Models.ColumnRelationship>;
+    updateRelationshipColumn(this: TablesDB<ServerAuth>, params: { databaseId: string, tableId: string, key: string, onDelete?: RelationMutate, newKey?: string }): Promise<Models.ColumnRelationship>;
     /**
      * Update relationship column. [Learn more about relationship columns](https://appwrite.io/docs/databases-relationships#relationship-columns).
      * 
@@ -4784,7 +4793,7 @@ export class TablesDB {
      * @returns {Promise<Models.ColumnRelationship>}
      * @deprecated Use the object parameter style method for a better developer experience.
      */
-    updateRelationshipColumn(databaseId: string, tableId: string, key: string, onDelete?: RelationMutate, newKey?: string): Promise<Models.ColumnRelationship>;
+    updateRelationshipColumn(this: TablesDB<ServerAuth>, databaseId: string, tableId: string, key: string, onDelete?: RelationMutate, newKey?: string): Promise<Models.ColumnRelationship>;
     updateRelationshipColumn(
         paramsOrFirst: { databaseId: string, tableId: string, key: string, onDelete?: RelationMutate, newKey?: string } | string,
         ...rest: [(string)?, (string)?, (RelationMutate)?, (string)?]    
@@ -4851,7 +4860,7 @@ export class TablesDB {
      * @throws {AppwriteException}
      * @returns {Promise<Models.ColumnIndexList>}
      */
-    listIndexes(params: { databaseId: string, tableId: string, queries?: string[], total?: boolean }): Promise<Models.ColumnIndexList>;
+    listIndexes(this: TablesDB<ServerAuth>, params: { databaseId: string, tableId: string, queries?: string[], total?: boolean }): Promise<Models.ColumnIndexList>;
     /**
      * List indexes on the table.
      *
@@ -4863,7 +4872,7 @@ export class TablesDB {
      * @returns {Promise<Models.ColumnIndexList>}
      * @deprecated Use the object parameter style method for a better developer experience.
      */
-    listIndexes(databaseId: string, tableId: string, queries?: string[], total?: boolean): Promise<Models.ColumnIndexList>;
+    listIndexes(this: TablesDB<ServerAuth>, databaseId: string, tableId: string, queries?: string[], total?: boolean): Promise<Models.ColumnIndexList>;
     listIndexes(
         paramsOrFirst: { databaseId: string, tableId: string, queries?: string[], total?: boolean } | string,
         ...rest: [(string)?, (string[])?, (boolean)?]    
@@ -4928,7 +4937,7 @@ export class TablesDB {
      * @throws {AppwriteException}
      * @returns {Promise<Models.ColumnIndex>}
      */
-    createIndex(params: { databaseId: string, tableId: string, key: string, type: TablesDBIndexType, columns: string[], orders?: OrderBy[], lengths?: number[] }): Promise<Models.ColumnIndex>;
+    createIndex(this: TablesDB<ServerAuth>, params: { databaseId: string, tableId: string, key: string, type: TablesDBIndexType, columns: string[], orders?: OrderBy[], lengths?: number[] }): Promise<Models.ColumnIndex>;
     /**
      * Creates an index on the columns listed. Your index should include all the columns you will query in a single request.
      * Type can be `key`, `fulltext`, or `unique`.
@@ -4944,7 +4953,7 @@ export class TablesDB {
      * @returns {Promise<Models.ColumnIndex>}
      * @deprecated Use the object parameter style method for a better developer experience.
      */
-    createIndex(databaseId: string, tableId: string, key: string, type: TablesDBIndexType, columns: string[], orders?: OrderBy[], lengths?: number[]): Promise<Models.ColumnIndex>;
+    createIndex(this: TablesDB<ServerAuth>, databaseId: string, tableId: string, key: string, type: TablesDBIndexType, columns: string[], orders?: OrderBy[], lengths?: number[]): Promise<Models.ColumnIndex>;
     createIndex(
         paramsOrFirst: { databaseId: string, tableId: string, key: string, type: TablesDBIndexType, columns: string[], orders?: OrderBy[], lengths?: number[] } | string,
         ...rest: [(string)?, (string)?, (TablesDBIndexType)?, (string[])?, (OrderBy[])?, (number[])?]    
@@ -5029,7 +5038,7 @@ export class TablesDB {
      * @throws {AppwriteException}
      * @returns {Promise<Models.ColumnIndex>}
      */
-    getIndex(params: { databaseId: string, tableId: string, key: string }): Promise<Models.ColumnIndex>;
+    getIndex(this: TablesDB<ServerAuth>, params: { databaseId: string, tableId: string, key: string }): Promise<Models.ColumnIndex>;
     /**
      * Get index by ID.
      *
@@ -5040,7 +5049,7 @@ export class TablesDB {
      * @returns {Promise<Models.ColumnIndex>}
      * @deprecated Use the object parameter style method for a better developer experience.
      */
-    getIndex(databaseId: string, tableId: string, key: string): Promise<Models.ColumnIndex>;
+    getIndex(this: TablesDB<ServerAuth>, databaseId: string, tableId: string, key: string): Promise<Models.ColumnIndex>;
     getIndex(
         paramsOrFirst: { databaseId: string, tableId: string, key: string } | string,
         ...rest: [(string)?, (string)?]    
@@ -5095,7 +5104,7 @@ export class TablesDB {
      * @throws {AppwriteException}
      * @returns {Promise<{}>}
      */
-    deleteIndex(params: { databaseId: string, tableId: string, key: string }): Promise<{}>;
+    deleteIndex(this: TablesDB<ServerAuth>, params: { databaseId: string, tableId: string, key: string }): Promise<{}>;
     /**
      * Delete an index.
      *
@@ -5106,7 +5115,7 @@ export class TablesDB {
      * @returns {Promise<{}>}
      * @deprecated Use the object parameter style method for a better developer experience.
      */
-    deleteIndex(databaseId: string, tableId: string, key: string): Promise<{}>;
+    deleteIndex(this: TablesDB<ServerAuth>, databaseId: string, tableId: string, key: string): Promise<{}>;
     deleteIndex(
         paramsOrFirst: { databaseId: string, tableId: string, key: string } | string,
         ...rest: [(string)?, (string)?]    
@@ -5422,7 +5431,7 @@ export class TablesDB {
      * @throws {AppwriteException}
      * @returns {Promise<Models.RowList<Row>>}
      */
-    upsertRows<Row extends Models.Row = Models.DefaultRow>(params: { databaseId: string, tableId: string, rows: object[], transactionId?: string }): Promise<Models.RowList<Row>>;
+    upsertRows<Row extends Models.Row = Models.DefaultRow>(this: TablesDB<ServerAuth>, params: { databaseId: string, tableId: string, rows: object[], transactionId?: string }): Promise<Models.RowList<Row>>;
     /**
      * Create or update Rows. Before using this route, you should create a new table resource using either a [server integration](https://appwrite.io/docs/references/cloud/server-dart/tablesDB#createTable) API or directly from your database console.
      * 
@@ -5435,7 +5444,7 @@ export class TablesDB {
      * @returns {Promise<Models.RowList<Row>>}
      * @deprecated Use the object parameter style method for a better developer experience.
      */
-    upsertRows<Row extends Models.Row = Models.DefaultRow>(databaseId: string, tableId: string, rows: object[], transactionId?: string): Promise<Models.RowList<Row>>;
+    upsertRows<Row extends Models.Row = Models.DefaultRow>(this: TablesDB<ServerAuth>, databaseId: string, tableId: string, rows: object[], transactionId?: string): Promise<Models.RowList<Row>>;
     upsertRows<Row extends Models.Row = Models.DefaultRow>(
         paramsOrFirst: { databaseId: string, tableId: string, rows: object[], transactionId?: string } | string,
         ...rest: [(string)?, (object[])?, (string)?]    
@@ -5501,7 +5510,7 @@ export class TablesDB {
      * @throws {AppwriteException}
      * @returns {Promise<Models.RowList<Row>>}
      */
-    updateRows<Row extends Models.Row = Models.DefaultRow>(params: { databaseId: string, tableId: string, data?: object, queries?: string[], transactionId?: string }): Promise<Models.RowList<Row>>;
+    updateRows<Row extends Models.Row = Models.DefaultRow>(this: TablesDB<ServerAuth>, params: { databaseId: string, tableId: string, data?: object, queries?: string[], transactionId?: string }): Promise<Models.RowList<Row>>;
     /**
      * Update all rows that match your queries, if no queries are submitted then all rows are updated. You can pass only specific fields to be updated.
      *
@@ -5514,7 +5523,7 @@ export class TablesDB {
      * @returns {Promise<Models.RowList<Row>>}
      * @deprecated Use the object parameter style method for a better developer experience.
      */
-    updateRows<Row extends Models.Row = Models.DefaultRow>(databaseId: string, tableId: string, data?: object, queries?: string[], transactionId?: string): Promise<Models.RowList<Row>>;
+    updateRows<Row extends Models.Row = Models.DefaultRow>(this: TablesDB<ServerAuth>, databaseId: string, tableId: string, data?: object, queries?: string[], transactionId?: string): Promise<Models.RowList<Row>>;
     updateRows<Row extends Models.Row = Models.DefaultRow>(
         paramsOrFirst: { databaseId: string, tableId: string, data?: object, queries?: string[], transactionId?: string } | string,
         ...rest: [(string)?, (object)?, (string[])?, (string)?]    
@@ -5581,7 +5590,7 @@ export class TablesDB {
      * @throws {AppwriteException}
      * @returns {Promise<Models.RowList<Row>>}
      */
-    deleteRows<Row extends Models.Row = Models.DefaultRow>(params: { databaseId: string, tableId: string, queries?: string[], transactionId?: string }): Promise<Models.RowList<Row>>;
+    deleteRows<Row extends Models.Row = Models.DefaultRow>(this: TablesDB<ServerAuth>, params: { databaseId: string, tableId: string, queries?: string[], transactionId?: string }): Promise<Models.RowList<Row>>;
     /**
      * Bulk delete rows using queries, if no queries are passed then all rows are deleted.
      *
@@ -5593,7 +5602,7 @@ export class TablesDB {
      * @returns {Promise<Models.RowList<Row>>}
      * @deprecated Use the object parameter style method for a better developer experience.
      */
-    deleteRows<Row extends Models.Row = Models.DefaultRow>(databaseId: string, tableId: string, queries?: string[], transactionId?: string): Promise<Models.RowList<Row>>;
+    deleteRows<Row extends Models.Row = Models.DefaultRow>(this: TablesDB<ServerAuth>, databaseId: string, tableId: string, queries?: string[], transactionId?: string): Promise<Models.RowList<Row>>;
     deleteRows<Row extends Models.Row = Models.DefaultRow>(
         paramsOrFirst: { databaseId: string, tableId: string, queries?: string[], transactionId?: string } | string,
         ...rest: [(string)?, (string[])?, (string)?]    
@@ -6165,3 +6174,9 @@ export class TablesDB {
         );
     }
 }
+
+const TablesDB = TablesDBRuntime as unknown as {
+    new <TAuth extends ClientAuth | ServerAuth = ClientAuth | ServerAuth>(client: Client<TAuth>): TablesDB<TAuth>;
+};
+
+export { TablesDB };

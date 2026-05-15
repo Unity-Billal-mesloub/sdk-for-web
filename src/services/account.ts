@@ -1,15 +1,25 @@
 import { Service } from '../service';
-import { AppwriteException, Client, type Payload, UploadProgress } from '../client';
+import { AppwriteException, Client, type ClientAuth, type ServerAuth, type Payload } from '../client';
 import type { Models } from '../models';
 
 import { AuthenticatorType } from '../enums/authenticator-type';
 import { AuthenticationFactor } from '../enums/authentication-factor';
 import { OAuthProvider } from '../enums/o-auth-provider';
 
-export class Account {
-    client: Client;
+type AccountServerOnlyMethod = never;
+type AccountClientOnlyMethod = never;
 
-    constructor(client: Client) {
+export type Account<TAuth extends ClientAuth | ServerAuth = ClientAuth | ServerAuth> =
+    TAuth extends ClientAuth
+        ? Omit<AccountRuntime<TAuth>, 'client' | AccountServerOnlyMethod>
+        : TAuth extends ServerAuth
+            ? Omit<AccountRuntime<TAuth>, 'client' | AccountClientOnlyMethod>
+            : Omit<AccountRuntime<TAuth>, 'client'>;
+
+class AccountRuntime<TAuth extends ClientAuth | ServerAuth = ClientAuth | ServerAuth> {
+    client: Client<TAuth>;
+
+    constructor(client: Client<TAuth>) {
         this.client = client;
     }
 
@@ -2405,8 +2415,8 @@ export class Account {
         const apiHeaders: { [header: string]: string } = {
         }
 
-        payload['project'] = this.client.config.project;
-        payload['session'] = this.client.config.session;
+        payload['project'] = (this.client.config as unknown as Record<string, string>)['project'];
+        payload['session'] = (this.client.config as unknown as Record<string, string>)['session'];
 
         for (const [key, value] of Object.entries(Service.flatten(payload))) {
             uri.searchParams.append(key, value);
@@ -2836,3 +2846,9 @@ export class Account {
         );
     }
 }
+
+const Account = AccountRuntime as unknown as {
+    new <TAuth extends ClientAuth | ServerAuth = ClientAuth | ServerAuth>(client: Client<TAuth>): Account<TAuth>;
+};
+
+export { Account };
