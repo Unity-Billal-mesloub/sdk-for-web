@@ -66,7 +66,6 @@ export type RealtimePresence = {
     userId: string;
     status?: string;
     source: string;
-    expiry?: string;
     metadata?: Record<string, any>;
 }
 
