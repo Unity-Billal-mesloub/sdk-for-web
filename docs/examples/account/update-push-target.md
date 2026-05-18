@@ -1,14 +1,15 @@
 ```javascript
-import { Client, TablesDB } from "appwrite";
+import { Client, Account } from "appwrite";
 
 const client = new Client()
     .setEndpoint('https://<REGION>.cloud.appwrite.io/v1') // Your API Endpoint
     .setProject('<YOUR_PROJECT_ID>'); // Your project ID
 
-const tablesDB = new TablesDB(client);
+const account = new Account(client);
 
-const result = await tablesDB.getTransaction({
-    transactionId: '<TRANSACTION_ID>'
+const result = await account.updatePushTarget({
+    targetId: '<TARGET_ID>',
+    identifier: '<IDENTIFIER>'
 });
 
 console.log(result);

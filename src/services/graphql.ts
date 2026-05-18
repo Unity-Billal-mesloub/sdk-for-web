@@ -1,21 +1,12 @@
-import { AppwriteException, Client, type ClientAuth, type ServerAuth, type Payload } from '../client';
+import { Service } from '../service';
+import { AppwriteException, Client, type Payload, UploadProgress } from '../client';
 import type { Models } from '../models';
 
 
-type GraphqlServerOnlyMethod = never;
-type GraphqlClientOnlyMethod = never;
+export class Graphql {
+    client: Client;
 
-export type Graphql<TAuth extends ClientAuth | ServerAuth = ClientAuth | ServerAuth> =
-    TAuth extends ClientAuth
-        ? Omit<GraphqlRuntime<TAuth>, 'client' | GraphqlServerOnlyMethod>
-        : TAuth extends ServerAuth
-            ? Omit<GraphqlRuntime<TAuth>, 'client' | GraphqlClientOnlyMethod>
-            : Omit<GraphqlRuntime<TAuth>, 'client'>;
-
-class GraphqlRuntime<TAuth extends ClientAuth | ServerAuth = ClientAuth | ServerAuth> {
-    client: Client<TAuth>;
-
-    constructor(client: Client<TAuth>) {
+    constructor(client: Client) {
         this.client = client;
     }
 
@@ -131,9 +122,3 @@ class GraphqlRuntime<TAuth extends ClientAuth | ServerAuth = ClientAuth | Server
         );
     }
 }
-
-const Graphql = GraphqlRuntime as unknown as {
-    new <TAuth extends ClientAuth | ServerAuth = ClientAuth | ServerAuth>(client: Client<TAuth>): Graphql<TAuth>;
-};
-
-export { Graphql };

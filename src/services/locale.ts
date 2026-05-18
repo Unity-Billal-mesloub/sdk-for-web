@@ -1,21 +1,12 @@
-import { AppwriteException, Client, type ClientAuth, type ServerAuth, type Payload } from '../client';
+import { Service } from '../service';
+import { AppwriteException, Client, type Payload, UploadProgress } from '../client';
 import type { Models } from '../models';
 
 
-type LocaleServerOnlyMethod = never;
-type LocaleClientOnlyMethod = never;
+export class Locale {
+    client: Client;
 
-export type Locale<TAuth extends ClientAuth | ServerAuth = ClientAuth | ServerAuth> =
-    TAuth extends ClientAuth
-        ? Omit<LocaleRuntime<TAuth>, 'client' | LocaleServerOnlyMethod>
-        : TAuth extends ServerAuth
-            ? Omit<LocaleRuntime<TAuth>, 'client' | LocaleClientOnlyMethod>
-            : Omit<LocaleRuntime<TAuth>, 'client'>;
-
-class LocaleRuntime<TAuth extends ClientAuth | ServerAuth = ClientAuth | ServerAuth> {
-    client: Client<TAuth>;
-
-    constructor(client: Client<TAuth>) {
+    constructor(client: Client) {
         this.client = client;
     }
 
@@ -205,9 +196,3 @@ class LocaleRuntime<TAuth extends ClientAuth | ServerAuth = ClientAuth | ServerA
         );
     }
 }
-
-const Locale = LocaleRuntime as unknown as {
-    new <TAuth extends ClientAuth | ServerAuth = ClientAuth | ServerAuth>(client: Client<TAuth>): Locale<TAuth>;
-};
-
-export { Locale };

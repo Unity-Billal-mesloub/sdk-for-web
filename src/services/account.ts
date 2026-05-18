@@ -1,25 +1,15 @@
 import { Service } from '../service';
-import { AppwriteException, Client, type ClientAuth, type ServerAuth, type Payload } from '../client';
+import { AppwriteException, Client, type Payload, UploadProgress } from '../client';
 import type { Models } from '../models';
 
 import { AuthenticatorType } from '../enums/authenticator-type';
 import { AuthenticationFactor } from '../enums/authentication-factor';
 import { OAuthProvider } from '../enums/o-auth-provider';
 
-type AccountServerOnlyMethod = never;
-type AccountClientOnlyMethod = never;
+export class Account {
+    client: Client;
 
-export type Account<TAuth extends ClientAuth | ServerAuth = ClientAuth | ServerAuth> =
-    TAuth extends ClientAuth
-        ? Omit<AccountRuntime<TAuth>, 'client' | AccountServerOnlyMethod>
-        : TAuth extends ServerAuth
-            ? Omit<AccountRuntime<TAuth>, 'client' | AccountClientOnlyMethod>
-            : Omit<AccountRuntime<TAuth>, 'client'>;
-
-class AccountRuntime<TAuth extends ClientAuth | ServerAuth = ClientAuth | ServerAuth> {
-    client: Client<TAuth>;
-
-    constructor(client: Client<TAuth>) {
+    constructor(client: Client) {
         this.client = client;
     }
 
@@ -1866,6 +1856,95 @@ class AccountRuntime<TAuth extends ClientAuth | ServerAuth = ClientAuth | Server
     }
 
     /**
+     * Allow the user to login to their account using the OAuth2 provider of their choice. Each OAuth2 provider should be enabled from the Appwrite console first. Use the success and failure arguments to provide a redirect URL's back to your app when login is completed.
+     * 
+     * If there is already an active session, the new session will be attached to the logged-in account. If there are no active sessions, the server will attempt to look for a user with the same email address as the email received from the OAuth2 provider and attach the new session to the existing user. If no matching user is found - the server will create a new user.
+     * 
+     * A user is limited to 10 active sessions at a time by default. [Learn more about session limits](https://appwrite.io/docs/authentication-security#limits).
+     * 
+     *
+     * @param {OAuthProvider} params.provider - OAuth2 Provider. Currently, supported providers are: amazon, apple, auth0, authentik, autodesk, bitbucket, bitly, box, dailymotion, discord, disqus, dropbox, etsy, facebook, figma, fusionauth, github, gitlab, google, keycloak, kick, linkedin, microsoft, notion, oidc, okta, paypal, paypalSandbox, podio, salesforce, slack, spotify, stripe, tradeshift, tradeshiftBox, twitch, wordpress, x, yahoo, yammer, yandex, zoho, zoom.
+     * @param {string} params.success - URL to redirect back to your app after a successful login attempt.  Only URLs from hostnames in your project's platform list are allowed. This requirement helps to prevent an [open redirect](https://cheatsheetseries.owasp.org/cheatsheets/Unvalidated_Redirects_and_Forwards_Cheat_Sheet.html) attack against your project API.
+     * @param {string} params.failure - URL to redirect back to your app after a failed login attempt.  Only URLs from hostnames in your project's platform list are allowed. This requirement helps to prevent an [open redirect](https://cheatsheetseries.owasp.org/cheatsheets/Unvalidated_Redirects_and_Forwards_Cheat_Sheet.html) attack against your project API.
+     * @param {string[]} params.scopes - A list of custom OAuth2 scopes. Check each provider internal docs for a list of supported scopes. Maximum of 100 scopes are allowed, each 4096 characters long.
+     * @throws {AppwriteException}
+     * @returns {void | string}
+     */
+    createOAuth2Session(params: { provider: OAuthProvider, success?: string, failure?: string, scopes?: string[] }): void | string;
+    /**
+     * Allow the user to login to their account using the OAuth2 provider of their choice. Each OAuth2 provider should be enabled from the Appwrite console first. Use the success and failure arguments to provide a redirect URL's back to your app when login is completed.
+     * 
+     * If there is already an active session, the new session will be attached to the logged-in account. If there are no active sessions, the server will attempt to look for a user with the same email address as the email received from the OAuth2 provider and attach the new session to the existing user. If no matching user is found - the server will create a new user.
+     * 
+     * A user is limited to 10 active sessions at a time by default. [Learn more about session limits](https://appwrite.io/docs/authentication-security#limits).
+     * 
+     *
+     * @param {OAuthProvider} provider - OAuth2 Provider. Currently, supported providers are: amazon, apple, auth0, authentik, autodesk, bitbucket, bitly, box, dailymotion, discord, disqus, dropbox, etsy, facebook, figma, fusionauth, github, gitlab, google, keycloak, kick, linkedin, microsoft, notion, oidc, okta, paypal, paypalSandbox, podio, salesforce, slack, spotify, stripe, tradeshift, tradeshiftBox, twitch, wordpress, x, yahoo, yammer, yandex, zoho, zoom.
+     * @param {string} success - URL to redirect back to your app after a successful login attempt.  Only URLs from hostnames in your project's platform list are allowed. This requirement helps to prevent an [open redirect](https://cheatsheetseries.owasp.org/cheatsheets/Unvalidated_Redirects_and_Forwards_Cheat_Sheet.html) attack against your project API.
+     * @param {string} failure - URL to redirect back to your app after a failed login attempt.  Only URLs from hostnames in your project's platform list are allowed. This requirement helps to prevent an [open redirect](https://cheatsheetseries.owasp.org/cheatsheets/Unvalidated_Redirects_and_Forwards_Cheat_Sheet.html) attack against your project API.
+     * @param {string[]} scopes - A list of custom OAuth2 scopes. Check each provider internal docs for a list of supported scopes. Maximum of 100 scopes are allowed, each 4096 characters long.
+     * @throws {AppwriteException}
+     * @returns {void | string}
+     * @deprecated Use the object parameter style method for a better developer experience.
+     */
+    createOAuth2Session(provider: OAuthProvider, success?: string, failure?: string, scopes?: string[]): void | string;
+    createOAuth2Session(
+        paramsOrFirst: { provider: OAuthProvider, success?: string, failure?: string, scopes?: string[] } | OAuthProvider,
+        ...rest: [(string)?, (string)?, (string[])?]    
+    ): void | string {
+        let params: { provider: OAuthProvider, success?: string, failure?: string, scopes?: string[] };
+        
+        if ((paramsOrFirst && typeof paramsOrFirst === 'object' && !Array.isArray(paramsOrFirst) && ('provider' in paramsOrFirst || 'success' in paramsOrFirst || 'failure' in paramsOrFirst || 'scopes' in paramsOrFirst))) {
+            params = (paramsOrFirst || {}) as { provider: OAuthProvider, success?: string, failure?: string, scopes?: string[] };
+        } else {
+            params = {
+                provider: paramsOrFirst as OAuthProvider,
+                success: rest[0] as string,
+                failure: rest[1] as string,
+                scopes: rest[2] as string[]            
+            };
+        }
+        
+        const provider = params.provider;
+        const success = params.success;
+        const failure = params.failure;
+        const scopes = params.scopes;
+
+        if (typeof provider === 'undefined') {
+            throw new AppwriteException('Missing required parameter: "provider"');
+        }
+
+        const apiPath = '/account/sessions/oauth2/{provider}'.replace('{provider}', provider);
+        const payload: Payload = {};
+        if (typeof success !== 'undefined') {
+            payload['success'] = success;
+        }
+        if (typeof failure !== 'undefined') {
+            payload['failure'] = failure;
+        }
+        if (typeof scopes !== 'undefined') {
+            payload['scopes'] = scopes;
+        }
+        const uri = new URL(this.client.config.endpoint + apiPath);
+
+        const apiHeaders: { [header: string]: string } = {
+        }
+
+        payload['project'] = this.client.config.project;
+
+        for (const [key, value] of Object.entries(Service.flatten(payload))) {
+            uri.searchParams.append(key, value);
+        }
+        
+        if (typeof window !== 'undefined' && window?.location) {
+            window.location.href = uri.toString();
+            return;
+        } else {
+            return uri.toString();
+        }
+    }
+
+    /**
      * Use this endpoint to create a session from token. Provide the **userId** and **secret** parameters from the successful response of authentication flows initiated by token creation. For example, magic URL and phone login.
      *
      * @param {string} params.userId - User ID. Choose a custom ID or generate a random ID with `ID.unique()`. Valid chars are a-z, A-Z, 0-9, period, hyphen, and underscore. Can't start with a special char. Max length is 36 chars.
@@ -2178,6 +2257,194 @@ class AccountRuntime<TAuth extends ClientAuth | ServerAuth = ClientAuth | Server
     }
 
     /**
+     * Use this endpoint to register a device for push notifications. Provide a target ID (custom or generated using ID.unique()), a device identifier (usually a device token), and optionally specify which provider should send notifications to this target. The target is automatically linked to the current session and includes device information like brand and model.
+     *
+     * @param {string} params.targetId - Target ID. Choose a custom ID or generate a random ID with `ID.unique()`. Valid chars are a-z, A-Z, 0-9, period, hyphen, and underscore. Can't start with a special char. Max length is 36 chars.
+     * @param {string} params.identifier - The target identifier (token, email, phone etc.)
+     * @param {string} params.providerId - Provider ID. Message will be sent to this target from the specified provider ID. If no provider ID is set the first setup provider will be used.
+     * @throws {AppwriteException}
+     * @returns {Promise<Models.Target>}
+     */
+    createPushTarget(params: { targetId: string, identifier: string, providerId?: string }): Promise<Models.Target>;
+    /**
+     * Use this endpoint to register a device for push notifications. Provide a target ID (custom or generated using ID.unique()), a device identifier (usually a device token), and optionally specify which provider should send notifications to this target. The target is automatically linked to the current session and includes device information like brand and model.
+     *
+     * @param {string} targetId - Target ID. Choose a custom ID or generate a random ID with `ID.unique()`. Valid chars are a-z, A-Z, 0-9, period, hyphen, and underscore. Can't start with a special char. Max length is 36 chars.
+     * @param {string} identifier - The target identifier (token, email, phone etc.)
+     * @param {string} providerId - Provider ID. Message will be sent to this target from the specified provider ID. If no provider ID is set the first setup provider will be used.
+     * @throws {AppwriteException}
+     * @returns {Promise<Models.Target>}
+     * @deprecated Use the object parameter style method for a better developer experience.
+     */
+    createPushTarget(targetId: string, identifier: string, providerId?: string): Promise<Models.Target>;
+    createPushTarget(
+        paramsOrFirst: { targetId: string, identifier: string, providerId?: string } | string,
+        ...rest: [(string)?, (string)?]    
+    ): Promise<Models.Target> {
+        let params: { targetId: string, identifier: string, providerId?: string };
+        
+        if ((paramsOrFirst && typeof paramsOrFirst === 'object' && !Array.isArray(paramsOrFirst))) {
+            params = (paramsOrFirst || {}) as { targetId: string, identifier: string, providerId?: string };
+        } else {
+            params = {
+                targetId: paramsOrFirst as string,
+                identifier: rest[0] as string,
+                providerId: rest[1] as string            
+            };
+        }
+        
+        const targetId = params.targetId;
+        const identifier = params.identifier;
+        const providerId = params.providerId;
+
+        if (typeof targetId === 'undefined') {
+            throw new AppwriteException('Missing required parameter: "targetId"');
+        }
+        if (typeof identifier === 'undefined') {
+            throw new AppwriteException('Missing required parameter: "identifier"');
+        }
+
+        const apiPath = '/account/targets/push';
+        const payload: Payload = {};
+        if (typeof targetId !== 'undefined') {
+            payload['targetId'] = targetId;
+        }
+        if (typeof identifier !== 'undefined') {
+            payload['identifier'] = identifier;
+        }
+        if (typeof providerId !== 'undefined') {
+            payload['providerId'] = providerId;
+        }
+        const uri = new URL(this.client.config.endpoint + apiPath);
+
+        const apiHeaders: { [header: string]: string } = {
+            'content-type': 'application/json',
+        }
+
+        return this.client.call(
+            'post',
+            uri,
+            apiHeaders,
+            payload
+        );
+    }
+
+    /**
+     * Update the currently logged in user's push notification target. You can modify the target's identifier (device token) and provider ID (token, email, phone etc.). The target must exist and belong to the current user. If you change the provider ID, notifications will be sent through the new messaging provider instead.
+     *
+     * @param {string} params.targetId - Target ID.
+     * @param {string} params.identifier - The target identifier (token, email, phone etc.)
+     * @throws {AppwriteException}
+     * @returns {Promise<Models.Target>}
+     */
+    updatePushTarget(params: { targetId: string, identifier: string }): Promise<Models.Target>;
+    /**
+     * Update the currently logged in user's push notification target. You can modify the target's identifier (device token) and provider ID (token, email, phone etc.). The target must exist and belong to the current user. If you change the provider ID, notifications will be sent through the new messaging provider instead.
+     *
+     * @param {string} targetId - Target ID.
+     * @param {string} identifier - The target identifier (token, email, phone etc.)
+     * @throws {AppwriteException}
+     * @returns {Promise<Models.Target>}
+     * @deprecated Use the object parameter style method for a better developer experience.
+     */
+    updatePushTarget(targetId: string, identifier: string): Promise<Models.Target>;
+    updatePushTarget(
+        paramsOrFirst: { targetId: string, identifier: string } | string,
+        ...rest: [(string)?]    
+    ): Promise<Models.Target> {
+        let params: { targetId: string, identifier: string };
+        
+        if ((paramsOrFirst && typeof paramsOrFirst === 'object' && !Array.isArray(paramsOrFirst))) {
+            params = (paramsOrFirst || {}) as { targetId: string, identifier: string };
+        } else {
+            params = {
+                targetId: paramsOrFirst as string,
+                identifier: rest[0] as string            
+            };
+        }
+        
+        const targetId = params.targetId;
+        const identifier = params.identifier;
+
+        if (typeof targetId === 'undefined') {
+            throw new AppwriteException('Missing required parameter: "targetId"');
+        }
+        if (typeof identifier === 'undefined') {
+            throw new AppwriteException('Missing required parameter: "identifier"');
+        }
+
+        const apiPath = '/account/targets/{targetId}/push'.replace('{targetId}', targetId);
+        const payload: Payload = {};
+        if (typeof identifier !== 'undefined') {
+            payload['identifier'] = identifier;
+        }
+        const uri = new URL(this.client.config.endpoint + apiPath);
+
+        const apiHeaders: { [header: string]: string } = {
+            'content-type': 'application/json',
+        }
+
+        return this.client.call(
+            'put',
+            uri,
+            apiHeaders,
+            payload
+        );
+    }
+
+    /**
+     * Delete a push notification target for the currently logged in user. After deletion, the device will no longer receive push notifications. The target must exist and belong to the current user.
+     *
+     * @param {string} params.targetId - Target ID.
+     * @throws {AppwriteException}
+     * @returns {Promise<{}>}
+     */
+    deletePushTarget(params: { targetId: string }): Promise<{}>;
+    /**
+     * Delete a push notification target for the currently logged in user. After deletion, the device will no longer receive push notifications. The target must exist and belong to the current user.
+     *
+     * @param {string} targetId - Target ID.
+     * @throws {AppwriteException}
+     * @returns {Promise<{}>}
+     * @deprecated Use the object parameter style method for a better developer experience.
+     */
+    deletePushTarget(targetId: string): Promise<{}>;
+    deletePushTarget(
+        paramsOrFirst: { targetId: string } | string    
+    ): Promise<{}> {
+        let params: { targetId: string };
+        
+        if ((paramsOrFirst && typeof paramsOrFirst === 'object' && !Array.isArray(paramsOrFirst))) {
+            params = (paramsOrFirst || {}) as { targetId: string };
+        } else {
+            params = {
+                targetId: paramsOrFirst as string            
+            };
+        }
+        
+        const targetId = params.targetId;
+
+        if (typeof targetId === 'undefined') {
+            throw new AppwriteException('Missing required parameter: "targetId"');
+        }
+
+        const apiPath = '/account/targets/{targetId}/push'.replace('{targetId}', targetId);
+        const payload: Payload = {};
+        const uri = new URL(this.client.config.endpoint + apiPath);
+
+        const apiHeaders: { [header: string]: string } = {
+            'content-type': 'application/json',
+        }
+
+        return this.client.call(
+            'delete',
+            uri,
+            apiHeaders,
+            payload
+        );
+    }
+
+    /**
      * Sends the user an email with a secret key for creating a session. If the email address has never been used, a **new account is created** using the provided `userId`. Otherwise, if the email address is already attached to an account, the **user ID is ignored**. Then, the user will receive an email with the one-time password. Use the returned user ID and secret and submit a request to the [POST /v1/account/sessions/token](https://appwrite.io/docs/references/cloud/client-web/account#createSession) endpoint to complete the login process. The secret sent to the user's email is valid for 15 minutes.
      * 
      * A user is limited to 10 active sessions at a time by default. [Learn more about session limits](https://appwrite.io/docs/authentication-security#limits).
@@ -2415,8 +2682,7 @@ class AccountRuntime<TAuth extends ClientAuth | ServerAuth = ClientAuth | Server
         const apiHeaders: { [header: string]: string } = {
         }
 
-        payload['project'] = (this.client.config as unknown as Record<string, string>)['project'];
-        payload['session'] = (this.client.config as unknown as Record<string, string>)['session'];
+        payload['project'] = this.client.config.project;
 
         for (const [key, value] of Object.entries(Service.flatten(payload))) {
             uri.searchParams.append(key, value);
@@ -2846,9 +3112,3 @@ class AccountRuntime<TAuth extends ClientAuth | ServerAuth = ClientAuth | Server
         );
     }
 }
-
-const Account = AccountRuntime as unknown as {
-    new <TAuth extends ClientAuth | ServerAuth = ClientAuth | ServerAuth>(client: Client<TAuth>): Account<TAuth>;
-};
-
-export { Account };

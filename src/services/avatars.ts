@@ -1,5 +1,5 @@
 import { Service } from '../service';
-import { AppwriteException, Client, type ClientAuth, type ServerAuth, type Payload } from '../client';
+import { AppwriteException, Client, type Payload, UploadProgress } from '../client';
 import type { Models } from '../models';
 
 import { Browser } from '../enums/browser';
@@ -10,20 +10,10 @@ import { Timezone } from '../enums/timezone';
 import { BrowserPermission } from '../enums/browser-permission';
 import { ImageFormat } from '../enums/image-format';
 
-type AvatarsServerOnlyMethod = never;
-type AvatarsClientOnlyMethod = never;
+export class Avatars {
+    client: Client;
 
-export type Avatars<TAuth extends ClientAuth | ServerAuth = ClientAuth | ServerAuth> =
-    TAuth extends ClientAuth
-        ? Omit<AvatarsRuntime<TAuth>, 'client' | AvatarsServerOnlyMethod>
-        : TAuth extends ServerAuth
-            ? Omit<AvatarsRuntime<TAuth>, 'client' | AvatarsClientOnlyMethod>
-            : Omit<AvatarsRuntime<TAuth>, 'client'>;
-
-class AvatarsRuntime<TAuth extends ClientAuth | ServerAuth = ClientAuth | ServerAuth> {
-    client: Client<TAuth>;
-
-    constructor(client: Client<TAuth>) {
+    constructor(client: Client) {
         this.client = client;
     }
 
@@ -96,8 +86,7 @@ class AvatarsRuntime<TAuth extends ClientAuth | ServerAuth = ClientAuth | Server
         const apiHeaders: { [header: string]: string } = {
         }
 
-        payload['project'] = (this.client.config as unknown as Record<string, string>)['project'];
-        payload['session'] = (this.client.config as unknown as Record<string, string>)['session'];
+        payload['project'] = this.client.config.project;
 
         for (const [key, value] of Object.entries(Service.flatten(payload))) {
             uri.searchParams.append(key, value);
@@ -177,8 +166,7 @@ class AvatarsRuntime<TAuth extends ClientAuth | ServerAuth = ClientAuth | Server
         const apiHeaders: { [header: string]: string } = {
         }
 
-        payload['project'] = (this.client.config as unknown as Record<string, string>)['project'];
-        payload['session'] = (this.client.config as unknown as Record<string, string>)['session'];
+        payload['project'] = this.client.config.project;
 
         for (const [key, value] of Object.entries(Service.flatten(payload))) {
             uri.searchParams.append(key, value);
@@ -237,8 +225,7 @@ class AvatarsRuntime<TAuth extends ClientAuth | ServerAuth = ClientAuth | Server
         const apiHeaders: { [header: string]: string } = {
         }
 
-        payload['project'] = (this.client.config as unknown as Record<string, string>)['project'];
-        payload['session'] = (this.client.config as unknown as Record<string, string>)['session'];
+        payload['project'] = this.client.config.project;
 
         for (const [key, value] of Object.entries(Service.flatten(payload))) {
             uri.searchParams.append(key, value);
@@ -318,8 +305,7 @@ class AvatarsRuntime<TAuth extends ClientAuth | ServerAuth = ClientAuth | Server
         const apiHeaders: { [header: string]: string } = {
         }
 
-        payload['project'] = (this.client.config as unknown as Record<string, string>)['project'];
-        payload['session'] = (this.client.config as unknown as Record<string, string>)['session'];
+        payload['project'] = this.client.config.project;
 
         for (const [key, value] of Object.entries(Service.flatten(payload))) {
             uri.searchParams.append(key, value);
@@ -397,8 +383,7 @@ class AvatarsRuntime<TAuth extends ClientAuth | ServerAuth = ClientAuth | Server
         const apiHeaders: { [header: string]: string } = {
         }
 
-        payload['project'] = (this.client.config as unknown as Record<string, string>)['project'];
-        payload['session'] = (this.client.config as unknown as Record<string, string>)['session'];
+        payload['project'] = this.client.config.project;
 
         for (const [key, value] of Object.entries(Service.flatten(payload))) {
             uri.searchParams.append(key, value);
@@ -482,8 +467,7 @@ class AvatarsRuntime<TAuth extends ClientAuth | ServerAuth = ClientAuth | Server
         const apiHeaders: { [header: string]: string } = {
         }
 
-        payload['project'] = (this.client.config as unknown as Record<string, string>)['project'];
-        payload['session'] = (this.client.config as unknown as Record<string, string>)['session'];
+        payload['project'] = this.client.config.project;
 
         for (const [key, value] of Object.entries(Service.flatten(payload))) {
             uri.searchParams.append(key, value);
@@ -562,8 +546,7 @@ class AvatarsRuntime<TAuth extends ClientAuth | ServerAuth = ClientAuth | Server
         const apiHeaders: { [header: string]: string } = {
         }
 
-        payload['project'] = (this.client.config as unknown as Record<string, string>)['project'];
-        payload['session'] = (this.client.config as unknown as Record<string, string>)['session'];
+        payload['project'] = this.client.config.project;
 
         for (const [key, value] of Object.entries(Service.flatten(payload))) {
             uri.searchParams.append(key, value);
@@ -760,8 +743,7 @@ class AvatarsRuntime<TAuth extends ClientAuth | ServerAuth = ClientAuth | Server
         const apiHeaders: { [header: string]: string } = {
         }
 
-        payload['project'] = (this.client.config as unknown as Record<string, string>)['project'];
-        payload['session'] = (this.client.config as unknown as Record<string, string>)['session'];
+        payload['project'] = this.client.config.project;
 
         for (const [key, value] of Object.entries(Service.flatten(payload))) {
             uri.searchParams.append(key, value);
@@ -770,9 +752,3 @@ class AvatarsRuntime<TAuth extends ClientAuth | ServerAuth = ClientAuth | Server
         return uri.toString();
     }
 }
-
-const Avatars = AvatarsRuntime as unknown as {
-    new <TAuth extends ClientAuth | ServerAuth = ClientAuth | ServerAuth>(client: Client<TAuth>): Avatars<TAuth>;
-};
-
-export { Avatars };

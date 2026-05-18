@@ -1,15 +1,13 @@
 # Change Log
 
-## 26.0.0
+## 25.1.0
 
-* Breaking: Web SDK now generated from the server API spec; package exposes the full server-side service surface (`Users`, `Projects`, `Functions` admin endpoints, `Sites`, `Health`, `Proxy`, `Webhooks`, `Backups`, `Activities`, `Tokens`) in addition to the existing client services
-* Added: Isomorphic `Client.from()`, `Client.fromSession()`, `Client.fromAPIKey()`, `Client.fromCookie()`, `Client.fromJWT()`, `Client.fromDevKey()`, and `Client.fromImpersonation()` static factories for use in both browser and server runtimes
-* Added: `setCookie()` method on `Client` for forwarding cookies from server runtimes
-* Added: `prompt` parameter on `Project.updateOAuth2Google()` plus `Prompt` and `OAuth2GooglePrompt` enums
-* Added: `Project.updateDenyCanonicalEmailPolicy()`, `Project.updateDenyDisposableEmailPolicy()`, `Project.updateDenyFreeEmailPolicy()`
-* Added: `fusionauth`, `keycloak`, and `kick` to `OAuthProvider` enum
-* Updated: `X-Appwrite-Response-Format` header to `1.9.4`
-* Updated: `BuildRuntime` and `Runtime` enums with `deno-1.21`, `deno-1.24`, `deno-1.35`
+* Added: Realtime `presences` channel and `RealtimePresence` types for presence subscriptions
+* Added: `Advisor` and `Presences` services
+* Added: `Insight`, `Presence`, and `Report` models with list variants
+* Added: `fusionauth`, `keycloak`, and `kick` providers to `OAuthProvider` enum
+* Added: `Client.setCookie()` method for forwarding cookies in server-side runtimes
+* Updated: `X-Appwrite-Response-Format` header to `1.9.5`
 
 ## 25.0.0
 
