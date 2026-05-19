@@ -1,12 +1,21 @@
-import { Service } from '../service';
-import { AppwriteException, Client, type Payload, UploadProgress } from '../client';
+import { AppwriteException, Client, type ClientAuth, type ServerAuth, type Payload } from '../client';
 import type { Models } from '../models';
 
 
-export class Teams {
-    client: Client;
+type TeamsServerOnlyMethod = never;
+type TeamsClientOnlyMethod = never;
 
-    constructor(client: Client) {
+export type Teams<TAuth extends ClientAuth | ServerAuth = ClientAuth | ServerAuth> =
+    TAuth extends ClientAuth
+        ? Omit<TeamsRuntime<TAuth>, 'client' | TeamsServerOnlyMethod>
+        : TAuth extends ServerAuth
+            ? Omit<TeamsRuntime<TAuth>, 'client' | TeamsClientOnlyMethod>
+            : Omit<TeamsRuntime<TAuth>, 'client'>;
+
+class TeamsRuntime<TAuth extends ClientAuth | ServerAuth = ClientAuth | ServerAuth> {
+    client: Client<TAuth>;
+
+    constructor(client: Client<TAuth>) {
         this.client = client;
     }
 
@@ -891,3 +900,9 @@ export class Teams {
         );
     }
 }
+
+const Teams = TeamsRuntime as unknown as {
+    new <TAuth extends ClientAuth | ServerAuth = ClientAuth | ServerAuth>(client: Client<TAuth>): Teams<TAuth>;
+};
+
+export { Teams };

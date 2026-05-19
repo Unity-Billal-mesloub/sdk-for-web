@@ -344,8 +344,48 @@ class AppwriteException extends Error {
 /**
  * Client that handles requests to Appwrite
  */
-class Client {
+type SDKPlatform = 'client' | 'server';
+type ClientAuth = 'browser' | 'session' | 'devKey' | 'impersonation';
+type ServerAuth = 'apiKey' | 'jwt' | 'cookie';
+type Auth = ClientAuth | ServerAuth;
+declare const clientAuthBrand: unique symbol;
+
+// Forces TypeScript to display the expanded shape on hover instead of an alias name.
+type Prettify<T> = { [K in keyof T]: T[K] } & {};
+
+type BaseClientParams = {
+    endpoint: string;
+    endpointRealtime?: string;
+    selfSigned?: boolean;
+    projectId: string;
+    locale?: string;
+};
+
+type ImpersonationTarget =
+    | { userId: string; email?: never; phone?: never }
+    | { email: string; userId?: never; phone?: never }
+    | { phone: string; userId?: never; email?: never };
+
+type LegacyClientSetter = Extract<keyof ClientRuntime<any>, `set${string}`>;
+type ClientAuthBuilder = Extract<keyof ClientRuntime<any>, `with${string}`>;
+type ClientInternalMethod = LegacyClientSetter | ClientAuthBuilder;
+export type Client<TAuth extends Auth = 'browser'> = Omit<ClientRuntime<TAuth>, ClientInternalMethod>;
+type LegacyClient<TAuth extends Auth = 'browser'> = Omit<ClientRuntime<TAuth>, ClientAuthBuilder>;
+
+type ClientConstructor = {
+    new <TAuth extends Auth = 'browser'>(): LegacyClient<TAuth>;
+    from(params: Prettify<BaseClientParams>): Client<'browser'>;
+    fromSession(params: Prettify<BaseClientParams & { session: string }>): Client<'session'>;
+    fromAPIKey(params: Prettify<BaseClientParams & { apiKey: string }>): Client<'apiKey'>;
+    fromCookie(params: Prettify<BaseClientParams & { cookie: string }>): Client<'cookie'>;
+    fromJWT(params: Prettify<BaseClientParams & { jwt: string }>): Client<'jwt'>;
+    fromDevKey(params: Prettify<BaseClientParams & { devKey: string }>): Client<'devKey'>;
+    fromImpersonation(params: Prettify<BaseClientParams & { session: string } & ImpersonationTarget>): Client<'impersonation'>;
+};
+
+class ClientRuntime<TAuth extends Auth = 'browser'> {
     static CHUNK_SIZE = 1024 * 1024 * 5;
+    declare readonly [clientAuthBrand]?: TAuth;
 
     /**
      * Holds configuration such as project.
@@ -362,6 +402,9 @@ class Client {
         impersonateuserid: string;
         impersonateuseremail: string;
         impersonateuserphone: string;
+        key: string;
+        forwardeduseragent: string;
+        selfSigned: boolean;
     } = {
         endpoint: 'https://cloud.appwrite.io/v1',
         endpointRealtime: '',
@@ -374,17 +417,132 @@ class Client {
         impersonateuserid: '',
         impersonateuseremail: '',
         impersonateuserphone: '',
+        key: '',
+        forwardeduseragent: '',
+        selfSigned: false,
     };
+
+    private sdkPlatform: SDKPlatform = 'server';
+
     /**
      * Custom headers for API requests.
      */
     headers: Headers = {
         'x-sdk-name': 'Web',
-        'x-sdk-platform': 'client',
+        'x-sdk-platform': 'server',
         'x-sdk-language': 'web',
-        'x-sdk-version': '25.1.1',
+        'x-sdk-version': '26.0.0',
         'X-Appwrite-Response-Format': '1.9.5',
     };
+
+    static from(params: Prettify<BaseClientParams>): Client<'browser'> {
+        return new ClientRuntime<'browser'>().applyBase<'browser'>(params, 'client');
+    }
+
+    static fromSession(params: Prettify<BaseClientParams & { session: string }>): Client<'session'> {
+        const client = new ClientRuntime<'session'>()
+            .applyBase<'session'>(params, 'client');
+        client.headers['X-Appwrite-Session'] = params.session;
+        client.config.session = params.session;
+        return client;
+    }
+
+    static fromAPIKey(params: Prettify<BaseClientParams & { apiKey: string }>): Client<'apiKey'> {
+        const client = new ClientRuntime<'apiKey'>()
+            .applyBase<'apiKey'>(params, 'server');
+        client.headers['X-Appwrite-Key'] = params.apiKey;
+        (client.config as unknown as Record<string, string>).key = params.apiKey;
+        return client;
+    }
+
+    static fromCookie(params: Prettify<BaseClientParams & { cookie: string }>): Client<'cookie'> {
+        const client = new ClientRuntime<'cookie'>()
+            .applyBase<'cookie'>(params, 'server');
+        client.headers['Cookie'] = params.cookie;
+        client.config.cookie = params.cookie;
+        return client;
+    }
+
+    static fromJWT(params: Prettify<BaseClientParams & { jwt: string }>): Client<'jwt'> {
+        const client = new ClientRuntime<'jwt'>()
+            .applyBase<'jwt'>(params, 'server');
+        client.headers['X-Appwrite-JWT'] = params.jwt;
+        client.config.jwt = params.jwt;
+        return client;
+    }
+
+    static fromDevKey(params: Prettify<BaseClientParams & { devKey: string }>): Client<'devKey'> {
+        const client = new ClientRuntime<'devKey'>()
+            .applyBase<'devKey'>(params, 'client');
+        client.headers['X-Appwrite-Dev-Key'] = params.devKey;
+        client.config.devkey = params.devKey;
+        return client;
+    }
+
+    static fromImpersonation(params: Prettify<BaseClientParams & { session: string } & ImpersonationTarget>): Client<'impersonation'> {
+        const targets = [
+            params.userId !== undefined,
+            params.email !== undefined,
+            params.phone !== undefined
+        ].filter(Boolean).length;
+
+        if (targets !== 1) {
+            throw new AppwriteException('Exactly one impersonation target must be provided');
+        }
+
+        const client = new ClientRuntime<'impersonation'>()
+            .applyBase<'impersonation'>(params, 'client');
+
+        client.headers['X-Appwrite-Session'] = params.session;
+        client.config.session = params.session;
+
+        if (params.userId !== undefined) {
+            client.headers['X-Appwrite-Impersonate-User-Id'] = params.userId;
+            client.config.impersonateuserid = params.userId;
+            return client;
+        }
+        if (params.email !== undefined) {
+            client.headers['X-Appwrite-Impersonate-User-Email'] = params.email;
+            client.config.impersonateuseremail = params.email;
+            return client;
+        }
+        client.headers['X-Appwrite-Impersonate-User-Phone'] = params.phone;
+        client.config.impersonateuserphone = params.phone;
+        return client;
+    }
+
+    withJWT(jwt: string): this {
+        this.headers['X-Appwrite-JWT'] = jwt;
+        this.config.jwt = jwt;
+        return this;
+    }
+
+    withForwardedUserAgent(forwardedUserAgent: string): this {
+        this.headers['X-Forwarded-User-Agent'] = forwardedUserAgent;
+        return this;
+    }
+
+    private applyBase<T extends Auth>(params: BaseClientParams, sdkPlatform: SDKPlatform): ClientRuntime<T> {
+        const client = this as unknown as ClientRuntime<T>;
+        client.sdkPlatform = sdkPlatform;
+        client.headers['x-sdk-platform'] = sdkPlatform === 'server' ? 'server' : 'client';
+        client.setEndpoint(params.endpoint);
+        client.setProject(params.projectId);
+
+        if (params.locale !== undefined) {
+            client.setLocale(params.locale);
+        }
+
+        if (params.endpointRealtime !== undefined) {
+            client.setEndpointRealtime(params.endpointRealtime);
+        }
+
+        if (params.selfSigned !== undefined) {
+            client.setSelfSigned(params.selfSigned);
+        }
+
+        return client;
+    }
 
     /**
      * Get Headers
@@ -406,6 +564,9 @@ class Client {
      * @param {string} endpoint
      *
      * @returns {this}
+     */
+    /**
+     * @deprecated Use `Client.from`, `Client.fromSession`, `Client.fromAPIKey`, or another static factory instead.
      */
     setEndpoint(endpoint: string): this {
         if (!endpoint || typeof endpoint !== 'string') {
@@ -429,6 +590,9 @@ class Client {
      *
      * @returns {this}
      */
+    /**
+     * @deprecated Use the `endpointRealtime` field on a static factory params object instead.
+     */
     setEndpointRealtime(endpointRealtime: string): this {
         if (!endpointRealtime || typeof endpointRealtime !== 'string') {
             throw new AppwriteException('Endpoint must be a valid string');
@@ -443,129 +607,119 @@ class Client {
     }
 
     /**
-     * Set Project
+     * Set self-signed
      *
-     * Your project ID
+     * @param {boolean} selfSigned
      *
-     * @param value string
-     *
-     * @return {this}
+     * @returns {this}
+     */
+    /**
+     * @deprecated Use the `selfSigned` field on a static factory params object instead.
+     */
+    setSelfSigned(selfSigned: boolean): this {
+        this.config.selfSigned = selfSigned;
+        return this;
+    }
+
+    /**
+     * @deprecated Use a static client factory or factory params object instead.
      */
     setProject(value: string): this {
         this.headers['X-Appwrite-Project'] = value;
         this.config.project = value;
-        return this;
+        return this as unknown as this;
     }
+
     /**
-     * Set JWT
-     *
-     * Your secret JSON Web Token
-     *
-     * @param value string
-     *
-     * @return {this}
+     * @deprecated Use a static client factory or factory params object instead.
      */
-    setJWT(value: string): this {
+    setJWT(value: string): ClientRuntime<'jwt'> {
         this.headers['X-Appwrite-JWT'] = value;
         this.config.jwt = value;
-        return this;
+        return this as unknown as ClientRuntime<'jwt'>;
     }
+
     /**
-     * Set Locale
-     *
-     * @param value string
-     *
-     * @return {this}
+     * @deprecated Use a static client factory or factory params object instead.
      */
     setLocale(value: string): this {
         this.headers['X-Appwrite-Locale'] = value;
         this.config.locale = value;
-        return this;
+        return this as unknown as this;
     }
+
     /**
-     * Set Session
-     *
-     * The user session to authenticate with
-     *
-     * @param value string
-     *
-     * @return {this}
+     * @deprecated Use a static client factory or factory params object instead.
      */
-    setSession(value: string): this {
+    setSession(value: string): ClientRuntime<'session'> {
         this.headers['X-Appwrite-Session'] = value;
         this.config.session = value;
-        return this;
+        return this as unknown as ClientRuntime<'session'>;
     }
+
     /**
-     * Set DevKey
-     *
-     * Your secret dev API key
-     *
-     * @param value string
-     *
-     * @return {this}
+     * @deprecated Use a static client factory or factory params object instead.
      */
-    setDevKey(value: string): this {
+    setDevKey(value: string): ClientRuntime<'devKey'> {
         this.headers['X-Appwrite-Dev-Key'] = value;
         this.config.devkey = value;
-        return this;
+        return this as unknown as ClientRuntime<'devKey'>;
     }
+
     /**
-     * Set Cookie
-     *
-     * The user cookie to authenticate with. Used by SDKs that forward an incoming Cookie header in server-side runtimes.
-     *
-     * @param value string
-     *
-     * @return {this}
+     * @deprecated Use a static client factory or factory params object instead.
      */
-    setCookie(value: string): this {
+    setCookie(value: string): ClientRuntime<'cookie'> {
         this.headers['Cookie'] = value;
         this.config.cookie = value;
-        return this;
+        return this as unknown as ClientRuntime<'cookie'>;
     }
+
     /**
-     * Set ImpersonateUserId
-     *
-     * Impersonate a user by ID on an already user-authenticated request. Requires the current request to be authenticated as a user with impersonator capability; X-Appwrite-Key alone is not sufficient. Impersonator users are intentionally granted users.read so they can discover a target before impersonation begins. Internal audit logs still attribute actions to the original impersonator and record the impersonated target only in internal audit payload data.
-     *
-     * @param value string
-     *
-     * @return {this}
+     * @deprecated Use a static client factory or factory params object instead.
      */
-    setImpersonateUserId(value: string): this {
+    setImpersonateUserId(value: string): ClientRuntime<'impersonation'> {
         this.headers['X-Appwrite-Impersonate-User-Id'] = value;
         this.config.impersonateuserid = value;
-        return this;
+        return this as unknown as ClientRuntime<'impersonation'>;
     }
+
     /**
-     * Set ImpersonateUserEmail
-     *
-     * Impersonate a user by email on an already user-authenticated request. Requires the current request to be authenticated as a user with impersonator capability; X-Appwrite-Key alone is not sufficient. Impersonator users are intentionally granted users.read so they can discover a target before impersonation begins. Internal audit logs still attribute actions to the original impersonator and record the impersonated target only in internal audit payload data.
-     *
-     * @param value string
-     *
-     * @return {this}
+     * @deprecated Use a static client factory or factory params object instead.
      */
-    setImpersonateUserEmail(value: string): this {
+    setImpersonateUserEmail(value: string): ClientRuntime<'impersonation'> {
         this.headers['X-Appwrite-Impersonate-User-Email'] = value;
         this.config.impersonateuseremail = value;
-        return this;
+        return this as unknown as ClientRuntime<'impersonation'>;
     }
+
     /**
-     * Set ImpersonateUserPhone
-     *
-     * Impersonate a user by phone on an already user-authenticated request. Requires the current request to be authenticated as a user with impersonator capability; X-Appwrite-Key alone is not sufficient. Impersonator users are intentionally granted users.read so they can discover a target before impersonation begins. Internal audit logs still attribute actions to the original impersonator and record the impersonated target only in internal audit payload data.
-     *
-     * @param value string
-     *
-     * @return {this}
+     * @deprecated Use a static client factory or factory params object instead.
      */
-    setImpersonateUserPhone(value: string): this {
+    setImpersonateUserPhone(value: string): ClientRuntime<'impersonation'> {
         this.headers['X-Appwrite-Impersonate-User-Phone'] = value;
         this.config.impersonateuserphone = value;
-        return this;
+        return this as unknown as ClientRuntime<'impersonation'>;
     }
+
+    /**
+     * @deprecated Use a static client factory or factory params object instead.
+     */
+    setKey(value: string): ClientRuntime<'apiKey'> {
+        this.headers['X-Appwrite-Key'] = value;
+        this.config.key = value;
+        return this as unknown as ClientRuntime<'apiKey'>;
+    }
+
+    /**
+     * @deprecated Use a static client factory or factory params object instead.
+     */
+    setForwardedUserAgent(value: string): this {
+        this.headers['X-Forwarded-User-Agent'] = value;
+        this.config.forwardeduseragent = value;
+        return this as unknown as this;
+    }
+
 
     private realtime: Realtime = {
         socket: undefined,
@@ -580,9 +734,13 @@ class Client {
         lastMessage: undefined,
         connect: () => {
             clearTimeout(this.realtime.timeout);
-            this.realtime.timeout = window?.setTimeout(() => {
-                this.realtime.createSocket();
-            }, 50);
+            this.realtime.timeout = typeof window !== 'undefined'
+                ? window.setTimeout(() => {
+                    this.realtime.createSocket();
+                }, 50)
+                : setTimeout(() => {
+                    this.realtime.createSocket();
+                }, 50) as unknown as TimeoutHandle;
         },
         getTimeout: () => {
             switch (true) {
@@ -598,14 +756,20 @@ class Client {
         },
         createHeartbeat: () => {
             if (this.realtime.heartbeat) {
-                clearTimeout(this.realtime.heartbeat);
+                clearInterval(this.realtime.heartbeat as any);
             }
 
-            this.realtime.heartbeat = window?.setInterval(() => {
-                this.realtime.socket?.send(JSONbig.stringify({
-                    type: 'ping'
-                }));
-            }, 20_000);
+            this.realtime.heartbeat = typeof window !== 'undefined'
+                ? window.setInterval(() => {
+                    this.realtime.socket?.send(JSONbig.stringify({
+                        type: 'ping'
+                    }));
+                }, 20_000)
+                : setInterval(() => {
+                    this.realtime.socket?.send(JSONbig.stringify({
+                        type: 'ping'
+                    }));
+                }, 20_000) as unknown as TimeoutHandle;
         },
         createSocket: () => {
             if (this.realtime.subscriptions.size < 1) {
@@ -691,8 +855,14 @@ class Client {
 
                         let session = this.config.session;
                         if (!session) {
-                            const cookie = JSONbig.parse(window.localStorage.getItem('cookieFallback') ?? '{}');
-                            session = cookie?.[`a_session_${this.config.project}`];
+                            try {
+                                if (typeof window !== 'undefined' && window.localStorage) {
+                                    const cookie = JSONbig.parse(window.localStorage.getItem('cookieFallback') ?? '{}');
+                                    session = cookie?.[`a_session_${this.config.project}`];
+                                }
+                            } catch (error) {
+                                console.error('Failed to parse cookie fallback:', error);
+                            }
                         }
                         if (session && !messageData?.user) {
                             this.realtime.socket?.send(JSONbig.stringify(<RealtimeRequest>{
@@ -857,7 +1027,7 @@ class Client {
 
         headers = Object.assign({}, this.headers, headers);
 
-        if (typeof window !== 'undefined' && window.localStorage) {
+        if (this.sdkPlatform === 'client' && typeof window !== 'undefined' && window.localStorage) {
             const cookieFallback = window.localStorage.getItem('cookieFallback');
             if (cookieFallback) {
                 headers['X-Fallback-Cookies'] = cookieFallback;
@@ -869,12 +1039,12 @@ class Client {
             headers,
         };
 
-        if (headers['X-Appwrite-Dev-Key'] === undefined) {
+        if (this.sdkPlatform === 'client' && headers['X-Appwrite-Dev-Key'] === undefined) {
             options.credentials = 'include';
         }
 
         if (method === 'GET') {
-            for (const [key, value] of Object.entries(Client.flatten(params))) {
+            for (const [key, value] of Object.entries(ClientRuntime.flatten(params))) {
                 url.searchParams.append(key, value);
             }
         } else {
@@ -884,6 +1054,10 @@ class Client {
                     break;
 
                 case 'multipart/form-data':
+                    if (typeof FormData === 'undefined' || typeof File === 'undefined') {
+                        throw new AppwriteException('Multipart requests require File and FormData globals');
+                    }
+
                     const formData = new FormData();
 
                     for (const [key, value] of Object.entries(params)) {
@@ -908,13 +1082,17 @@ class Client {
     }
 
     async chunkedUpload(method: string, url: URL, headers: Headers = {}, originalPayload: Payload = {}, onProgress: (progress: UploadProgress) => void) {
+        if (typeof File === 'undefined' || typeof FormData === 'undefined') {
+            throw new AppwriteException('Chunked uploads require File and FormData globals');
+        }
+
         const [fileParam, file] = Object.entries(originalPayload).find(([_, value]) => value instanceof File) ?? [];
 
         if (!file || !fileParam) {
             throw new Error('File not found in payload');
         }
 
-        if (file.size <= Client.CHUNK_SIZE) {
+        if (file.size <= ClientRuntime.CHUNK_SIZE) {
             return await this.call(method, url, headers, originalPayload);
         }
 
@@ -922,26 +1100,27 @@ class Client {
         let response = null;
 
         while (start < file.size) {
-            let end = start + Client.CHUNK_SIZE; // Prepare end for the next chunk
+            let end = start + ClientRuntime.CHUNK_SIZE; // Prepare end for the next chunk
             if (end >= file.size) {
                 end = file.size; // Adjust for the last chunk to include the last byte
             }
 
-            headers['content-range'] = `bytes ${start}-${end-1}/${file.size}`;
+            const chunkHeaders = { ...headers };
+            chunkHeaders['content-range'] = `bytes ${start}-${end-1}/${file.size}`;
             const chunk = file.slice(start, end);
 
             let payload = { ...originalPayload };
             payload[fileParam] = new File([chunk], file.name);
 
-            response = await this.call(method, url, headers, payload);
+            response = await this.call(method, url, chunkHeaders, payload);
 
             if (onProgress && typeof onProgress === 'function') {
                 onProgress({
                     $id: response.$id,
                     progress: Math.round((end / file.size) * 100),
                     sizeUploaded: end,
-                    chunksTotal: Math.ceil(file.size / Client.CHUNK_SIZE),
-                    chunksUploaded: Math.ceil(end / Client.CHUNK_SIZE)
+                    chunksTotal: Math.ceil(file.size / ClientRuntime.CHUNK_SIZE),
+                    chunksUploaded: Math.ceil(end / ClientRuntime.CHUNK_SIZE)
                 });
             }
 
@@ -967,9 +1146,9 @@ class Client {
         const response = await fetch(uri, options);
 
         // type opaque: No-CORS, different-origin response (CORS-issue)
-        if (response.type === 'opaque') {
+        if (this.sdkPlatform === 'client' && typeof window !== 'undefined' && response.type === 'opaque') {
             throw new AppwriteException(
-                `Invalid Origin. Register your new client (${window.location.host}) as a new Web platform on your project console dashboard`,
+                `Invalid Origin. Register your new client (${typeof window !== 'undefined' ? window.location.host : 'unknown'}) as a new Web platform on your project console dashboard`,
                 403,
                 "forbidden",
                 ""
@@ -1003,7 +1182,7 @@ class Client {
 
         const cookieFallback = response.headers.get('X-Fallback-Cookies');
 
-        if (typeof window !== 'undefined' && window.localStorage && cookieFallback) {
+        if (this.sdkPlatform === 'client' && typeof window !== 'undefined' && window.localStorage && cookieFallback) {
             window.console.warn('Appwrite is using localStorage for session management. Increase your security by adding a custom domain as your API endpoint.');
             window.localStorage.setItem('cookieFallback', cookieFallback);
         }
@@ -1021,7 +1200,7 @@ class Client {
         for (const [key, value] of Object.entries(data)) {
             let finalKey = prefix ? prefix + '[' + key +']' : key;
             if (Array.isArray(value)) {
-                output = { ...output, ...Client.flatten(value, finalKey) };
+                output = { ...output, ...ClientRuntime.flatten(value, finalKey) };
             } else {
                 output[finalKey] = value;
             }
@@ -1031,8 +1210,9 @@ class Client {
     }
 }
 
+const Client = ClientRuntime as unknown as ClientConstructor;
+
 export { Client, AppwriteException };
+export type { Models, SDKPlatform, ClientAuth, ServerAuth, Payload, RealtimeResponseEvent, UploadProgress };
 export { Query } from './query';
-export type { Models, Payload, UploadProgress };
-export type { RealtimeResponseEvent };
 export type { QueryTypes, QueryTypesList } from './query';

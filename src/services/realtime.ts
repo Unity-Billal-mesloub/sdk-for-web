@@ -1,4 +1,4 @@
-import { AppwriteException, Client, JSONbig } from '../client';
+import { AppwriteException, Client, JSONbig, type ClientAuth } from '../client';
 import { Channel, ActionableChannel, ResolvedChannel } from '../channel';
 import { Query } from '../query';
 import { ID } from '../id';
@@ -96,7 +96,7 @@ export class Realtime {
     private readonly DEBOUNCE_MS = 1;
     private readonly HEARTBEAT_INTERVAL = 20000; // 20 seconds in milliseconds
 
-    private client: Client;
+    private client: Client<ClientAuth>;
     private socket?: WebSocket;
     private activeSubscriptions = new Map<string, RealtimeCallback<any>>();
     private pendingSubscribes = new Map<string, RealtimeRequestSubscribeRow>();
@@ -117,7 +117,7 @@ export class Realtime {
     private onCloseCallbacks: Array<() => void> = [];
     private onOpenCallbacks: Array<() => void> = [];
 
-    constructor(client: Client) {
+    constructor(client: Client<ClientAuth>) {
         this.client = client;
     }
 
@@ -153,16 +153,26 @@ export class Realtime {
 
     private startHeartbeat(): void {
         this.stopHeartbeat();
-        this.heartbeatTimer = window?.setInterval(() => {
-            if (this.socket && this.socket.readyState === WebSocket.OPEN) {
-                this.socket.send(JSONbig.stringify({ type: 'ping' }));
-            }
-        }, this.HEARTBEAT_INTERVAL);
+        this.heartbeatTimer = typeof window !== 'undefined'
+            ? window.setInterval(() => {
+                if (this.socket && this.socket.readyState === WebSocket.OPEN) {
+                    this.socket.send(JSONbig.stringify({ type: 'ping' }));
+                }
+            }, this.HEARTBEAT_INTERVAL)
+            : setInterval(() => {
+                if (this.socket && this.socket.readyState === WebSocket.OPEN) {
+                    this.socket.send(JSONbig.stringify({ type: 'ping' }));
+                }
+            }, this.HEARTBEAT_INTERVAL) as unknown as number;
     }
 
     private stopHeartbeat(): void {
         if (this.heartbeatTimer) {
-            window?.clearInterval(this.heartbeatTimer);
+            if (typeof window !== 'undefined') {
+                window.clearInterval(this.heartbeatTimer);
+            } else {
+                clearInterval(this.heartbeatTimer as any);
+            }
             this.heartbeatTimer = undefined;
         }
     }
@@ -707,8 +717,10 @@ export class Realtime {
         let session = this.client.config.session;
         if (!session) {
             try {
-                const cookie = JSONbig.parse(window.localStorage.getItem('cookieFallback') ?? '{}');
-                session = cookie?.[`a_session_${this.client.config.project}`];
+                if (typeof window !== 'undefined' && window.localStorage) {
+                    const cookie = JSONbig.parse(window.localStorage.getItem('cookieFallback') ?? '{}');
+                    session = cookie?.[`a_session_${this.client.config.project}`];
+                }
             } catch (error) {
                 console.error('Failed to parse cookie fallback:', error);
             }

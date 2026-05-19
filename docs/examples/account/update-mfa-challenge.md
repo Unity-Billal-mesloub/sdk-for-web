@@ -7,7 +7,7 @@ const client = new Client()
 
 const account = new Account(client);
 
-const result = await account.updateMFAChallenge({
+const result = await account.updateMfaChallenge({
     challengeId: '<CHALLENGE_ID>',
     otp: '<OTP>'
 });

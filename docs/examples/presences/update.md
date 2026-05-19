@@ -9,6 +9,7 @@ const presences = new Presences(client);
 
 const result = await presences.update({
     presenceId: '<PRESENCE_ID>',
+    userId: '<USER_ID>', // optional
     status: '<STATUS>', // optional
     expiresAt: '2020-10-15T06:38:00.000+00:00', // optional
     metadata: {}, // optional

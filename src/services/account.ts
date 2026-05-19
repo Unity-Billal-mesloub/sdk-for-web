@@ -1,15 +1,25 @@
 import { Service } from '../service';
-import { AppwriteException, Client, type Payload, UploadProgress } from '../client';
+import { AppwriteException, Client, type ClientAuth, type ServerAuth, type Payload } from '../client';
 import type { Models } from '../models';
 
 import { AuthenticatorType } from '../enums/authenticator-type';
 import { AuthenticationFactor } from '../enums/authentication-factor';
 import { OAuthProvider } from '../enums/o-auth-provider';
 
-export class Account {
-    client: Client;
+type AccountServerOnlyMethod = never;
+type AccountClientOnlyMethod = never;
 
-    constructor(client: Client) {
+export type Account<TAuth extends ClientAuth | ServerAuth = ClientAuth | ServerAuth> =
+    TAuth extends ClientAuth
+        ? Omit<AccountRuntime<TAuth>, 'client' | AccountServerOnlyMethod>
+        : TAuth extends ServerAuth
+            ? Omit<AccountRuntime<TAuth>, 'client' | AccountClientOnlyMethod>
+            : Omit<AccountRuntime<TAuth>, 'client'>;
+
+class AccountRuntime<TAuth extends ClientAuth | ServerAuth = ClientAuth | ServerAuth> {
+    client: Client<TAuth>;
+
+    constructor(client: Client<TAuth>) {
         this.client = client;
     }
 
@@ -520,58 +530,6 @@ export class Account {
     }
 
     /**
-     * Add an authenticator app to be used as an MFA factor. Verify the authenticator using the [verify authenticator](/docs/references/cloud/client-web/account#updateMfaAuthenticator) method.
-     *
-     * @param {AuthenticatorType} params.type - Type of authenticator. Must be `totp`
-     * @throws {AppwriteException}
-     * @returns {Promise<Models.MfaType>}
-     */
-    createMFAAuthenticator(params: { type: AuthenticatorType }): Promise<Models.MfaType>;
-    /**
-     * Add an authenticator app to be used as an MFA factor. Verify the authenticator using the [verify authenticator](/docs/references/cloud/client-web/account#updateMfaAuthenticator) method.
-     *
-     * @param {AuthenticatorType} type - Type of authenticator. Must be `totp`
-     * @throws {AppwriteException}
-     * @returns {Promise<Models.MfaType>}
-     * @deprecated Use the object parameter style method for a better developer experience.
-     */
-    createMFAAuthenticator(type: AuthenticatorType): Promise<Models.MfaType>;
-    createMFAAuthenticator(
-        paramsOrFirst: { type: AuthenticatorType } | AuthenticatorType    
-    ): Promise<Models.MfaType> {
-        let params: { type: AuthenticatorType };
-        
-        if ((paramsOrFirst && typeof paramsOrFirst === 'object' && !Array.isArray(paramsOrFirst) && ('type' in paramsOrFirst))) {
-            params = (paramsOrFirst || {}) as { type: AuthenticatorType };
-        } else {
-            params = {
-                type: paramsOrFirst as AuthenticatorType            
-            };
-        }
-        
-        const type = params.type;
-
-        if (typeof type === 'undefined') {
-            throw new AppwriteException('Missing required parameter: "type"');
-        }
-
-        const apiPath = '/account/mfa/authenticators/{type}'.replace('{type}', type);
-        const payload: Payload = {};
-        const uri = new URL(this.client.config.endpoint + apiPath);
-
-        const apiHeaders: { [header: string]: string } = {
-            'content-type': 'application/json',
-        }
-
-        return this.client.call(
-            'post',
-            uri,
-            apiHeaders,
-            payload
-        );
-    }
-
-    /**
      * Verify an authenticator app after adding it using the [add authenticator](/docs/references/cloud/client-web/account#createMfaAuthenticator) method.
      *
      * @param {AuthenticatorType} params.type - Type of authenticator.
@@ -592,69 +550,6 @@ export class Account {
      */
     updateMfaAuthenticator<Preferences extends Models.Preferences = Models.DefaultPreferences>(type: AuthenticatorType, otp: string): Promise<Models.User<Preferences>>;
     updateMfaAuthenticator<Preferences extends Models.Preferences = Models.DefaultPreferences>(
-        paramsOrFirst: { type: AuthenticatorType, otp: string } | AuthenticatorType,
-        ...rest: [(string)?]    
-    ): Promise<Models.User<Preferences>> {
-        let params: { type: AuthenticatorType, otp: string };
-        
-        if ((paramsOrFirst && typeof paramsOrFirst === 'object' && !Array.isArray(paramsOrFirst) && ('type' in paramsOrFirst || 'otp' in paramsOrFirst))) {
-            params = (paramsOrFirst || {}) as { type: AuthenticatorType, otp: string };
-        } else {
-            params = {
-                type: paramsOrFirst as AuthenticatorType,
-                otp: rest[0] as string            
-            };
-        }
-        
-        const type = params.type;
-        const otp = params.otp;
-
-        if (typeof type === 'undefined') {
-            throw new AppwriteException('Missing required parameter: "type"');
-        }
-        if (typeof otp === 'undefined') {
-            throw new AppwriteException('Missing required parameter: "otp"');
-        }
-
-        const apiPath = '/account/mfa/authenticators/{type}'.replace('{type}', type);
-        const payload: Payload = {};
-        if (typeof otp !== 'undefined') {
-            payload['otp'] = otp;
-        }
-        const uri = new URL(this.client.config.endpoint + apiPath);
-
-        const apiHeaders: { [header: string]: string } = {
-            'content-type': 'application/json',
-        }
-
-        return this.client.call(
-            'put',
-            uri,
-            apiHeaders,
-            payload
-        );
-    }
-
-    /**
-     * Verify an authenticator app after adding it using the [add authenticator](/docs/references/cloud/client-web/account#createMfaAuthenticator) method.
-     *
-     * @param {AuthenticatorType} params.type - Type of authenticator.
-     * @param {string} params.otp - Valid verification token.
-     * @throws {AppwriteException}
-     * @returns {Promise<Models.User<Preferences>>}
-     */
-    updateMFAAuthenticator<Preferences extends Models.Preferences = Models.DefaultPreferences>(params: { type: AuthenticatorType, otp: string }): Promise<Models.User<Preferences>>;
-    /**
-     * Verify an authenticator app after adding it using the [add authenticator](/docs/references/cloud/client-web/account#createMfaAuthenticator) method.
-     *
-     * @param {AuthenticatorType} type - Type of authenticator.
-     * @param {string} otp - Valid verification token.
-     * @throws {AppwriteException}
-     * @returns {Promise<Models.User<Preferences>>}
-     * @deprecated Use the object parameter style method for a better developer experience.
-     */
-    updateMFAAuthenticator<Preferences extends Models.Preferences = Models.DefaultPreferences>(type: AuthenticatorType, otp: string): Promise<Models.User<Preferences>>;
-    updateMFAAuthenticator<Preferences extends Models.Preferences = Models.DefaultPreferences>(
         paramsOrFirst: { type: AuthenticatorType, otp: string } | AuthenticatorType,
         ...rest: [(string)?]    
     ): Promise<Models.User<Preferences>> {
@@ -752,58 +647,6 @@ export class Account {
     }
 
     /**
-     * Delete an authenticator for a user by ID.
-     *
-     * @param {AuthenticatorType} params.type - Type of authenticator.
-     * @throws {AppwriteException}
-     * @returns {Promise<{}>}
-     */
-    deleteMFAAuthenticator(params: { type: AuthenticatorType }): Promise<{}>;
-    /**
-     * Delete an authenticator for a user by ID.
-     *
-     * @param {AuthenticatorType} type - Type of authenticator.
-     * @throws {AppwriteException}
-     * @returns {Promise<{}>}
-     * @deprecated Use the object parameter style method for a better developer experience.
-     */
-    deleteMFAAuthenticator(type: AuthenticatorType): Promise<{}>;
-    deleteMFAAuthenticator(
-        paramsOrFirst: { type: AuthenticatorType } | AuthenticatorType    
-    ): Promise<{}> {
-        let params: { type: AuthenticatorType };
-        
-        if ((paramsOrFirst && typeof paramsOrFirst === 'object' && !Array.isArray(paramsOrFirst) && ('type' in paramsOrFirst))) {
-            params = (paramsOrFirst || {}) as { type: AuthenticatorType };
-        } else {
-            params = {
-                type: paramsOrFirst as AuthenticatorType            
-            };
-        }
-        
-        const type = params.type;
-
-        if (typeof type === 'undefined') {
-            throw new AppwriteException('Missing required parameter: "type"');
-        }
-
-        const apiPath = '/account/mfa/authenticators/{type}'.replace('{type}', type);
-        const payload: Payload = {};
-        const uri = new URL(this.client.config.endpoint + apiPath);
-
-        const apiHeaders: { [header: string]: string } = {
-            'content-type': 'application/json',
-        }
-
-        return this.client.call(
-            'delete',
-            uri,
-            apiHeaders,
-            payload
-        );
-    }
-
-    /**
      * Begin the process of MFA verification after sign-in. Finish the flow with [updateMfaChallenge](/docs/references/cloud/client-web/account#updateMfaChallenge) method.
      *
      * @param {AuthenticationFactor} params.factor - Factor used for verification. Must be one of following: `email`, `phone`, `totp`, `recoveryCode`.
@@ -822,61 +665,6 @@ export class Account {
      */
     createMfaChallenge(factor: AuthenticationFactor): Promise<Models.MfaChallenge>;
     createMfaChallenge(
-        paramsOrFirst: { factor: AuthenticationFactor } | AuthenticationFactor    
-    ): Promise<Models.MfaChallenge> {
-        let params: { factor: AuthenticationFactor };
-        
-        if ((paramsOrFirst && typeof paramsOrFirst === 'object' && !Array.isArray(paramsOrFirst) && ('factor' in paramsOrFirst))) {
-            params = (paramsOrFirst || {}) as { factor: AuthenticationFactor };
-        } else {
-            params = {
-                factor: paramsOrFirst as AuthenticationFactor            
-            };
-        }
-        
-        const factor = params.factor;
-
-        if (typeof factor === 'undefined') {
-            throw new AppwriteException('Missing required parameter: "factor"');
-        }
-
-        const apiPath = '/account/mfa/challenges';
-        const payload: Payload = {};
-        if (typeof factor !== 'undefined') {
-            payload['factor'] = factor;
-        }
-        const uri = new URL(this.client.config.endpoint + apiPath);
-
-        const apiHeaders: { [header: string]: string } = {
-            'content-type': 'application/json',
-        }
-
-        return this.client.call(
-            'post',
-            uri,
-            apiHeaders,
-            payload
-        );
-    }
-
-    /**
-     * Begin the process of MFA verification after sign-in. Finish the flow with [updateMfaChallenge](/docs/references/cloud/client-web/account#updateMfaChallenge) method.
-     *
-     * @param {AuthenticationFactor} params.factor - Factor used for verification. Must be one of following: `email`, `phone`, `totp`, `recoveryCode`.
-     * @throws {AppwriteException}
-     * @returns {Promise<Models.MfaChallenge>}
-     */
-    createMFAChallenge(params: { factor: AuthenticationFactor }): Promise<Models.MfaChallenge>;
-    /**
-     * Begin the process of MFA verification after sign-in. Finish the flow with [updateMfaChallenge](/docs/references/cloud/client-web/account#updateMfaChallenge) method.
-     *
-     * @param {AuthenticationFactor} factor - Factor used for verification. Must be one of following: `email`, `phone`, `totp`, `recoveryCode`.
-     * @throws {AppwriteException}
-     * @returns {Promise<Models.MfaChallenge>}
-     * @deprecated Use the object parameter style method for a better developer experience.
-     */
-    createMFAChallenge(factor: AuthenticationFactor): Promise<Models.MfaChallenge>;
-    createMFAChallenge(
         paramsOrFirst: { factor: AuthenticationFactor } | AuthenticationFactor    
     ): Promise<Models.MfaChallenge> {
         let params: { factor: AuthenticationFactor };
@@ -982,72 +770,6 @@ export class Account {
     }
 
     /**
-     * Complete the MFA challenge by providing the one-time password. Finish the process of MFA verification by providing the one-time password. To begin the flow, use [createMfaChallenge](/docs/references/cloud/client-web/account#createMfaChallenge) method.
-     *
-     * @param {string} params.challengeId - ID of the challenge.
-     * @param {string} params.otp - Valid verification token.
-     * @throws {AppwriteException}
-     * @returns {Promise<Models.Session>}
-     */
-    updateMFAChallenge(params: { challengeId: string, otp: string }): Promise<Models.Session>;
-    /**
-     * Complete the MFA challenge by providing the one-time password. Finish the process of MFA verification by providing the one-time password. To begin the flow, use [createMfaChallenge](/docs/references/cloud/client-web/account#createMfaChallenge) method.
-     *
-     * @param {string} challengeId - ID of the challenge.
-     * @param {string} otp - Valid verification token.
-     * @throws {AppwriteException}
-     * @returns {Promise<Models.Session>}
-     * @deprecated Use the object parameter style method for a better developer experience.
-     */
-    updateMFAChallenge(challengeId: string, otp: string): Promise<Models.Session>;
-    updateMFAChallenge(
-        paramsOrFirst: { challengeId: string, otp: string } | string,
-        ...rest: [(string)?]    
-    ): Promise<Models.Session> {
-        let params: { challengeId: string, otp: string };
-        
-        if ((paramsOrFirst && typeof paramsOrFirst === 'object' && !Array.isArray(paramsOrFirst))) {
-            params = (paramsOrFirst || {}) as { challengeId: string, otp: string };
-        } else {
-            params = {
-                challengeId: paramsOrFirst as string,
-                otp: rest[0] as string            
-            };
-        }
-        
-        const challengeId = params.challengeId;
-        const otp = params.otp;
-
-        if (typeof challengeId === 'undefined') {
-            throw new AppwriteException('Missing required parameter: "challengeId"');
-        }
-        if (typeof otp === 'undefined') {
-            throw new AppwriteException('Missing required parameter: "otp"');
-        }
-
-        const apiPath = '/account/mfa/challenges';
-        const payload: Payload = {};
-        if (typeof challengeId !== 'undefined') {
-            payload['challengeId'] = challengeId;
-        }
-        if (typeof otp !== 'undefined') {
-            payload['otp'] = otp;
-        }
-        const uri = new URL(this.client.config.endpoint + apiPath);
-
-        const apiHeaders: { [header: string]: string } = {
-            'content-type': 'application/json',
-        }
-
-        return this.client.call(
-            'put',
-            uri,
-            apiHeaders,
-            payload
-        );
-    }
-
-    /**
      * List the factors available on the account to be used as a MFA challange.
      *
      * @throws {AppwriteException}
@@ -1072,29 +794,6 @@ export class Account {
     }
 
     /**
-     * List the factors available on the account to be used as a MFA challange.
-     *
-     * @throws {AppwriteException}
-     * @returns {Promise<Models.MfaFactors>}
-     */
-    listMFAFactors(): Promise<Models.MfaFactors> {
-
-        const apiPath = '/account/mfa/factors';
-        const payload: Payload = {};
-        const uri = new URL(this.client.config.endpoint + apiPath);
-
-        const apiHeaders: { [header: string]: string } = {
-        }
-
-        return this.client.call(
-            'get',
-            uri,
-            apiHeaders,
-            payload
-        );
-    }
-
-    /**
      * Get recovery codes that can be used as backup for MFA flow. Before getting codes, they must be generated using [createMfaRecoveryCodes](/docs/references/cloud/client-web/account#createMfaRecoveryCodes) method. An OTP challenge is required to read recovery codes.
      *
      * @throws {AppwriteException}
@@ -1102,29 +801,6 @@ export class Account {
      * @deprecated This API has been deprecated since 1.8.0. Please use `Account.getMFARecoveryCodes` instead.
      */
     getMfaRecoveryCodes(): Promise<Models.MfaRecoveryCodes> {
-
-        const apiPath = '/account/mfa/recovery-codes';
-        const payload: Payload = {};
-        const uri = new URL(this.client.config.endpoint + apiPath);
-
-        const apiHeaders: { [header: string]: string } = {
-        }
-
-        return this.client.call(
-            'get',
-            uri,
-            apiHeaders,
-            payload
-        );
-    }
-
-    /**
-     * Get recovery codes that can be used as backup for MFA flow. Before getting codes, they must be generated using [createMfaRecoveryCodes](/docs/references/cloud/client-web/account#createMfaRecoveryCodes) method. An OTP challenge is required to read recovery codes.
-     *
-     * @throws {AppwriteException}
-     * @returns {Promise<Models.MfaRecoveryCodes>}
-     */
-    getMFARecoveryCodes(): Promise<Models.MfaRecoveryCodes> {
 
         const apiPath = '/account/mfa/recovery-codes';
         const payload: Payload = {};
@@ -1167,30 +843,6 @@ export class Account {
     }
 
     /**
-     * Generate recovery codes as backup for MFA flow. It's recommended to generate and show then immediately after user successfully adds their authehticator. Recovery codes can be used as a MFA verification type in [createMfaChallenge](/docs/references/cloud/client-web/account#createMfaChallenge) method.
-     *
-     * @throws {AppwriteException}
-     * @returns {Promise<Models.MfaRecoveryCodes>}
-     */
-    createMFARecoveryCodes(): Promise<Models.MfaRecoveryCodes> {
-
-        const apiPath = '/account/mfa/recovery-codes';
-        const payload: Payload = {};
-        const uri = new URL(this.client.config.endpoint + apiPath);
-
-        const apiHeaders: { [header: string]: string } = {
-            'content-type': 'application/json',
-        }
-
-        return this.client.call(
-            'post',
-            uri,
-            apiHeaders,
-            payload
-        );
-    }
-
-    /**
      * Regenerate recovery codes that can be used as backup for MFA flow. Before regenerating codes, they must be first generated using [createMfaRecoveryCodes](/docs/references/cloud/client-web/account#createMfaRecoveryCodes) method. An OTP challenge is required to regenreate recovery codes.
      *
      * @throws {AppwriteException}
@@ -1198,30 +850,6 @@ export class Account {
      * @deprecated This API has been deprecated since 1.8.0. Please use `Account.updateMFARecoveryCodes` instead.
      */
     updateMfaRecoveryCodes(): Promise<Models.MfaRecoveryCodes> {
-
-        const apiPath = '/account/mfa/recovery-codes';
-        const payload: Payload = {};
-        const uri = new URL(this.client.config.endpoint + apiPath);
-
-        const apiHeaders: { [header: string]: string } = {
-            'content-type': 'application/json',
-        }
-
-        return this.client.call(
-            'patch',
-            uri,
-            apiHeaders,
-            payload
-        );
-    }
-
-    /**
-     * Regenerate recovery codes that can be used as backup for MFA flow. Before regenerating codes, they must be first generated using [createMfaRecoveryCodes](/docs/references/cloud/client-web/account#createMfaRecoveryCodes) method. An OTP challenge is required to regenreate recovery codes.
-     *
-     * @throws {AppwriteException}
-     * @returns {Promise<Models.MfaRecoveryCodes>}
-     */
-    updateMFARecoveryCodes(): Promise<Models.MfaRecoveryCodes> {
 
         const apiPath = '/account/mfa/recovery-codes';
         const payload: Payload = {};
@@ -1930,7 +1558,7 @@ export class Account {
         const apiHeaders: { [header: string]: string } = {
         }
 
-        payload['project'] = this.client.config.project;
+        payload['project'] = (this.client.config as unknown as Record<string, string>)['project'];
 
         for (const [key, value] of Object.entries(Service.flatten(payload))) {
             uri.searchParams.append(key, value);
@@ -2682,7 +2310,7 @@ export class Account {
         const apiHeaders: { [header: string]: string } = {
         }
 
-        payload['project'] = this.client.config.project;
+        payload['project'] = (this.client.config as unknown as Record<string, string>)['project'];
 
         for (const [key, value] of Object.entries(Service.flatten(payload))) {
             uri.searchParams.append(key, value);
@@ -2828,68 +2456,6 @@ export class Account {
     }
 
     /**
-     * Use this endpoint to send a verification message to your user email address to confirm they are the valid owners of that address. Both the **userId** and **secret** arguments will be passed as query parameters to the URL you have provided to be attached to the verification email. The provided URL should redirect the user back to your app and allow you to complete the verification process by verifying both the **userId** and **secret** parameters. Learn more about how to [complete the verification process](https://appwrite.io/docs/references/cloud/client-web/account#updateVerification). The verification link sent to the user's email address is valid for 7 days.
-     * 
-     * Please note that in order to avoid a [Redirect Attack](https://github.com/OWASP/CheatSheetSeries/blob/master/cheatsheets/Unvalidated_Redirects_and_Forwards_Cheat_Sheet.md), the only valid redirect URLs are the ones from domains you have set when adding your platforms in the console interface.
-     * 
-     *
-     * @param {string} params.url - URL to redirect the user back to your app from the verification email. Only URLs from hostnames in your project platform list are allowed. This requirement helps to prevent an [open redirect](https://cheatsheetseries.owasp.org/cheatsheets/Unvalidated_Redirects_and_Forwards_Cheat_Sheet.html) attack against your project API.
-     * @throws {AppwriteException}
-     * @returns {Promise<Models.Token>}
-     * @deprecated This API has been deprecated since 1.8.0. Please use `Account.createEmailVerification` instead.
-     */
-    createVerification(params: { url: string }): Promise<Models.Token>;
-    /**
-     * Use this endpoint to send a verification message to your user email address to confirm they are the valid owners of that address. Both the **userId** and **secret** arguments will be passed as query parameters to the URL you have provided to be attached to the verification email. The provided URL should redirect the user back to your app and allow you to complete the verification process by verifying both the **userId** and **secret** parameters. Learn more about how to [complete the verification process](https://appwrite.io/docs/references/cloud/client-web/account#updateVerification). The verification link sent to the user's email address is valid for 7 days.
-     * 
-     * Please note that in order to avoid a [Redirect Attack](https://github.com/OWASP/CheatSheetSeries/blob/master/cheatsheets/Unvalidated_Redirects_and_Forwards_Cheat_Sheet.md), the only valid redirect URLs are the ones from domains you have set when adding your platforms in the console interface.
-     * 
-     *
-     * @param {string} url - URL to redirect the user back to your app from the verification email. Only URLs from hostnames in your project platform list are allowed. This requirement helps to prevent an [open redirect](https://cheatsheetseries.owasp.org/cheatsheets/Unvalidated_Redirects_and_Forwards_Cheat_Sheet.html) attack against your project API.
-     * @throws {AppwriteException}
-     * @returns {Promise<Models.Token>}
-     * @deprecated Use the object parameter style method for a better developer experience.
-     */
-    createVerification(url: string): Promise<Models.Token>;
-    createVerification(
-        paramsOrFirst: { url: string } | string    
-    ): Promise<Models.Token> {
-        let params: { url: string };
-        
-        if ((paramsOrFirst && typeof paramsOrFirst === 'object' && !Array.isArray(paramsOrFirst))) {
-            params = (paramsOrFirst || {}) as { url: string };
-        } else {
-            params = {
-                url: paramsOrFirst as string            
-            };
-        }
-        
-        const url = params.url;
-
-        if (typeof url === 'undefined') {
-            throw new AppwriteException('Missing required parameter: "url"');
-        }
-
-        const apiPath = '/account/verifications/email';
-        const payload: Payload = {};
-        if (typeof url !== 'undefined') {
-            payload['url'] = url;
-        }
-        const uri = new URL(this.client.config.endpoint + apiPath);
-
-        const apiHeaders: { [header: string]: string } = {
-            'content-type': 'application/json',
-        }
-
-        return this.client.call(
-            'post',
-            uri,
-            apiHeaders,
-            payload
-        );
-    }
-
-    /**
      * Use this endpoint to complete the user email verification process. Use both the **userId** and **secret** parameters that were attached to your app URL to verify the user email ownership. If confirmed this route will return a 200 status code.
      *
      * @param {string} params.userId - User ID.
@@ -2909,73 +2475,6 @@ export class Account {
      */
     updateEmailVerification(userId: string, secret: string): Promise<Models.Token>;
     updateEmailVerification(
-        paramsOrFirst: { userId: string, secret: string } | string,
-        ...rest: [(string)?]    
-    ): Promise<Models.Token> {
-        let params: { userId: string, secret: string };
-        
-        if ((paramsOrFirst && typeof paramsOrFirst === 'object' && !Array.isArray(paramsOrFirst))) {
-            params = (paramsOrFirst || {}) as { userId: string, secret: string };
-        } else {
-            params = {
-                userId: paramsOrFirst as string,
-                secret: rest[0] as string            
-            };
-        }
-        
-        const userId = params.userId;
-        const secret = params.secret;
-
-        if (typeof userId === 'undefined') {
-            throw new AppwriteException('Missing required parameter: "userId"');
-        }
-        if (typeof secret === 'undefined') {
-            throw new AppwriteException('Missing required parameter: "secret"');
-        }
-
-        const apiPath = '/account/verifications/email';
-        const payload: Payload = {};
-        if (typeof userId !== 'undefined') {
-            payload['userId'] = userId;
-        }
-        if (typeof secret !== 'undefined') {
-            payload['secret'] = secret;
-        }
-        const uri = new URL(this.client.config.endpoint + apiPath);
-
-        const apiHeaders: { [header: string]: string } = {
-            'content-type': 'application/json',
-        }
-
-        return this.client.call(
-            'put',
-            uri,
-            apiHeaders,
-            payload
-        );
-    }
-
-    /**
-     * Use this endpoint to complete the user email verification process. Use both the **userId** and **secret** parameters that were attached to your app URL to verify the user email ownership. If confirmed this route will return a 200 status code.
-     *
-     * @param {string} params.userId - User ID.
-     * @param {string} params.secret - Valid verification token.
-     * @throws {AppwriteException}
-     * @returns {Promise<Models.Token>}
-     * @deprecated This API has been deprecated since 1.8.0. Please use `Account.updateEmailVerification` instead.
-     */
-    updateVerification(params: { userId: string, secret: string }): Promise<Models.Token>;
-    /**
-     * Use this endpoint to complete the user email verification process. Use both the **userId** and **secret** parameters that were attached to your app URL to verify the user email ownership. If confirmed this route will return a 200 status code.
-     *
-     * @param {string} userId - User ID.
-     * @param {string} secret - Valid verification token.
-     * @throws {AppwriteException}
-     * @returns {Promise<Models.Token>}
-     * @deprecated Use the object parameter style method for a better developer experience.
-     */
-    updateVerification(userId: string, secret: string): Promise<Models.Token>;
-    updateVerification(
         paramsOrFirst: { userId: string, secret: string } | string,
         ...rest: [(string)?]    
     ): Promise<Models.Token> {
@@ -3112,3 +2611,9 @@ export class Account {
         );
     }
 }
+
+const Account = AccountRuntime as unknown as {
+    new <TAuth extends ClientAuth | ServerAuth = ClientAuth | ServerAuth>(client: Client<TAuth>): Account<TAuth>;
+};
+
+export { Account };

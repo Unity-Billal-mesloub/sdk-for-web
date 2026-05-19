@@ -10,15 +10,16 @@ const tablesDB = new TablesDB(client);
 const result = await tablesDB.createRow({
     databaseId: '<DATABASE_ID>',
     tableId: '<TABLE_ID>',
-    rowId: '<ROW_ID>',
+    rowId: '<ROW_ID>', // optional
     data: {
         "username": "walter.obrien",
         "email": "walter.obrien@example.com",
         "fullName": "Walter O'Brien",
         "age": 30,
         "isAdmin": false
-    },
+    }, // optional
     permissions: [Permission.read(Role.any())], // optional
+    rows: [], // optional
     transactionId: '<TRANSACTION_ID>' // optional
 });
 

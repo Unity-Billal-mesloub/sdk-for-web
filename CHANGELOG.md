@@ -1,5 +1,14 @@
 # Change Log
 
+## 26.0.0
+
+* Added: Isomorphic `Client<TAuth>` typed by auth capability — services narrow available methods by auth type at compile time
+* Added: Static factory constructors `Client.from`, `Client.fromSession`, `Client.fromAPIKey`, `Client.fromCookie`, `Client.fromJWT`, `Client.fromDevKey`, and `Client.fromImpersonation`
+* Added: Server-side auth via `apiKey`, `cookie`, and `jwt` factories
+* Added: Admin and server-only endpoints (`Users`, `Projects`, function and site deployments, storage buckets, and more)
+* Deprecated: `new Client()` constructor and `setEndpoint`/`setProject`/setter pattern remain for backwards compatibility but are now marked deprecated
+* Updated: `x-sdk-platform` header now reflects browser or server runtime
+
 ## 25.1.1
 
 * Fixed: Removed `Advisor` service and `Insight`, `InsightCTA`, `InsightList`, `Report`, `ReportList` models (admin-only endpoints, not intended for client SDKs)

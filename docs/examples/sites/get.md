@@ -1,15 +1,14 @@
 ```javascript
-import { Client, Account } from "appwrite";
+import { Client, Sites } from "appwrite";
 
 const client = new Client()
     .setEndpoint('https://<REGION>.cloud.appwrite.io/v1') // Your API Endpoint
     .setProject('<YOUR_PROJECT_ID>'); // Your project ID
 
-const account = new Account(client);
+const sites = new Sites(client);
 
-const result = await account.updateVerification({
-    userId: '<USER_ID>',
-    secret: '<SECRET>'
+const result = await sites.get({
+    siteId: '<SITE_ID>'
 });
 
 console.log(result);
