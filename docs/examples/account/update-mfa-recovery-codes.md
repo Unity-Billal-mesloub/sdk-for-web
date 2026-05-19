@@ -7,7 +7,7 @@ const client = new Client()
 
 const account = new Account(client);
 
-const result = await account.updateMfaRecoveryCodes();
+const result = await account.updateMFARecoveryCodes();
 
 console.log(result);
 ```

@@ -7,7 +7,7 @@ const client = new Client()
 
 const messaging = new Messaging(client);
 
-const result = await messaging.updateSmtpProvider({
+const result = await messaging.updateSMTPProvider({
     providerId: '<PROVIDER_ID>',
     name: '<NAME>', // optional
     host: '<HOST>', // optional

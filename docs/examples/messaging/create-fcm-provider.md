@@ -7,7 +7,7 @@ const client = new Client()
 
 const messaging = new Messaging(client);
 
-const result = await messaging.createFcmProvider({
+const result = await messaging.createFCMProvider({
     providerId: '<PROVIDER_ID>',
     name: '<NAME>',
     serviceAccountJSON: {}, // optional

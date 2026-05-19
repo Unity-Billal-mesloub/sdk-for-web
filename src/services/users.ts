@@ -1519,6 +1519,69 @@ class UsersRuntime {
     }
 
     /**
+     * Enable or disable MFA on a user account.
+     *
+     * @param {string} params.userId - User ID.
+     * @param {boolean} params.mfa - Enable or disable MFA.
+     * @throws {AppwriteException}
+     * @returns {Promise<Models.User<Preferences>>}
+     */
+    updateMFA<Preferences extends Models.Preferences = Models.DefaultPreferences>(params: { userId: string, mfa: boolean }): Promise<Models.User<Preferences>>;
+    /**
+     * Enable or disable MFA on a user account.
+     *
+     * @param {string} userId - User ID.
+     * @param {boolean} mfa - Enable or disable MFA.
+     * @throws {AppwriteException}
+     * @returns {Promise<Models.User<Preferences>>}
+     * @deprecated Use the object parameter style method for a better developer experience.
+     */
+    updateMFA<Preferences extends Models.Preferences = Models.DefaultPreferences>(userId: string, mfa: boolean): Promise<Models.User<Preferences>>;
+    updateMFA<Preferences extends Models.Preferences = Models.DefaultPreferences>(
+        paramsOrFirst: { userId: string, mfa: boolean } | string,
+        ...rest: [(boolean)?]    
+    ): Promise<Models.User<Preferences>> {
+        let params: { userId: string, mfa: boolean };
+        
+        if ((paramsOrFirst && typeof paramsOrFirst === 'object' && !Array.isArray(paramsOrFirst))) {
+            params = (paramsOrFirst || {}) as { userId: string, mfa: boolean };
+        } else {
+            params = {
+                userId: paramsOrFirst as string,
+                mfa: rest[0] as boolean            
+            };
+        }
+        
+        const userId = params.userId;
+        const mfa = params.mfa;
+
+        if (typeof userId === 'undefined') {
+            throw new AppwriteException('Missing required parameter: "userId"');
+        }
+        if (typeof mfa === 'undefined') {
+            throw new AppwriteException('Missing required parameter: "mfa"');
+        }
+
+        const apiPath = '/users/{userId}/mfa'.replace('{userId}', userId);
+        const payload: Payload = {};
+        if (typeof mfa !== 'undefined') {
+            payload['mfa'] = mfa;
+        }
+        const uri = new URL(this.client.config.endpoint + apiPath);
+
+        const apiHeaders: { [header: string]: string } = {
+            'content-type': 'application/json',
+        }
+
+        return this.client.call(
+            'patch',
+            uri,
+            apiHeaders,
+            payload
+        );
+    }
+
+    /**
      * Delete an authenticator app.
      *
      * @param {string} params.userId - User ID.
@@ -1539,6 +1602,66 @@ class UsersRuntime {
      */
     deleteMfaAuthenticator(userId: string, type: AuthenticatorType): Promise<{}>;
     deleteMfaAuthenticator(
+        paramsOrFirst: { userId: string, type: AuthenticatorType } | string,
+        ...rest: [(AuthenticatorType)?]    
+    ): Promise<{}> {
+        let params: { userId: string, type: AuthenticatorType };
+        
+        if ((paramsOrFirst && typeof paramsOrFirst === 'object' && !Array.isArray(paramsOrFirst))) {
+            params = (paramsOrFirst || {}) as { userId: string, type: AuthenticatorType };
+        } else {
+            params = {
+                userId: paramsOrFirst as string,
+                type: rest[0] as AuthenticatorType            
+            };
+        }
+        
+        const userId = params.userId;
+        const type = params.type;
+
+        if (typeof userId === 'undefined') {
+            throw new AppwriteException('Missing required parameter: "userId"');
+        }
+        if (typeof type === 'undefined') {
+            throw new AppwriteException('Missing required parameter: "type"');
+        }
+
+        const apiPath = '/users/{userId}/mfa/authenticators/{type}'.replace('{userId}', userId).replace('{type}', type);
+        const payload: Payload = {};
+        const uri = new URL(this.client.config.endpoint + apiPath);
+
+        const apiHeaders: { [header: string]: string } = {
+            'content-type': 'application/json',
+        }
+
+        return this.client.call(
+            'delete',
+            uri,
+            apiHeaders,
+            payload
+        );
+    }
+
+    /**
+     * Delete an authenticator app.
+     *
+     * @param {string} params.userId - User ID.
+     * @param {AuthenticatorType} params.type - Type of authenticator.
+     * @throws {AppwriteException}
+     * @returns {Promise<{}>}
+     */
+    deleteMFAAuthenticator(params: { userId: string, type: AuthenticatorType }): Promise<{}>;
+    /**
+     * Delete an authenticator app.
+     *
+     * @param {string} userId - User ID.
+     * @param {AuthenticatorType} type - Type of authenticator.
+     * @throws {AppwriteException}
+     * @returns {Promise<{}>}
+     * @deprecated Use the object parameter style method for a better developer experience.
+     */
+    deleteMFAAuthenticator(userId: string, type: AuthenticatorType): Promise<{}>;
+    deleteMFAAuthenticator(
         paramsOrFirst: { userId: string, type: AuthenticatorType } | string,
         ...rest: [(AuthenticatorType)?]    
     ): Promise<{}> {
@@ -1632,6 +1755,57 @@ class UsersRuntime {
     }
 
     /**
+     * List the factors available on the account to be used as a MFA challange.
+     *
+     * @param {string} params.userId - User ID.
+     * @throws {AppwriteException}
+     * @returns {Promise<Models.MfaFactors>}
+     */
+    listMFAFactors(params: { userId: string }): Promise<Models.MfaFactors>;
+    /**
+     * List the factors available on the account to be used as a MFA challange.
+     *
+     * @param {string} userId - User ID.
+     * @throws {AppwriteException}
+     * @returns {Promise<Models.MfaFactors>}
+     * @deprecated Use the object parameter style method for a better developer experience.
+     */
+    listMFAFactors(userId: string): Promise<Models.MfaFactors>;
+    listMFAFactors(
+        paramsOrFirst: { userId: string } | string    
+    ): Promise<Models.MfaFactors> {
+        let params: { userId: string };
+        
+        if ((paramsOrFirst && typeof paramsOrFirst === 'object' && !Array.isArray(paramsOrFirst))) {
+            params = (paramsOrFirst || {}) as { userId: string };
+        } else {
+            params = {
+                userId: paramsOrFirst as string            
+            };
+        }
+        
+        const userId = params.userId;
+
+        if (typeof userId === 'undefined') {
+            throw new AppwriteException('Missing required parameter: "userId"');
+        }
+
+        const apiPath = '/users/{userId}/mfa/factors'.replace('{userId}', userId);
+        const payload: Payload = {};
+        const uri = new URL(this.client.config.endpoint + apiPath);
+
+        const apiHeaders: { [header: string]: string } = {
+        }
+
+        return this.client.call(
+            'get',
+            uri,
+            apiHeaders,
+            payload
+        );
+    }
+
+    /**
      * Get recovery codes that can be used as backup for MFA flow by User ID. Before getting codes, they must be generated using [createMfaRecoveryCodes](/docs/references/cloud/client-web/account#createMfaRecoveryCodes) method.
      *
      * @param {string} params.userId - User ID.
@@ -1650,6 +1824,57 @@ class UsersRuntime {
      */
     getMfaRecoveryCodes(userId: string): Promise<Models.MfaRecoveryCodes>;
     getMfaRecoveryCodes(
+        paramsOrFirst: { userId: string } | string    
+    ): Promise<Models.MfaRecoveryCodes> {
+        let params: { userId: string };
+        
+        if ((paramsOrFirst && typeof paramsOrFirst === 'object' && !Array.isArray(paramsOrFirst))) {
+            params = (paramsOrFirst || {}) as { userId: string };
+        } else {
+            params = {
+                userId: paramsOrFirst as string            
+            };
+        }
+        
+        const userId = params.userId;
+
+        if (typeof userId === 'undefined') {
+            throw new AppwriteException('Missing required parameter: "userId"');
+        }
+
+        const apiPath = '/users/{userId}/mfa/recovery-codes'.replace('{userId}', userId);
+        const payload: Payload = {};
+        const uri = new URL(this.client.config.endpoint + apiPath);
+
+        const apiHeaders: { [header: string]: string } = {
+        }
+
+        return this.client.call(
+            'get',
+            uri,
+            apiHeaders,
+            payload
+        );
+    }
+
+    /**
+     * Get recovery codes that can be used as backup for MFA flow by User ID. Before getting codes, they must be generated using [createMfaRecoveryCodes](/docs/references/cloud/client-web/account#createMfaRecoveryCodes) method.
+     *
+     * @param {string} params.userId - User ID.
+     * @throws {AppwriteException}
+     * @returns {Promise<Models.MfaRecoveryCodes>}
+     */
+    getMFARecoveryCodes(params: { userId: string }): Promise<Models.MfaRecoveryCodes>;
+    /**
+     * Get recovery codes that can be used as backup for MFA flow by User ID. Before getting codes, they must be generated using [createMfaRecoveryCodes](/docs/references/cloud/client-web/account#createMfaRecoveryCodes) method.
+     *
+     * @param {string} userId - User ID.
+     * @throws {AppwriteException}
+     * @returns {Promise<Models.MfaRecoveryCodes>}
+     * @deprecated Use the object parameter style method for a better developer experience.
+     */
+    getMFARecoveryCodes(userId: string): Promise<Models.MfaRecoveryCodes>;
+    getMFARecoveryCodes(
         paramsOrFirst: { userId: string } | string    
     ): Promise<Models.MfaRecoveryCodes> {
         let params: { userId: string };
@@ -1737,6 +1962,58 @@ class UsersRuntime {
     }
 
     /**
+     * Regenerate recovery codes that can be used as backup for MFA flow by User ID. Before regenerating codes, they must be first generated using [createMfaRecoveryCodes](/docs/references/cloud/client-web/account#createMfaRecoveryCodes) method.
+     *
+     * @param {string} params.userId - User ID.
+     * @throws {AppwriteException}
+     * @returns {Promise<Models.MfaRecoveryCodes>}
+     */
+    updateMFARecoveryCodes(params: { userId: string }): Promise<Models.MfaRecoveryCodes>;
+    /**
+     * Regenerate recovery codes that can be used as backup for MFA flow by User ID. Before regenerating codes, they must be first generated using [createMfaRecoveryCodes](/docs/references/cloud/client-web/account#createMfaRecoveryCodes) method.
+     *
+     * @param {string} userId - User ID.
+     * @throws {AppwriteException}
+     * @returns {Promise<Models.MfaRecoveryCodes>}
+     * @deprecated Use the object parameter style method for a better developer experience.
+     */
+    updateMFARecoveryCodes(userId: string): Promise<Models.MfaRecoveryCodes>;
+    updateMFARecoveryCodes(
+        paramsOrFirst: { userId: string } | string    
+    ): Promise<Models.MfaRecoveryCodes> {
+        let params: { userId: string };
+        
+        if ((paramsOrFirst && typeof paramsOrFirst === 'object' && !Array.isArray(paramsOrFirst))) {
+            params = (paramsOrFirst || {}) as { userId: string };
+        } else {
+            params = {
+                userId: paramsOrFirst as string            
+            };
+        }
+        
+        const userId = params.userId;
+
+        if (typeof userId === 'undefined') {
+            throw new AppwriteException('Missing required parameter: "userId"');
+        }
+
+        const apiPath = '/users/{userId}/mfa/recovery-codes'.replace('{userId}', userId);
+        const payload: Payload = {};
+        const uri = new URL(this.client.config.endpoint + apiPath);
+
+        const apiHeaders: { [header: string]: string } = {
+            'content-type': 'application/json',
+        }
+
+        return this.client.call(
+            'put',
+            uri,
+            apiHeaders,
+            payload
+        );
+    }
+
+    /**
      * Generate recovery codes used as backup for MFA flow for User ID. Recovery codes can be used as a MFA verification type in [createMfaChallenge](/docs/references/cloud/client-web/account#createMfaChallenge) method by client SDK.
      *
      * @param {string} params.userId - User ID.
@@ -1755,6 +2032,58 @@ class UsersRuntime {
      */
     createMfaRecoveryCodes(userId: string): Promise<Models.MfaRecoveryCodes>;
     createMfaRecoveryCodes(
+        paramsOrFirst: { userId: string } | string    
+    ): Promise<Models.MfaRecoveryCodes> {
+        let params: { userId: string };
+        
+        if ((paramsOrFirst && typeof paramsOrFirst === 'object' && !Array.isArray(paramsOrFirst))) {
+            params = (paramsOrFirst || {}) as { userId: string };
+        } else {
+            params = {
+                userId: paramsOrFirst as string            
+            };
+        }
+        
+        const userId = params.userId;
+
+        if (typeof userId === 'undefined') {
+            throw new AppwriteException('Missing required parameter: "userId"');
+        }
+
+        const apiPath = '/users/{userId}/mfa/recovery-codes'.replace('{userId}', userId);
+        const payload: Payload = {};
+        const uri = new URL(this.client.config.endpoint + apiPath);
+
+        const apiHeaders: { [header: string]: string } = {
+            'content-type': 'application/json',
+        }
+
+        return this.client.call(
+            'patch',
+            uri,
+            apiHeaders,
+            payload
+        );
+    }
+
+    /**
+     * Generate recovery codes used as backup for MFA flow for User ID. Recovery codes can be used as a MFA verification type in [createMfaChallenge](/docs/references/cloud/client-web/account#createMfaChallenge) method by client SDK.
+     *
+     * @param {string} params.userId - User ID.
+     * @throws {AppwriteException}
+     * @returns {Promise<Models.MfaRecoveryCodes>}
+     */
+    createMFARecoveryCodes(params: { userId: string }): Promise<Models.MfaRecoveryCodes>;
+    /**
+     * Generate recovery codes used as backup for MFA flow for User ID. Recovery codes can be used as a MFA verification type in [createMfaChallenge](/docs/references/cloud/client-web/account#createMfaChallenge) method by client SDK.
+     *
+     * @param {string} userId - User ID.
+     * @throws {AppwriteException}
+     * @returns {Promise<Models.MfaRecoveryCodes>}
+     * @deprecated Use the object parameter style method for a better developer experience.
+     */
+    createMFARecoveryCodes(userId: string): Promise<Models.MfaRecoveryCodes>;
+    createMFARecoveryCodes(
         paramsOrFirst: { userId: string } | string    
     ): Promise<Models.MfaRecoveryCodes> {
         let params: { userId: string };

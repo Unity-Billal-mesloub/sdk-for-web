@@ -7,7 +7,7 @@ const client = new Client()
 
 const messaging = new Messaging(client);
 
-const result = await messaging.updateApnsProvider({
+const result = await messaging.updateAPNSProvider({
     providerId: '<PROVIDER_ID>',
     name: '<NAME>', // optional
     enabled: false, // optional

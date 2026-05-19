@@ -7,8 +7,9 @@ const client = new Client()
 
 const presences = new Presences(client);
 
-const result = await presences.update({
+const result = await presences.updatePresence({
     presenceId: '<PRESENCE_ID>',
+    userId: '<USER_ID>',
     status: '<STATUS>', // optional
     expiresAt: '2020-10-15T06:38:00.000+00:00', // optional
     metadata: {}, // optional

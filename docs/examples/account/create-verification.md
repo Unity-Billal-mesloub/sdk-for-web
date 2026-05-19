@@ -1,5 +1,5 @@
 ```javascript
-import { Client, Account, AuthenticatorType } from "appwrite";
+import { Client, Account } from "appwrite";
 
 const client = new Client()
     .setEndpoint('https://<REGION>.cloud.appwrite.io/v1') // Your API Endpoint
@@ -7,8 +7,8 @@ const client = new Client()
 
 const account = new Account(client);
 
-const result = await account.deleteMFAAuthenticator({
-    type: AuthenticatorType.Totp
+const result = await account.createVerification({
+    url: 'https://example.com'
 });
 
 console.log(result);

@@ -7,7 +7,7 @@ const client = new Client()
 
 const messaging = new Messaging(client);
 
-const result = await messaging.createApnsProvider({
+const result = await messaging.createAPNSProvider({
     providerId: '<PROVIDER_ID>',
     name: '<NAME>',
     authKey: '<AUTH_KEY>', // optional
