@@ -1255,9 +1255,9 @@ class SitesRuntime {
      * @param {string} params.deploymentId - Deployment ID.
      * @param {DeploymentDownloadType} params.type - Deployment file to download. Can be: "source", "output".
      * @throws {AppwriteException}
-     * @returns {string}
+     * @returns {Promise<ArrayBuffer>}
      */
-    getDeploymentDownload(params: { siteId: string, deploymentId: string, type?: DeploymentDownloadType }): string;
+    getDeploymentDownload(params: { siteId: string, deploymentId: string, type?: DeploymentDownloadType }): Promise<ArrayBuffer>;
     /**
      * Get a site deployment content by its unique ID. The endpoint response return with a 'Content-Disposition: attachment' header that tells the browser to start downloading the file to user downloads directory.
      *
@@ -1265,14 +1265,14 @@ class SitesRuntime {
      * @param {string} deploymentId - Deployment ID.
      * @param {DeploymentDownloadType} type - Deployment file to download. Can be: "source", "output".
      * @throws {AppwriteException}
-     * @returns {string}
+     * @returns {Promise<ArrayBuffer>}
      * @deprecated Use the object parameter style method for a better developer experience.
      */
-    getDeploymentDownload(siteId: string, deploymentId: string, type?: DeploymentDownloadType): string;
+    getDeploymentDownload(siteId: string, deploymentId: string, type?: DeploymentDownloadType): Promise<ArrayBuffer>;
     getDeploymentDownload(
         paramsOrFirst: { siteId: string, deploymentId: string, type?: DeploymentDownloadType } | string,
         ...rest: [(string)?, (DeploymentDownloadType)?]    
-    ): string {
+    ): Promise<ArrayBuffer> {
         let params: { siteId: string, deploymentId: string, type?: DeploymentDownloadType };
         
         if ((paramsOrFirst && typeof paramsOrFirst === 'object' && !Array.isArray(paramsOrFirst))) {
@@ -1306,14 +1306,17 @@ class SitesRuntime {
         const apiHeaders: { [header: string]: string } = {
         }
 
-        payload['project'] = (this.client.config as unknown as Record<string, string>)['project'];
-        payload['key'] = (this.client.config as unknown as Record<string, string>)['key'];
-
         for (const [key, value] of Object.entries(Service.flatten(payload))) {
             uri.searchParams.append(key, value);
         }
         
-        return uri.toString();
+        return this.client.call(
+            'get',
+            uri,
+            apiHeaders,
+            payload,
+            'arrayBuffer'
+        );
     }
 
     /**

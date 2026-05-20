@@ -422,14 +422,14 @@ class ClientRuntime<TAuth extends Auth = 'browser'> {
         selfSigned: false,
     };
 
-    private sdkPlatform: SDKPlatform = 'server';
+    private sdkPlatform: SDKPlatform = 'client';
 
     /**
      * Custom headers for API requests.
      */
     headers: Headers = {
         'x-sdk-name': 'Web',
-        'x-sdk-platform': 'server',
+        'x-sdk-platform': 'client',
         'x-sdk-language': 'web',
         'x-sdk-version': '26.0.0',
         'X-Appwrite-Response-Format': '1.9.5',
