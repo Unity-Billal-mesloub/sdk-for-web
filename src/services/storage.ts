@@ -869,10 +869,10 @@ class StorageRuntime<TAuth extends ClientAuth | ServerAuth = ClientAuth | Server
         const apiHeaders: { [header: string]: string } = {
         }
 
+        payload['project'] = (this.client.config as unknown as Record<string, string>)['project'];
         for (const [key, value] of Object.entries(Service.flatten(payload))) {
             uri.searchParams.append(key, value);
         }
-        
         return uri.toString();
     }
 
@@ -1011,10 +1011,10 @@ class StorageRuntime<TAuth extends ClientAuth | ServerAuth = ClientAuth | Server
         const apiHeaders: { [header: string]: string } = {
         }
 
+        payload['project'] = (this.client.config as unknown as Record<string, string>)['project'];
         for (const [key, value] of Object.entries(Service.flatten(payload))) {
             uri.searchParams.append(key, value);
         }
-        
         return uri.toString();
     }
 
@@ -1076,10 +1076,10 @@ class StorageRuntime<TAuth extends ClientAuth | ServerAuth = ClientAuth | Server
         const apiHeaders: { [header: string]: string } = {
         }
 
+        payload['project'] = (this.client.config as unknown as Record<string, string>)['project'];
         for (const [key, value] of Object.entries(Service.flatten(payload))) {
             uri.searchParams.append(key, value);
         }
-        
         return uri.toString();
     }
 }

@@ -1940,10 +1940,10 @@ class AccountRuntime<TAuth extends ClientAuth | ServerAuth = ClientAuth | Server
         const apiHeaders: { [header: string]: string } = {
         }
 
+        payload['project'] = (this.client.config as unknown as Record<string, string>)['project'];
         for (const [key, value] of Object.entries(Service.flatten(payload))) {
             uri.searchParams.append(key, value);
         }
-        
         if (typeof window !== 'undefined' && window?.location) {
             window.location.href = uri.toString();
             return;
@@ -2690,10 +2690,10 @@ class AccountRuntime<TAuth extends ClientAuth | ServerAuth = ClientAuth | Server
         const apiHeaders: { [header: string]: string } = {
         }
 
+        payload['project'] = (this.client.config as unknown as Record<string, string>)['project'];
         for (const [key, value] of Object.entries(Service.flatten(payload))) {
             uri.searchParams.append(key, value);
         }
-        
         if (typeof window !== 'undefined' && window?.location) {
             window.location.href = uri.toString();
             return;

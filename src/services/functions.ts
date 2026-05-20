@@ -1307,10 +1307,6 @@ class FunctionsRuntime<TAuth extends ClientAuth | ServerAuth = ClientAuth | Serv
         const apiHeaders: { [header: string]: string } = {
         }
 
-        for (const [key, value] of Object.entries(Service.flatten(payload))) {
-            uri.searchParams.append(key, value);
-        }
-        
         return this.client.call(
             'get',
             uri,
