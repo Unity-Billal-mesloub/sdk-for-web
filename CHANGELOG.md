@@ -6,7 +6,21 @@
 * Added: Static factory constructors `Client.from`, `Client.fromSession`, `Client.fromAPIKey`, `Client.fromCookie`, `Client.fromJWT`, `Client.fromDevKey`, and `Client.fromImpersonation`
 * Added: Server-side auth via `apiKey`, `cookie`, and `jwt` factories
 * Added: Admin and server-only endpoints (`Users`, `Projects`, function and site deployments, storage buckets, and more)
+* Breaking: Renamed `Presences.update` to `Presences.updatePresence`
+* Breaking: `Presences.upsert` and `Presences.updatePresence` now require a `userId` parameter
 * Deprecated: `new Client()` constructor and `setEndpoint`/`setProject`/setter pattern remain for backwards compatibility but are now marked deprecated
+
+### Migration
+
+```ts
+// Before (25.x)
+await presences.upsert(presenceId, status);
+await presences.update(presenceId, status);
+
+// After (26.0.0)
+await presences.upsert(presenceId, userId, status);
+await presences.updatePresence(presenceId, userId, status);
+```
 
 ## 25.1.1
 
