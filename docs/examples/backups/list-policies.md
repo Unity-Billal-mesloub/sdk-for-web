@@ -1,9 +1,11 @@
 ```javascript
 import { Client, Backups } from "appwrite";
 
-const client = new Client()
-    .setEndpoint('https://<REGION>.cloud.appwrite.io/v1') // Your API Endpoint
-    .setProject('<YOUR_PROJECT_ID>'); // Your project ID
+const client = Client.fromAPIKey({
+    endpoint: 'https://<REGION>.cloud.appwrite.io/v1', // Your API Endpoint
+    projectId: '<YOUR_PROJECT_ID>', // Your project ID
+    apiKey: '<YOUR_API_KEY>' // Your secret API key
+});
 
 const backups = new Backups(client);
 

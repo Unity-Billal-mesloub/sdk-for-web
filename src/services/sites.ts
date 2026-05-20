@@ -1307,6 +1307,7 @@ class SitesRuntime {
         }
 
         payload['project'] = (this.client.config as unknown as Record<string, string>)['project'];
+        payload['key'] = (this.client.config as unknown as Record<string, string>)['key'];
 
         for (const [key, value] of Object.entries(Service.flatten(payload))) {
             uri.searchParams.append(key, value);

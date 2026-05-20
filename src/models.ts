@@ -4214,7 +4214,7 @@ export namespace Models {
         /**
          * Billing limits reached
          */
-        billingLimits: BillingLimits;
+        billingLimits?: BillingLimits;
         /**
          * Project blocks information
          */
@@ -6764,35 +6764,35 @@ export namespace Models {
         /**
          * Bandwidth limit
          */
-        bandwidth: number;
+        bandwidth?: number;
         /**
          * Storage limit
          */
-        storage: number;
+        storage?: number;
         /**
          * Users limit
          */
-        users: number;
+        users?: number;
         /**
          * Executions limit
          */
-        executions: number;
+        executions?: number;
         /**
          * GBHours limit
          */
-        GBHours: number;
+        GBHours?: number;
         /**
          * Image transformations limit
          */
-        imageTransformations: number;
+        imageTransformations?: number;
         /**
          * Auth phone limit
          */
-        authPhone: number;
+        authPhone?: number;
         /**
          * Budget limit percentage
          */
-        budgetLimit: number;
+        budgetLimit?: number;
     }
 
     /**

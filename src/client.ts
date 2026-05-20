@@ -394,31 +394,31 @@ class ClientRuntime<TAuth extends Auth = 'browser'> {
         endpoint: string;
         endpointRealtime: string;
         project: string;
+        key: string;
         jwt: string;
         locale: string;
         session: string;
+        forwardeduseragent: string;
         devkey: string;
         cookie: string;
         impersonateuserid: string;
         impersonateuseremail: string;
         impersonateuserphone: string;
-        key: string;
-        forwardeduseragent: string;
         selfSigned: boolean;
     } = {
         endpoint: 'https://cloud.appwrite.io/v1',
         endpointRealtime: '',
         project: '',
+        key: '',
         jwt: '',
         locale: '',
         session: '',
+        forwardeduseragent: '',
         devkey: '',
         cookie: '',
         impersonateuserid: '',
         impersonateuseremail: '',
         impersonateuserphone: '',
-        key: '',
-        forwardeduseragent: '',
         selfSigned: false,
     };
 
@@ -633,6 +633,15 @@ class ClientRuntime<TAuth extends Auth = 'browser'> {
     /**
      * @deprecated Use a static client factory or factory params object instead.
      */
+    setKey(value: string): ClientRuntime<'apiKey'> {
+        this.headers['X-Appwrite-Key'] = value;
+        this.config.key = value;
+        return this as unknown as ClientRuntime<'apiKey'>;
+    }
+
+    /**
+     * @deprecated Use a static client factory or factory params object instead.
+     */
     setJWT(value: string): ClientRuntime<'jwt'> {
         this.headers['X-Appwrite-JWT'] = value;
         this.config.jwt = value;
@@ -655,6 +664,15 @@ class ClientRuntime<TAuth extends Auth = 'browser'> {
         this.headers['X-Appwrite-Session'] = value;
         this.config.session = value;
         return this as unknown as ClientRuntime<'session'>;
+    }
+
+    /**
+     * @deprecated Use a static client factory or factory params object instead.
+     */
+    setForwardedUserAgent(value: string): this {
+        this.headers['X-Forwarded-User-Agent'] = value;
+        this.config.forwardeduseragent = value;
+        return this as unknown as this;
     }
 
     /**
@@ -700,24 +718,6 @@ class ClientRuntime<TAuth extends Auth = 'browser'> {
         this.headers['X-Appwrite-Impersonate-User-Phone'] = value;
         this.config.impersonateuserphone = value;
         return this as unknown as ClientRuntime<'impersonation'>;
-    }
-
-    /**
-     * @deprecated Use a static client factory or factory params object instead.
-     */
-    setKey(value: string): ClientRuntime<'apiKey'> {
-        this.headers['X-Appwrite-Key'] = value;
-        this.config.key = value;
-        return this as unknown as ClientRuntime<'apiKey'>;
-    }
-
-    /**
-     * @deprecated Use a static client factory or factory params object instead.
-     */
-    setForwardedUserAgent(value: string): this {
-        this.headers['X-Forwarded-User-Agent'] = value;
-        this.config.forwardeduseragent = value;
-        return this as unknown as this;
     }
 
 

@@ -7,7 +7,6 @@
 * Added: Server-side auth via `apiKey`, `cookie`, and `jwt` factories
 * Added: Admin and server-only endpoints (`Users`, `Projects`, function and site deployments, storage buckets, and more)
 * Deprecated: `new Client()` constructor and `setEndpoint`/`setProject`/setter pattern remain for backwards compatibility but are now marked deprecated
-* Updated: `x-sdk-platform` header now reflects browser or server runtime
 
 ## 25.1.1
 

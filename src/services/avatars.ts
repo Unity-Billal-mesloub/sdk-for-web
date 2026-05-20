@@ -97,6 +97,7 @@ class AvatarsRuntime<TAuth extends ClientAuth | ServerAuth = ClientAuth | Server
         }
 
         payload['project'] = (this.client.config as unknown as Record<string, string>)['project'];
+        payload['session'] = (this.client.config as unknown as Record<string, string>)['session'];
 
         for (const [key, value] of Object.entries(Service.flatten(payload))) {
             uri.searchParams.append(key, value);
@@ -177,6 +178,7 @@ class AvatarsRuntime<TAuth extends ClientAuth | ServerAuth = ClientAuth | Server
         }
 
         payload['project'] = (this.client.config as unknown as Record<string, string>)['project'];
+        payload['session'] = (this.client.config as unknown as Record<string, string>)['session'];
 
         for (const [key, value] of Object.entries(Service.flatten(payload))) {
             uri.searchParams.append(key, value);
@@ -236,6 +238,7 @@ class AvatarsRuntime<TAuth extends ClientAuth | ServerAuth = ClientAuth | Server
         }
 
         payload['project'] = (this.client.config as unknown as Record<string, string>)['project'];
+        payload['session'] = (this.client.config as unknown as Record<string, string>)['session'];
 
         for (const [key, value] of Object.entries(Service.flatten(payload))) {
             uri.searchParams.append(key, value);
@@ -316,6 +319,7 @@ class AvatarsRuntime<TAuth extends ClientAuth | ServerAuth = ClientAuth | Server
         }
 
         payload['project'] = (this.client.config as unknown as Record<string, string>)['project'];
+        payload['session'] = (this.client.config as unknown as Record<string, string>)['session'];
 
         for (const [key, value] of Object.entries(Service.flatten(payload))) {
             uri.searchParams.append(key, value);
@@ -394,6 +398,7 @@ class AvatarsRuntime<TAuth extends ClientAuth | ServerAuth = ClientAuth | Server
         }
 
         payload['project'] = (this.client.config as unknown as Record<string, string>)['project'];
+        payload['session'] = (this.client.config as unknown as Record<string, string>)['session'];
 
         for (const [key, value] of Object.entries(Service.flatten(payload))) {
             uri.searchParams.append(key, value);
@@ -478,6 +483,7 @@ class AvatarsRuntime<TAuth extends ClientAuth | ServerAuth = ClientAuth | Server
         }
 
         payload['project'] = (this.client.config as unknown as Record<string, string>)['project'];
+        payload['session'] = (this.client.config as unknown as Record<string, string>)['session'];
 
         for (const [key, value] of Object.entries(Service.flatten(payload))) {
             uri.searchParams.append(key, value);
@@ -557,6 +563,7 @@ class AvatarsRuntime<TAuth extends ClientAuth | ServerAuth = ClientAuth | Server
         }
 
         payload['project'] = (this.client.config as unknown as Record<string, string>)['project'];
+        payload['session'] = (this.client.config as unknown as Record<string, string>)['session'];
 
         for (const [key, value] of Object.entries(Service.flatten(payload))) {
             uri.searchParams.append(key, value);
@@ -754,6 +761,7 @@ class AvatarsRuntime<TAuth extends ClientAuth | ServerAuth = ClientAuth | Server
         }
 
         payload['project'] = (this.client.config as unknown as Record<string, string>)['project'];
+        payload['session'] = (this.client.config as unknown as Record<string, string>)['session'];
 
         for (const [key, value] of Object.entries(Service.flatten(payload))) {
             uri.searchParams.append(key, value);
