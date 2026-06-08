@@ -7,6 +7,8 @@
 * Breaking: Made `presences` `list`/`get`/`upsert`/`update` non-generic and removed `Models.DefaultPresence`.
 * Added: Email metadata fields to `User` (`emailCanonical`, `emailIsFree`, `emailIsDisposable`, `emailIsCorporate`, `emailIsCanonical`).
 * Added: `Membership.userAccessedAt` and `Presence.metadata` fields.
+* Fixed: `toString()` on response objects now returns valid JSON via `JSONbig.stringify`, preserving large integers.
+* Updated: Requests now send an explicit `accept` header matching each endpoint's response type.
 
 ## 25.1.1
 
