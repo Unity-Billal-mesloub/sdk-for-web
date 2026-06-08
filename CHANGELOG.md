@@ -5,9 +5,6 @@
 * Breaking: Removed `Client.setKey()` and `Client.setForwardedUserAgent()` methods.
 * Breaking: Renamed `Theme` enum to `BrowserTheme`, changing `avatars.getScreenshot()` `theme` param type.
 * Breaking: Made `presences` `list`/`get`/`upsert`/`update` non-generic and removed `Models.DefaultPresence`.
-* Added: `apps` and `oauth2` services for application and OAuth2 management.
-* Added: `App`, `AppSecret`, `AppSecretPlaintext`, `AppsList`, and `AppSecretList` models.
-* Added: `Oauth2Authorize`, `Oauth2Approve`, `Oauth2Reject`, and `Oauth2Grant` models.
 * Added: Email metadata fields to `User` (`emailCanonical`, `emailIsFree`, `emailIsDisposable`, `emailIsCorporate`, `emailIsCanonical`).
 * Added: `Membership.userAccessedAt` and `Presence.metadata` fields.
 
