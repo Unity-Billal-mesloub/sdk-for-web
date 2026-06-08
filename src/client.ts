@@ -354,11 +354,9 @@ class Client {
         endpoint: string;
         endpointRealtime: string;
         project: string;
-        key: string;
         jwt: string;
         locale: string;
         session: string;
-        forwardeduseragent: string;
         devkey: string;
         cookie: string;
         impersonateuserid: string;
@@ -368,11 +366,9 @@ class Client {
         endpoint: 'https://cloud.appwrite.io/v1',
         endpointRealtime: '',
         project: '',
-        key: '',
         jwt: '',
         locale: '',
         session: '',
-        forwardeduseragent: '',
         devkey: '',
         cookie: '',
         impersonateuserid: '',
@@ -384,7 +380,7 @@ class Client {
      */
     headers: Headers = {
         'x-sdk-name': 'Web',
-        'x-sdk-platform': 'server',
+        'x-sdk-platform': 'client',
         'x-sdk-language': 'web',
         'x-sdk-version': '26.0.0',
         'X-Appwrite-Response-Format': '1.9.5',
@@ -460,20 +456,6 @@ class Client {
         return this;
     }
     /**
-     * Set Key
-     *
-     * Your secret API key
-     *
-     * @param value string
-     *
-     * @return {this}
-     */
-    setKey(value: string): this {
-        this.headers['X-Appwrite-Key'] = value;
-        this.config.key = value;
-        return this;
-    }
-    /**
      * Set JWT
      *
      * Your secret JSON Web Token
@@ -511,20 +493,6 @@ class Client {
     setSession(value: string): this {
         this.headers['X-Appwrite-Session'] = value;
         this.config.session = value;
-        return this;
-    }
-    /**
-     * Set ForwardedUserAgent
-     *
-     * The user agent string of the client that made the request
-     *
-     * @param value string
-     *
-     * @return {this}
-     */
-    setForwardedUserAgent(value: string): this {
-        this.headers['X-Forwarded-User-Agent'] = value;
-        this.config.forwardeduseragent = value;
         return this;
     }
     /**
