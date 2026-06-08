@@ -1,29 +1,19 @@
 import { Service } from '../service';
-import { AppwriteException, Client, type ClientAuth, type ServerAuth, type Payload } from '../client';
+import { AppwriteException, Client, type Payload, UploadProgress } from '../client';
 import type { Models } from '../models';
 
 import { Browser } from '../enums/browser';
 import { CreditCard } from '../enums/credit-card';
 import { Flag } from '../enums/flag';
-import { Theme } from '../enums/theme';
+import { BrowserTheme } from '../enums/browser-theme';
 import { Timezone } from '../enums/timezone';
 import { BrowserPermission } from '../enums/browser-permission';
 import { ImageFormat } from '../enums/image-format';
 
-type AvatarsServerOnlyMethod = never;
-type AvatarsClientOnlyMethod = never;
+export class Avatars {
+    client: Client;
 
-export type Avatars<TAuth extends ClientAuth | ServerAuth = ClientAuth | ServerAuth> =
-    TAuth extends ClientAuth
-        ? Omit<AvatarsRuntime<TAuth>, 'client' | AvatarsServerOnlyMethod>
-        : TAuth extends ServerAuth
-            ? Omit<AvatarsRuntime<TAuth>, 'client' | AvatarsClientOnlyMethod>
-            : Omit<AvatarsRuntime<TAuth>, 'client'>;
-
-class AvatarsRuntime<TAuth extends ClientAuth | ServerAuth = ClientAuth | ServerAuth> {
-    client: Client<TAuth>;
-
-    constructor(client: Client<TAuth>) {
+    constructor(client: Client) {
         this.client = client;
     }
 
@@ -94,12 +84,16 @@ class AvatarsRuntime<TAuth extends ClientAuth | ServerAuth = ClientAuth | Server
         const uri = new URL(this.client.config.endpoint + apiPath);
 
         const apiHeaders: { [header: string]: string } = {
+            'X-Appwrite-Project': this.client.config.project,
+            'accept': 'image/png',
         }
 
-        payload['project'] = (this.client.config as unknown as Record<string, string>)['project'];
+        payload['project'] = this.client.config.project;
+
         for (const [key, value] of Object.entries(Service.flatten(payload))) {
             uri.searchParams.append(key, value);
         }
+        
         return uri.toString();
     }
 
@@ -172,12 +166,16 @@ class AvatarsRuntime<TAuth extends ClientAuth | ServerAuth = ClientAuth | Server
         const uri = new URL(this.client.config.endpoint + apiPath);
 
         const apiHeaders: { [header: string]: string } = {
+            'X-Appwrite-Project': this.client.config.project,
+            'accept': 'image/png',
         }
 
-        payload['project'] = (this.client.config as unknown as Record<string, string>)['project'];
+        payload['project'] = this.client.config.project;
+
         for (const [key, value] of Object.entries(Service.flatten(payload))) {
             uri.searchParams.append(key, value);
         }
+        
         return uri.toString();
     }
 
@@ -229,12 +227,16 @@ class AvatarsRuntime<TAuth extends ClientAuth | ServerAuth = ClientAuth | Server
         const uri = new URL(this.client.config.endpoint + apiPath);
 
         const apiHeaders: { [header: string]: string } = {
+            'X-Appwrite-Project': this.client.config.project,
+            'accept': 'image/*',
         }
 
-        payload['project'] = (this.client.config as unknown as Record<string, string>)['project'];
+        payload['project'] = this.client.config.project;
+
         for (const [key, value] of Object.entries(Service.flatten(payload))) {
             uri.searchParams.append(key, value);
         }
+        
         return uri.toString();
     }
 
@@ -307,12 +309,16 @@ class AvatarsRuntime<TAuth extends ClientAuth | ServerAuth = ClientAuth | Server
         const uri = new URL(this.client.config.endpoint + apiPath);
 
         const apiHeaders: { [header: string]: string } = {
+            'X-Appwrite-Project': this.client.config.project,
+            'accept': 'image/png',
         }
 
-        payload['project'] = (this.client.config as unknown as Record<string, string>)['project'];
+        payload['project'] = this.client.config.project;
+
         for (const [key, value] of Object.entries(Service.flatten(payload))) {
             uri.searchParams.append(key, value);
         }
+        
         return uri.toString();
     }
 
@@ -383,12 +389,16 @@ class AvatarsRuntime<TAuth extends ClientAuth | ServerAuth = ClientAuth | Server
         const uri = new URL(this.client.config.endpoint + apiPath);
 
         const apiHeaders: { [header: string]: string } = {
+            'X-Appwrite-Project': this.client.config.project,
+            'accept': 'image/*',
         }
 
-        payload['project'] = (this.client.config as unknown as Record<string, string>)['project'];
+        payload['project'] = this.client.config.project;
+
         for (const [key, value] of Object.entries(Service.flatten(payload))) {
             uri.searchParams.append(key, value);
         }
+        
         return uri.toString();
     }
 
@@ -465,12 +475,16 @@ class AvatarsRuntime<TAuth extends ClientAuth | ServerAuth = ClientAuth | Server
         const uri = new URL(this.client.config.endpoint + apiPath);
 
         const apiHeaders: { [header: string]: string } = {
+            'X-Appwrite-Project': this.client.config.project,
+            'accept': 'image/png',
         }
 
-        payload['project'] = (this.client.config as unknown as Record<string, string>)['project'];
+        payload['project'] = this.client.config.project;
+
         for (const [key, value] of Object.entries(Service.flatten(payload))) {
             uri.searchParams.append(key, value);
         }
+        
         return uri.toString();
     }
 
@@ -542,12 +556,16 @@ class AvatarsRuntime<TAuth extends ClientAuth | ServerAuth = ClientAuth | Server
         const uri = new URL(this.client.config.endpoint + apiPath);
 
         const apiHeaders: { [header: string]: string } = {
+            'X-Appwrite-Project': this.client.config.project,
+            'accept': 'image/png',
         }
 
-        payload['project'] = (this.client.config as unknown as Record<string, string>)['project'];
+        payload['project'] = this.client.config.project;
+
         for (const [key, value] of Object.entries(Service.flatten(payload))) {
             uri.searchParams.append(key, value);
         }
+        
         return uri.toString();
     }
 
@@ -563,7 +581,7 @@ class AvatarsRuntime<TAuth extends ClientAuth | ServerAuth = ClientAuth | Server
      * @param {number} params.viewportWidth - Browser viewport width. Pass an integer between 1 to 1920. Defaults to 1280.
      * @param {number} params.viewportHeight - Browser viewport height. Pass an integer between 1 to 1080. Defaults to 720.
      * @param {number} params.scale - Browser scale factor. Pass a number between 0.1 to 3. Defaults to 1.
-     * @param {Theme} params.theme - Browser theme. Pass "light" or "dark". Defaults to "light".
+     * @param {BrowserTheme} params.theme - Browser theme. Pass "light" or "dark". Defaults to "light".
      * @param {string} params.userAgent - Custom user agent string. Defaults to browser default.
      * @param {boolean} params.fullpage - Capture full page scroll. Pass 0 for viewport only, or 1 for full page. Defaults to 0.
      * @param {string} params.locale - Browser locale (e.g., "en-US", "fr-FR"). Defaults to browser default.
@@ -581,7 +599,7 @@ class AvatarsRuntime<TAuth extends ClientAuth | ServerAuth = ClientAuth | Server
      * @throws {AppwriteException}
      * @returns {string}
      */
-    getScreenshot(params: { url: string, headers?: object, viewportWidth?: number, viewportHeight?: number, scale?: number, theme?: Theme, userAgent?: string, fullpage?: boolean, locale?: string, timezone?: Timezone, latitude?: number, longitude?: number, accuracy?: number, touch?: boolean, permissions?: BrowserPermission[], sleep?: number, width?: number, height?: number, quality?: number, output?: ImageFormat }): string;
+    getScreenshot(params: { url: string, headers?: object, viewportWidth?: number, viewportHeight?: number, scale?: number, theme?: BrowserTheme, userAgent?: string, fullpage?: boolean, locale?: string, timezone?: Timezone, latitude?: number, longitude?: number, accuracy?: number, touch?: boolean, permissions?: BrowserPermission[], sleep?: number, width?: number, height?: number, quality?: number, output?: ImageFormat }): string;
     /**
      * Use this endpoint to capture a screenshot of any website URL. This endpoint uses a headless browser to render the webpage and capture it as an image.
      * 
@@ -594,7 +612,7 @@ class AvatarsRuntime<TAuth extends ClientAuth | ServerAuth = ClientAuth | Server
      * @param {number} viewportWidth - Browser viewport width. Pass an integer between 1 to 1920. Defaults to 1280.
      * @param {number} viewportHeight - Browser viewport height. Pass an integer between 1 to 1080. Defaults to 720.
      * @param {number} scale - Browser scale factor. Pass a number between 0.1 to 3. Defaults to 1.
-     * @param {Theme} theme - Browser theme. Pass "light" or "dark". Defaults to "light".
+     * @param {BrowserTheme} theme - Browser theme. Pass "light" or "dark". Defaults to "light".
      * @param {string} userAgent - Custom user agent string. Defaults to browser default.
      * @param {boolean} fullpage - Capture full page scroll. Pass 0 for viewport only, or 1 for full page. Defaults to 0.
      * @param {string} locale - Browser locale (e.g., "en-US", "fr-FR"). Defaults to browser default.
@@ -613,15 +631,15 @@ class AvatarsRuntime<TAuth extends ClientAuth | ServerAuth = ClientAuth | Server
      * @returns {string}
      * @deprecated Use the object parameter style method for a better developer experience.
      */
-    getScreenshot(url: string, headers?: object, viewportWidth?: number, viewportHeight?: number, scale?: number, theme?: Theme, userAgent?: string, fullpage?: boolean, locale?: string, timezone?: Timezone, latitude?: number, longitude?: number, accuracy?: number, touch?: boolean, permissions?: BrowserPermission[], sleep?: number, width?: number, height?: number, quality?: number, output?: ImageFormat): string;
+    getScreenshot(url: string, headers?: object, viewportWidth?: number, viewportHeight?: number, scale?: number, theme?: BrowserTheme, userAgent?: string, fullpage?: boolean, locale?: string, timezone?: Timezone, latitude?: number, longitude?: number, accuracy?: number, touch?: boolean, permissions?: BrowserPermission[], sleep?: number, width?: number, height?: number, quality?: number, output?: ImageFormat): string;
     getScreenshot(
-        paramsOrFirst: { url: string, headers?: object, viewportWidth?: number, viewportHeight?: number, scale?: number, theme?: Theme, userAgent?: string, fullpage?: boolean, locale?: string, timezone?: Timezone, latitude?: number, longitude?: number, accuracy?: number, touch?: boolean, permissions?: BrowserPermission[], sleep?: number, width?: number, height?: number, quality?: number, output?: ImageFormat } | string,
-        ...rest: [(object)?, (number)?, (number)?, (number)?, (Theme)?, (string)?, (boolean)?, (string)?, (Timezone)?, (number)?, (number)?, (number)?, (boolean)?, (BrowserPermission[])?, (number)?, (number)?, (number)?, (number)?, (ImageFormat)?]    
+        paramsOrFirst: { url: string, headers?: object, viewportWidth?: number, viewportHeight?: number, scale?: number, theme?: BrowserTheme, userAgent?: string, fullpage?: boolean, locale?: string, timezone?: Timezone, latitude?: number, longitude?: number, accuracy?: number, touch?: boolean, permissions?: BrowserPermission[], sleep?: number, width?: number, height?: number, quality?: number, output?: ImageFormat } | string,
+        ...rest: [(object)?, (number)?, (number)?, (number)?, (BrowserTheme)?, (string)?, (boolean)?, (string)?, (Timezone)?, (number)?, (number)?, (number)?, (boolean)?, (BrowserPermission[])?, (number)?, (number)?, (number)?, (number)?, (ImageFormat)?]    
     ): string {
-        let params: { url: string, headers?: object, viewportWidth?: number, viewportHeight?: number, scale?: number, theme?: Theme, userAgent?: string, fullpage?: boolean, locale?: string, timezone?: Timezone, latitude?: number, longitude?: number, accuracy?: number, touch?: boolean, permissions?: BrowserPermission[], sleep?: number, width?: number, height?: number, quality?: number, output?: ImageFormat };
+        let params: { url: string, headers?: object, viewportWidth?: number, viewportHeight?: number, scale?: number, theme?: BrowserTheme, userAgent?: string, fullpage?: boolean, locale?: string, timezone?: Timezone, latitude?: number, longitude?: number, accuracy?: number, touch?: boolean, permissions?: BrowserPermission[], sleep?: number, width?: number, height?: number, quality?: number, output?: ImageFormat };
         
         if ((paramsOrFirst && typeof paramsOrFirst === 'object' && !Array.isArray(paramsOrFirst))) {
-            params = (paramsOrFirst || {}) as { url: string, headers?: object, viewportWidth?: number, viewportHeight?: number, scale?: number, theme?: Theme, userAgent?: string, fullpage?: boolean, locale?: string, timezone?: Timezone, latitude?: number, longitude?: number, accuracy?: number, touch?: boolean, permissions?: BrowserPermission[], sleep?: number, width?: number, height?: number, quality?: number, output?: ImageFormat };
+            params = (paramsOrFirst || {}) as { url: string, headers?: object, viewportWidth?: number, viewportHeight?: number, scale?: number, theme?: BrowserTheme, userAgent?: string, fullpage?: boolean, locale?: string, timezone?: Timezone, latitude?: number, longitude?: number, accuracy?: number, touch?: boolean, permissions?: BrowserPermission[], sleep?: number, width?: number, height?: number, quality?: number, output?: ImageFormat };
         } else {
             params = {
                 url: paramsOrFirst as string,
@@ -629,7 +647,7 @@ class AvatarsRuntime<TAuth extends ClientAuth | ServerAuth = ClientAuth | Server
                 viewportWidth: rest[1] as number,
                 viewportHeight: rest[2] as number,
                 scale: rest[3] as number,
-                theme: rest[4] as Theme,
+                theme: rest[4] as BrowserTheme,
                 userAgent: rest[5] as string,
                 fullpage: rest[6] as boolean,
                 locale: rest[7] as string,
@@ -737,18 +755,16 @@ class AvatarsRuntime<TAuth extends ClientAuth | ServerAuth = ClientAuth | Server
         const uri = new URL(this.client.config.endpoint + apiPath);
 
         const apiHeaders: { [header: string]: string } = {
+            'X-Appwrite-Project': this.client.config.project,
+            'accept': 'image/png',
         }
 
-        payload['project'] = (this.client.config as unknown as Record<string, string>)['project'];
+        payload['project'] = this.client.config.project;
+
         for (const [key, value] of Object.entries(Service.flatten(payload))) {
             uri.searchParams.append(key, value);
         }
+        
         return uri.toString();
     }
 }
-
-const Avatars = AvatarsRuntime as unknown as {
-    new <TAuth extends ClientAuth | ServerAuth = ClientAuth | ServerAuth>(client: Client<TAuth>): Avatars<TAuth>;
-};
-
-export { Avatars };

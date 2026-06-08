@@ -1,25 +1,15 @@
 import { Service } from '../service';
-import { AppwriteException, Client, type ClientAuth, type ServerAuth, type Payload } from '../client';
+import { AppwriteException, Client, type Payload, UploadProgress } from '../client';
 import type { Models } from '../models';
 
 import { AuthenticatorType } from '../enums/authenticator-type';
 import { AuthenticationFactor } from '../enums/authentication-factor';
 import { OAuthProvider } from '../enums/o-auth-provider';
 
-type AccountServerOnlyMethod = never;
-type AccountClientOnlyMethod = never;
+export class Account {
+    client: Client;
 
-export type Account<TAuth extends ClientAuth | ServerAuth = ClientAuth | ServerAuth> =
-    TAuth extends ClientAuth
-        ? Omit<AccountRuntime<TAuth>, 'client' | AccountServerOnlyMethod>
-        : TAuth extends ServerAuth
-            ? Omit<AccountRuntime<TAuth>, 'client' | AccountClientOnlyMethod>
-            : Omit<AccountRuntime<TAuth>, 'client'>;
-
-class AccountRuntime<TAuth extends ClientAuth | ServerAuth = ClientAuth | ServerAuth> {
-    client: Client<TAuth>;
-
-    constructor(client: Client<TAuth>) {
+    constructor(client: Client) {
         this.client = client;
     }
 
@@ -36,6 +26,8 @@ class AccountRuntime<TAuth extends ClientAuth | ServerAuth = ClientAuth | Server
         const uri = new URL(this.client.config.endpoint + apiPath);
 
         const apiHeaders: { [header: string]: string } = {
+            'X-Appwrite-Project': this.client.config.project,
+            'accept': 'application/json',
         }
 
         return this.client.call(
@@ -118,7 +110,9 @@ class AccountRuntime<TAuth extends ClientAuth | ServerAuth = ClientAuth | Server
         const uri = new URL(this.client.config.endpoint + apiPath);
 
         const apiHeaders: { [header: string]: string } = {
+            'X-Appwrite-Project': this.client.config.project,
             'content-type': 'application/json',
+            'accept': 'application/json',
         }
 
         return this.client.call(
@@ -188,7 +182,9 @@ class AccountRuntime<TAuth extends ClientAuth | ServerAuth = ClientAuth | Server
         const uri = new URL(this.client.config.endpoint + apiPath);
 
         const apiHeaders: { [header: string]: string } = {
+            'X-Appwrite-Project': this.client.config.project,
             'content-type': 'application/json',
+            'accept': 'application/json',
         }
 
         return this.client.call(
@@ -248,6 +244,8 @@ class AccountRuntime<TAuth extends ClientAuth | ServerAuth = ClientAuth | Server
         const uri = new URL(this.client.config.endpoint + apiPath);
 
         const apiHeaders: { [header: string]: string } = {
+            'X-Appwrite-Project': this.client.config.project,
+            'accept': 'application/json',
         }
 
         return this.client.call(
@@ -299,6 +297,7 @@ class AccountRuntime<TAuth extends ClientAuth | ServerAuth = ClientAuth | Server
         const uri = new URL(this.client.config.endpoint + apiPath);
 
         const apiHeaders: { [header: string]: string } = {
+            'X-Appwrite-Project': this.client.config.project,
             'content-type': 'application/json',
         }
 
@@ -351,7 +350,9 @@ class AccountRuntime<TAuth extends ClientAuth | ServerAuth = ClientAuth | Server
         const uri = new URL(this.client.config.endpoint + apiPath);
 
         const apiHeaders: { [header: string]: string } = {
+            'X-Appwrite-Project': this.client.config.project,
             'content-type': 'application/json',
+            'accept': 'application/json',
         }
 
         return this.client.call(
@@ -411,6 +412,8 @@ class AccountRuntime<TAuth extends ClientAuth | ServerAuth = ClientAuth | Server
         const uri = new URL(this.client.config.endpoint + apiPath);
 
         const apiHeaders: { [header: string]: string } = {
+            'X-Appwrite-Project': this.client.config.project,
+            'accept': 'application/json',
         }
 
         return this.client.call(
@@ -465,7 +468,9 @@ class AccountRuntime<TAuth extends ClientAuth | ServerAuth = ClientAuth | Server
         const uri = new URL(this.client.config.endpoint + apiPath);
 
         const apiHeaders: { [header: string]: string } = {
+            'X-Appwrite-Project': this.client.config.project,
             'content-type': 'application/json',
+            'accept': 'application/json',
         }
 
         return this.client.call(
@@ -518,7 +523,9 @@ class AccountRuntime<TAuth extends ClientAuth | ServerAuth = ClientAuth | Server
         const uri = new URL(this.client.config.endpoint + apiPath);
 
         const apiHeaders: { [header: string]: string } = {
+            'X-Appwrite-Project': this.client.config.project,
             'content-type': 'application/json',
+            'accept': 'application/json',
         }
 
         return this.client.call(
@@ -570,7 +577,9 @@ class AccountRuntime<TAuth extends ClientAuth | ServerAuth = ClientAuth | Server
         const uri = new URL(this.client.config.endpoint + apiPath);
 
         const apiHeaders: { [header: string]: string } = {
+            'X-Appwrite-Project': this.client.config.project,
             'content-type': 'application/json',
+            'accept': 'application/json',
         }
 
         return this.client.call(
@@ -634,7 +643,9 @@ class AccountRuntime<TAuth extends ClientAuth | ServerAuth = ClientAuth | Server
         const uri = new URL(this.client.config.endpoint + apiPath);
 
         const apiHeaders: { [header: string]: string } = {
+            'X-Appwrite-Project': this.client.config.project,
             'content-type': 'application/json',
+            'accept': 'application/json',
         }
 
         return this.client.call(
@@ -697,7 +708,9 @@ class AccountRuntime<TAuth extends ClientAuth | ServerAuth = ClientAuth | Server
         const uri = new URL(this.client.config.endpoint + apiPath);
 
         const apiHeaders: { [header: string]: string } = {
+            'X-Appwrite-Project': this.client.config.project,
             'content-type': 'application/json',
+            'accept': 'application/json',
         }
 
         return this.client.call(
@@ -750,6 +763,7 @@ class AccountRuntime<TAuth extends ClientAuth | ServerAuth = ClientAuth | Server
         const uri = new URL(this.client.config.endpoint + apiPath);
 
         const apiHeaders: { [header: string]: string } = {
+            'X-Appwrite-Project': this.client.config.project,
             'content-type': 'application/json',
         }
 
@@ -802,6 +816,7 @@ class AccountRuntime<TAuth extends ClientAuth | ServerAuth = ClientAuth | Server
         const uri = new URL(this.client.config.endpoint + apiPath);
 
         const apiHeaders: { [header: string]: string } = {
+            'X-Appwrite-Project': this.client.config.project,
             'content-type': 'application/json',
         }
 
@@ -858,7 +873,9 @@ class AccountRuntime<TAuth extends ClientAuth | ServerAuth = ClientAuth | Server
         const uri = new URL(this.client.config.endpoint + apiPath);
 
         const apiHeaders: { [header: string]: string } = {
+            'X-Appwrite-Project': this.client.config.project,
             'content-type': 'application/json',
+            'accept': 'application/json',
         }
 
         return this.client.call(
@@ -913,7 +930,9 @@ class AccountRuntime<TAuth extends ClientAuth | ServerAuth = ClientAuth | Server
         const uri = new URL(this.client.config.endpoint + apiPath);
 
         const apiHeaders: { [header: string]: string } = {
+            'X-Appwrite-Project': this.client.config.project,
             'content-type': 'application/json',
+            'accept': 'application/json',
         }
 
         return this.client.call(
@@ -980,7 +999,9 @@ class AccountRuntime<TAuth extends ClientAuth | ServerAuth = ClientAuth | Server
         const uri = new URL(this.client.config.endpoint + apiPath);
 
         const apiHeaders: { [header: string]: string } = {
+            'X-Appwrite-Project': this.client.config.project,
             'content-type': 'application/json',
+            'accept': 'application/json',
         }
 
         return this.client.call(
@@ -1046,7 +1067,9 @@ class AccountRuntime<TAuth extends ClientAuth | ServerAuth = ClientAuth | Server
         const uri = new URL(this.client.config.endpoint + apiPath);
 
         const apiHeaders: { [header: string]: string } = {
+            'X-Appwrite-Project': this.client.config.project,
             'content-type': 'application/json',
+            'accept': 'application/json',
         }
 
         return this.client.call(
@@ -1071,6 +1094,8 @@ class AccountRuntime<TAuth extends ClientAuth | ServerAuth = ClientAuth | Server
         const uri = new URL(this.client.config.endpoint + apiPath);
 
         const apiHeaders: { [header: string]: string } = {
+            'X-Appwrite-Project': this.client.config.project,
+            'accept': 'application/json',
         }
 
         return this.client.call(
@@ -1094,6 +1119,8 @@ class AccountRuntime<TAuth extends ClientAuth | ServerAuth = ClientAuth | Server
         const uri = new URL(this.client.config.endpoint + apiPath);
 
         const apiHeaders: { [header: string]: string } = {
+            'X-Appwrite-Project': this.client.config.project,
+            'accept': 'application/json',
         }
 
         return this.client.call(
@@ -1118,6 +1145,8 @@ class AccountRuntime<TAuth extends ClientAuth | ServerAuth = ClientAuth | Server
         const uri = new URL(this.client.config.endpoint + apiPath);
 
         const apiHeaders: { [header: string]: string } = {
+            'X-Appwrite-Project': this.client.config.project,
+            'accept': 'application/json',
         }
 
         return this.client.call(
@@ -1141,6 +1170,8 @@ class AccountRuntime<TAuth extends ClientAuth | ServerAuth = ClientAuth | Server
         const uri = new URL(this.client.config.endpoint + apiPath);
 
         const apiHeaders: { [header: string]: string } = {
+            'X-Appwrite-Project': this.client.config.project,
+            'accept': 'application/json',
         }
 
         return this.client.call(
@@ -1165,7 +1196,9 @@ class AccountRuntime<TAuth extends ClientAuth | ServerAuth = ClientAuth | Server
         const uri = new URL(this.client.config.endpoint + apiPath);
 
         const apiHeaders: { [header: string]: string } = {
+            'X-Appwrite-Project': this.client.config.project,
             'content-type': 'application/json',
+            'accept': 'application/json',
         }
 
         return this.client.call(
@@ -1189,7 +1222,9 @@ class AccountRuntime<TAuth extends ClientAuth | ServerAuth = ClientAuth | Server
         const uri = new URL(this.client.config.endpoint + apiPath);
 
         const apiHeaders: { [header: string]: string } = {
+            'X-Appwrite-Project': this.client.config.project,
             'content-type': 'application/json',
+            'accept': 'application/json',
         }
 
         return this.client.call(
@@ -1214,7 +1249,9 @@ class AccountRuntime<TAuth extends ClientAuth | ServerAuth = ClientAuth | Server
         const uri = new URL(this.client.config.endpoint + apiPath);
 
         const apiHeaders: { [header: string]: string } = {
+            'X-Appwrite-Project': this.client.config.project,
             'content-type': 'application/json',
+            'accept': 'application/json',
         }
 
         return this.client.call(
@@ -1238,7 +1275,9 @@ class AccountRuntime<TAuth extends ClientAuth | ServerAuth = ClientAuth | Server
         const uri = new URL(this.client.config.endpoint + apiPath);
 
         const apiHeaders: { [header: string]: string } = {
+            'X-Appwrite-Project': this.client.config.project,
             'content-type': 'application/json',
+            'accept': 'application/json',
         }
 
         return this.client.call(
@@ -1293,7 +1332,9 @@ class AccountRuntime<TAuth extends ClientAuth | ServerAuth = ClientAuth | Server
         const uri = new URL(this.client.config.endpoint + apiPath);
 
         const apiHeaders: { [header: string]: string } = {
+            'X-Appwrite-Project': this.client.config.project,
             'content-type': 'application/json',
+            'accept': 'application/json',
         }
 
         return this.client.call(
@@ -1308,7 +1349,7 @@ class AccountRuntime<TAuth extends ClientAuth | ServerAuth = ClientAuth | Server
      * Update currently logged in user password. For validation, user is required to pass in the new password, and the old password. For users created with OAuth, Team Invites and Magic URL, oldPassword is optional.
      *
      * @param {string} params.password - New user password. Must be at least 8 chars.
-     * @param {string} params.oldPassword - Current user password. Must be at least 8 chars.
+     * @param {string} params.oldPassword - Current user password. Max length: 256 chars.
      * @throws {AppwriteException}
      * @returns {Promise<Models.User<Preferences>>}
      */
@@ -1317,7 +1358,7 @@ class AccountRuntime<TAuth extends ClientAuth | ServerAuth = ClientAuth | Server
      * Update currently logged in user password. For validation, user is required to pass in the new password, and the old password. For users created with OAuth, Team Invites and Magic URL, oldPassword is optional.
      *
      * @param {string} password - New user password. Must be at least 8 chars.
-     * @param {string} oldPassword - Current user password. Must be at least 8 chars.
+     * @param {string} oldPassword - Current user password. Max length: 256 chars.
      * @throws {AppwriteException}
      * @returns {Promise<Models.User<Preferences>>}
      * @deprecated Use the object parameter style method for a better developer experience.
@@ -1356,7 +1397,9 @@ class AccountRuntime<TAuth extends ClientAuth | ServerAuth = ClientAuth | Server
         const uri = new URL(this.client.config.endpoint + apiPath);
 
         const apiHeaders: { [header: string]: string } = {
+            'X-Appwrite-Project': this.client.config.project,
             'content-type': 'application/json',
+            'accept': 'application/json',
         }
 
         return this.client.call(
@@ -1422,7 +1465,9 @@ class AccountRuntime<TAuth extends ClientAuth | ServerAuth = ClientAuth | Server
         const uri = new URL(this.client.config.endpoint + apiPath);
 
         const apiHeaders: { [header: string]: string } = {
+            'X-Appwrite-Project': this.client.config.project,
             'content-type': 'application/json',
+            'accept': 'application/json',
         }
 
         return this.client.call(
@@ -1446,6 +1491,8 @@ class AccountRuntime<TAuth extends ClientAuth | ServerAuth = ClientAuth | Server
         const uri = new URL(this.client.config.endpoint + apiPath);
 
         const apiHeaders: { [header: string]: string } = {
+            'X-Appwrite-Project': this.client.config.project,
+            'accept': 'application/json',
         }
 
         return this.client.call(
@@ -1500,7 +1547,9 @@ class AccountRuntime<TAuth extends ClientAuth | ServerAuth = ClientAuth | Server
         const uri = new URL(this.client.config.endpoint + apiPath);
 
         const apiHeaders: { [header: string]: string } = {
+            'X-Appwrite-Project': this.client.config.project,
             'content-type': 'application/json',
+            'accept': 'application/json',
         }
 
         return this.client.call(
@@ -1566,7 +1615,9 @@ class AccountRuntime<TAuth extends ClientAuth | ServerAuth = ClientAuth | Server
         const uri = new URL(this.client.config.endpoint + apiPath);
 
         const apiHeaders: { [header: string]: string } = {
+            'X-Appwrite-Project': this.client.config.project,
             'content-type': 'application/json',
+            'accept': 'application/json',
         }
 
         return this.client.call(
@@ -1646,7 +1697,9 @@ class AccountRuntime<TAuth extends ClientAuth | ServerAuth = ClientAuth | Server
         const uri = new URL(this.client.config.endpoint + apiPath);
 
         const apiHeaders: { [header: string]: string } = {
+            'X-Appwrite-Project': this.client.config.project,
             'content-type': 'application/json',
+            'accept': 'application/json',
         }
 
         return this.client.call(
@@ -1670,6 +1723,8 @@ class AccountRuntime<TAuth extends ClientAuth | ServerAuth = ClientAuth | Server
         const uri = new URL(this.client.config.endpoint + apiPath);
 
         const apiHeaders: { [header: string]: string } = {
+            'X-Appwrite-Project': this.client.config.project,
+            'accept': 'application/json',
         }
 
         return this.client.call(
@@ -1693,6 +1748,7 @@ class AccountRuntime<TAuth extends ClientAuth | ServerAuth = ClientAuth | Server
         const uri = new URL(this.client.config.endpoint + apiPath);
 
         const apiHeaders: { [header: string]: string } = {
+            'X-Appwrite-Project': this.client.config.project,
             'content-type': 'application/json',
         }
 
@@ -1717,7 +1773,9 @@ class AccountRuntime<TAuth extends ClientAuth | ServerAuth = ClientAuth | Server
         const uri = new URL(this.client.config.endpoint + apiPath);
 
         const apiHeaders: { [header: string]: string } = {
+            'X-Appwrite-Project': this.client.config.project,
             'content-type': 'application/json',
+            'accept': 'application/json',
         }
 
         return this.client.call(
@@ -1787,7 +1845,9 @@ class AccountRuntime<TAuth extends ClientAuth | ServerAuth = ClientAuth | Server
         const uri = new URL(this.client.config.endpoint + apiPath);
 
         const apiHeaders: { [header: string]: string } = {
+            'X-Appwrite-Project': this.client.config.project,
             'content-type': 'application/json',
+            'accept': 'application/json',
         }
 
         return this.client.call(
@@ -1854,7 +1914,9 @@ class AccountRuntime<TAuth extends ClientAuth | ServerAuth = ClientAuth | Server
         const uri = new URL(this.client.config.endpoint + apiPath);
 
         const apiHeaders: { [header: string]: string } = {
+            'X-Appwrite-Project': this.client.config.project,
             'content-type': 'application/json',
+            'accept': 'application/json',
         }
 
         return this.client.call(
@@ -1938,12 +2000,16 @@ class AccountRuntime<TAuth extends ClientAuth | ServerAuth = ClientAuth | Server
         const uri = new URL(this.client.config.endpoint + apiPath);
 
         const apiHeaders: { [header: string]: string } = {
+            'X-Appwrite-Project': this.client.config.project,
+            'accept': 'text/html',
         }
 
-        payload['project'] = (this.client.config as unknown as Record<string, string>)['project'];
+        payload['project'] = this.client.config.project;
+
         for (const [key, value] of Object.entries(Service.flatten(payload))) {
             uri.searchParams.append(key, value);
         }
+        
         if (typeof window !== 'undefined' && window?.location) {
             window.location.href = uri.toString();
             return;
@@ -2008,7 +2074,9 @@ class AccountRuntime<TAuth extends ClientAuth | ServerAuth = ClientAuth | Server
         const uri = new URL(this.client.config.endpoint + apiPath);
 
         const apiHeaders: { [header: string]: string } = {
+            'X-Appwrite-Project': this.client.config.project,
             'content-type': 'application/json',
+            'accept': 'application/json',
         }
 
         return this.client.call(
@@ -2074,7 +2142,9 @@ class AccountRuntime<TAuth extends ClientAuth | ServerAuth = ClientAuth | Server
         const uri = new URL(this.client.config.endpoint + apiPath);
 
         const apiHeaders: { [header: string]: string } = {
+            'X-Appwrite-Project': this.client.config.project,
             'content-type': 'application/json',
+            'accept': 'application/json',
         }
 
         return this.client.call(
@@ -2126,6 +2196,8 @@ class AccountRuntime<TAuth extends ClientAuth | ServerAuth = ClientAuth | Server
         const uri = new URL(this.client.config.endpoint + apiPath);
 
         const apiHeaders: { [header: string]: string } = {
+            'X-Appwrite-Project': this.client.config.project,
+            'accept': 'application/json',
         }
 
         return this.client.call(
@@ -2177,7 +2249,9 @@ class AccountRuntime<TAuth extends ClientAuth | ServerAuth = ClientAuth | Server
         const uri = new URL(this.client.config.endpoint + apiPath);
 
         const apiHeaders: { [header: string]: string } = {
+            'X-Appwrite-Project': this.client.config.project,
             'content-type': 'application/json',
+            'accept': 'application/json',
         }
 
         return this.client.call(
@@ -2229,6 +2303,7 @@ class AccountRuntime<TAuth extends ClientAuth | ServerAuth = ClientAuth | Server
         const uri = new URL(this.client.config.endpoint + apiPath);
 
         const apiHeaders: { [header: string]: string } = {
+            'X-Appwrite-Project': this.client.config.project,
             'content-type': 'application/json',
         }
 
@@ -2253,7 +2328,9 @@ class AccountRuntime<TAuth extends ClientAuth | ServerAuth = ClientAuth | Server
         const uri = new URL(this.client.config.endpoint + apiPath);
 
         const apiHeaders: { [header: string]: string } = {
+            'X-Appwrite-Project': this.client.config.project,
             'content-type': 'application/json',
+            'accept': 'application/json',
         }
 
         return this.client.call(
@@ -2326,7 +2403,9 @@ class AccountRuntime<TAuth extends ClientAuth | ServerAuth = ClientAuth | Server
         const uri = new URL(this.client.config.endpoint + apiPath);
 
         const apiHeaders: { [header: string]: string } = {
+            'X-Appwrite-Project': this.client.config.project,
             'content-type': 'application/json',
+            'accept': 'application/json',
         }
 
         return this.client.call(
@@ -2389,7 +2468,9 @@ class AccountRuntime<TAuth extends ClientAuth | ServerAuth = ClientAuth | Server
         const uri = new URL(this.client.config.endpoint + apiPath);
 
         const apiHeaders: { [header: string]: string } = {
+            'X-Appwrite-Project': this.client.config.project,
             'content-type': 'application/json',
+            'accept': 'application/json',
         }
 
         return this.client.call(
@@ -2441,6 +2522,7 @@ class AccountRuntime<TAuth extends ClientAuth | ServerAuth = ClientAuth | Server
         const uri = new URL(this.client.config.endpoint + apiPath);
 
         const apiHeaders: { [header: string]: string } = {
+            'X-Appwrite-Project': this.client.config.project,
             'content-type': 'application/json',
         }
 
@@ -2520,7 +2602,9 @@ class AccountRuntime<TAuth extends ClientAuth | ServerAuth = ClientAuth | Server
         const uri = new URL(this.client.config.endpoint + apiPath);
 
         const apiHeaders: { [header: string]: string } = {
+            'X-Appwrite-Project': this.client.config.project,
             'content-type': 'application/json',
+            'accept': 'application/json',
         }
 
         return this.client.call(
@@ -2606,7 +2690,9 @@ class AccountRuntime<TAuth extends ClientAuth | ServerAuth = ClientAuth | Server
         const uri = new URL(this.client.config.endpoint + apiPath);
 
         const apiHeaders: { [header: string]: string } = {
+            'X-Appwrite-Project': this.client.config.project,
             'content-type': 'application/json',
+            'accept': 'application/json',
         }
 
         return this.client.call(
@@ -2688,12 +2774,16 @@ class AccountRuntime<TAuth extends ClientAuth | ServerAuth = ClientAuth | Server
         const uri = new URL(this.client.config.endpoint + apiPath);
 
         const apiHeaders: { [header: string]: string } = {
+            'X-Appwrite-Project': this.client.config.project,
+            'accept': 'text/html',
         }
 
-        payload['project'] = (this.client.config as unknown as Record<string, string>)['project'];
+        payload['project'] = this.client.config.project;
+
         for (const [key, value] of Object.entries(Service.flatten(payload))) {
             uri.searchParams.append(key, value);
         }
+        
         if (typeof window !== 'undefined' && window?.location) {
             window.location.href = uri.toString();
             return;
@@ -2761,7 +2851,9 @@ class AccountRuntime<TAuth extends ClientAuth | ServerAuth = ClientAuth | Server
         const uri = new URL(this.client.config.endpoint + apiPath);
 
         const apiHeaders: { [header: string]: string } = {
+            'X-Appwrite-Project': this.client.config.project,
             'content-type': 'application/json',
+            'accept': 'application/json',
         }
 
         return this.client.call(
@@ -2822,7 +2914,9 @@ class AccountRuntime<TAuth extends ClientAuth | ServerAuth = ClientAuth | Server
         const uri = new URL(this.client.config.endpoint + apiPath);
 
         const apiHeaders: { [header: string]: string } = {
+            'X-Appwrite-Project': this.client.config.project,
             'content-type': 'application/json',
+            'accept': 'application/json',
         }
 
         return this.client.call(
@@ -2884,7 +2978,9 @@ class AccountRuntime<TAuth extends ClientAuth | ServerAuth = ClientAuth | Server
         const uri = new URL(this.client.config.endpoint + apiPath);
 
         const apiHeaders: { [header: string]: string } = {
+            'X-Appwrite-Project': this.client.config.project,
             'content-type': 'application/json',
+            'accept': 'application/json',
         }
 
         return this.client.call(
@@ -2950,7 +3046,9 @@ class AccountRuntime<TAuth extends ClientAuth | ServerAuth = ClientAuth | Server
         const uri = new URL(this.client.config.endpoint + apiPath);
 
         const apiHeaders: { [header: string]: string } = {
+            'X-Appwrite-Project': this.client.config.project,
             'content-type': 'application/json',
+            'accept': 'application/json',
         }
 
         return this.client.call(
@@ -3017,7 +3115,9 @@ class AccountRuntime<TAuth extends ClientAuth | ServerAuth = ClientAuth | Server
         const uri = new URL(this.client.config.endpoint + apiPath);
 
         const apiHeaders: { [header: string]: string } = {
+            'X-Appwrite-Project': this.client.config.project,
             'content-type': 'application/json',
+            'accept': 'application/json',
         }
 
         return this.client.call(
@@ -3041,7 +3141,9 @@ class AccountRuntime<TAuth extends ClientAuth | ServerAuth = ClientAuth | Server
         const uri = new URL(this.client.config.endpoint + apiPath);
 
         const apiHeaders: { [header: string]: string } = {
+            'X-Appwrite-Project': this.client.config.project,
             'content-type': 'application/json',
+            'accept': 'application/json',
         }
 
         return this.client.call(
@@ -3107,7 +3209,9 @@ class AccountRuntime<TAuth extends ClientAuth | ServerAuth = ClientAuth | Server
         const uri = new URL(this.client.config.endpoint + apiPath);
 
         const apiHeaders: { [header: string]: string } = {
+            'X-Appwrite-Project': this.client.config.project,
             'content-type': 'application/json',
+            'accept': 'application/json',
         }
 
         return this.client.call(
@@ -3118,9 +3222,3 @@ class AccountRuntime<TAuth extends ClientAuth | ServerAuth = ClientAuth | Server
         );
     }
 }
-
-const Account = AccountRuntime as unknown as {
-    new <TAuth extends ClientAuth | ServerAuth = ClientAuth | ServerAuth>(client: Client<TAuth>): Account<TAuth>;
-};
-
-export { Account };

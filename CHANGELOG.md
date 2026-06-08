@@ -2,25 +2,14 @@
 
 ## 26.0.0
 
-* Added: Isomorphic `Client<TAuth>` typed by auth capability — services narrow available methods by auth type at compile time
-* Added: Static factory constructors `Client.from`, `Client.fromSession`, `Client.fromAPIKey`, `Client.fromCookie`, `Client.fromJWT`, `Client.fromDevKey`, and `Client.fromImpersonation`
-* Added: Server-side auth via `apiKey`, `cookie`, and `jwt` factories
-* Added: Admin and server-only endpoints (`Users`, `Projects`, function and site deployments, storage buckets, and more)
-* Breaking: Renamed `Presences.update` to `Presences.updatePresence`
-* Breaking: `Presences.upsert` and `Presences.updatePresence` now require a `userId` parameter
-* Deprecated: `new Client()` constructor and `setEndpoint`/`setProject`/setter pattern remain for backwards compatibility but are now marked deprecated
-
-### Migration
-
-```ts
-// Before (25.x)
-await presences.upsert(presenceId, status);
-await presences.update(presenceId, status);
-
-// After (26.0.0)
-await presences.upsert(presenceId, userId, status);
-await presences.updatePresence(presenceId, userId, status);
-```
+* Breaking: Removed `Client.setKey()` and `Client.setForwardedUserAgent()` methods.
+* Breaking: Renamed `Theme` enum to `BrowserTheme`, changing `avatars.getScreenshot()` `theme` param type.
+* Breaking: Made `presences` `list`/`get`/`upsert`/`update` non-generic and removed `Models.DefaultPresence`.
+* Added: `apps` and `oauth2` services for application and OAuth2 management.
+* Added: `App`, `AppSecret`, `AppSecretPlaintext`, `AppsList`, and `AppSecretList` models.
+* Added: `Oauth2Authorize`, `Oauth2Approve`, `Oauth2Reject`, and `Oauth2Grant` models.
+* Added: Email metadata fields to `User` (`emailCanonical`, `emailIsFree`, `emailIsDisposable`, `emailIsCorporate`, `emailIsCanonical`).
+* Added: `Membership.userAccessedAt` and `Presence.metadata` fields.
 
 ## 25.1.1
 

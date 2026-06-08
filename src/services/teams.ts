@@ -1,21 +1,12 @@
-import { AppwriteException, Client, type ClientAuth, type ServerAuth, type Payload } from '../client';
+import { Service } from '../service';
+import { AppwriteException, Client, type Payload, UploadProgress } from '../client';
 import type { Models } from '../models';
 
 
-type TeamsServerOnlyMethod = never;
-type TeamsClientOnlyMethod = never;
+export class Teams {
+    client: Client;
 
-export type Teams<TAuth extends ClientAuth | ServerAuth = ClientAuth | ServerAuth> =
-    TAuth extends ClientAuth
-        ? Omit<TeamsRuntime<TAuth>, 'client' | TeamsServerOnlyMethod>
-        : TAuth extends ServerAuth
-            ? Omit<TeamsRuntime<TAuth>, 'client' | TeamsClientOnlyMethod>
-            : Omit<TeamsRuntime<TAuth>, 'client'>;
-
-class TeamsRuntime<TAuth extends ClientAuth | ServerAuth = ClientAuth | ServerAuth> {
-    client: Client<TAuth>;
-
-    constructor(client: Client<TAuth>) {
+    constructor(client: Client) {
         this.client = client;
     }
 
@@ -75,6 +66,8 @@ class TeamsRuntime<TAuth extends ClientAuth | ServerAuth = ClientAuth | ServerAu
         const uri = new URL(this.client.config.endpoint + apiPath);
 
         const apiHeaders: { [header: string]: string } = {
+            'X-Appwrite-Project': this.client.config.project,
+            'accept': 'application/json',
         }
 
         return this.client.call(
@@ -147,7 +140,9 @@ class TeamsRuntime<TAuth extends ClientAuth | ServerAuth = ClientAuth | ServerAu
         const uri = new URL(this.client.config.endpoint + apiPath);
 
         const apiHeaders: { [header: string]: string } = {
+            'X-Appwrite-Project': this.client.config.project,
             'content-type': 'application/json',
+            'accept': 'application/json',
         }
 
         return this.client.call(
@@ -199,6 +194,8 @@ class TeamsRuntime<TAuth extends ClientAuth | ServerAuth = ClientAuth | ServerAu
         const uri = new URL(this.client.config.endpoint + apiPath);
 
         const apiHeaders: { [header: string]: string } = {
+            'X-Appwrite-Project': this.client.config.project,
+            'accept': 'application/json',
         }
 
         return this.client.call(
@@ -261,7 +258,9 @@ class TeamsRuntime<TAuth extends ClientAuth | ServerAuth = ClientAuth | ServerAu
         const uri = new URL(this.client.config.endpoint + apiPath);
 
         const apiHeaders: { [header: string]: string } = {
+            'X-Appwrite-Project': this.client.config.project,
             'content-type': 'application/json',
+            'accept': 'application/json',
         }
 
         return this.client.call(
@@ -313,6 +312,7 @@ class TeamsRuntime<TAuth extends ClientAuth | ServerAuth = ClientAuth | ServerAu
         const uri = new URL(this.client.config.endpoint + apiPath);
 
         const apiHeaders: { [header: string]: string } = {
+            'X-Appwrite-Project': this.client.config.project,
             'content-type': 'application/json',
         }
 
@@ -387,6 +387,8 @@ class TeamsRuntime<TAuth extends ClientAuth | ServerAuth = ClientAuth | ServerAu
         const uri = new URL(this.client.config.endpoint + apiPath);
 
         const apiHeaders: { [header: string]: string } = {
+            'X-Appwrite-Project': this.client.config.project,
+            'accept': 'application/json',
         }
 
         return this.client.call(
@@ -498,7 +500,9 @@ class TeamsRuntime<TAuth extends ClientAuth | ServerAuth = ClientAuth | ServerAu
         const uri = new URL(this.client.config.endpoint + apiPath);
 
         const apiHeaders: { [header: string]: string } = {
+            'X-Appwrite-Project': this.client.config.project,
             'content-type': 'application/json',
+            'accept': 'application/json',
         }
 
         return this.client.call(
@@ -558,6 +562,8 @@ class TeamsRuntime<TAuth extends ClientAuth | ServerAuth = ClientAuth | ServerAu
         const uri = new URL(this.client.config.endpoint + apiPath);
 
         const apiHeaders: { [header: string]: string } = {
+            'X-Appwrite-Project': this.client.config.project,
+            'accept': 'application/json',
         }
 
         return this.client.call(
@@ -629,7 +635,9 @@ class TeamsRuntime<TAuth extends ClientAuth | ServerAuth = ClientAuth | ServerAu
         const uri = new URL(this.client.config.endpoint + apiPath);
 
         const apiHeaders: { [header: string]: string } = {
+            'X-Appwrite-Project': this.client.config.project,
             'content-type': 'application/json',
+            'accept': 'application/json',
         }
 
         return this.client.call(
@@ -689,6 +697,7 @@ class TeamsRuntime<TAuth extends ClientAuth | ServerAuth = ClientAuth | ServerAu
         const uri = new URL(this.client.config.endpoint + apiPath);
 
         const apiHeaders: { [header: string]: string } = {
+            'X-Appwrite-Project': this.client.config.project,
             'content-type': 'application/json',
         }
 
@@ -775,7 +784,9 @@ class TeamsRuntime<TAuth extends ClientAuth | ServerAuth = ClientAuth | ServerAu
         const uri = new URL(this.client.config.endpoint + apiPath);
 
         const apiHeaders: { [header: string]: string } = {
+            'X-Appwrite-Project': this.client.config.project,
             'content-type': 'application/json',
+            'accept': 'application/json',
         }
 
         return this.client.call(
@@ -827,6 +838,8 @@ class TeamsRuntime<TAuth extends ClientAuth | ServerAuth = ClientAuth | ServerAu
         const uri = new URL(this.client.config.endpoint + apiPath);
 
         const apiHeaders: { [header: string]: string } = {
+            'X-Appwrite-Project': this.client.config.project,
+            'accept': 'application/json',
         }
 
         return this.client.call(
@@ -889,7 +902,9 @@ class TeamsRuntime<TAuth extends ClientAuth | ServerAuth = ClientAuth | ServerAu
         const uri = new URL(this.client.config.endpoint + apiPath);
 
         const apiHeaders: { [header: string]: string } = {
+            'X-Appwrite-Project': this.client.config.project,
             'content-type': 'application/json',
+            'accept': 'application/json',
         }
 
         return this.client.call(
@@ -900,9 +915,3 @@ class TeamsRuntime<TAuth extends ClientAuth | ServerAuth = ClientAuth | ServerAu
         );
     }
 }
-
-const Teams = TeamsRuntime as unknown as {
-    new <TAuth extends ClientAuth | ServerAuth = ClientAuth | ServerAuth>(client: Client<TAuth>): Teams<TAuth>;
-};
-
-export { Teams };

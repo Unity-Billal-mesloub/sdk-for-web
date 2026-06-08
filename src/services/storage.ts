@@ -1,450 +1,15 @@
 import { Service } from '../service';
-import { AppwriteException, Client, type ClientAuth, type ServerAuth, type Payload, UploadProgress } from '../client';
+import { AppwriteException, Client, type Payload, UploadProgress } from '../client';
 import type { Models } from '../models';
 
-import { Compression } from '../enums/compression';
 import { ImageGravity } from '../enums/image-gravity';
 import { ImageFormat } from '../enums/image-format';
 
-type StorageServerOnlyMethod = 'listBuckets' | 'createBucket' | 'getBucket' | 'updateBucket' | 'deleteBucket';
-type StorageClientOnlyMethod = never;
+export class Storage {
+    client: Client;
 
-export type Storage<TAuth extends ClientAuth | ServerAuth = ClientAuth | ServerAuth> =
-    TAuth extends ClientAuth
-        ? Omit<StorageRuntime<TAuth>, 'client' | StorageServerOnlyMethod>
-        : TAuth extends ServerAuth
-            ? Omit<StorageRuntime<TAuth>, 'client' | StorageClientOnlyMethod>
-            : Omit<StorageRuntime<TAuth>, 'client'>;
-
-class StorageRuntime<TAuth extends ClientAuth | ServerAuth = ClientAuth | ServerAuth> {
-    client: Client<TAuth>;
-
-    constructor(client: Client<TAuth>) {
+    constructor(client: Client) {
         this.client = client;
-    }
-
-    /**
-     * Get a list of all the storage buckets. You can use the query params to filter your results.
-     *
-     * @param {string[]} params.queries - Array of query strings generated using the Query class provided by the SDK. [Learn more about queries](https://appwrite.io/docs/queries). Maximum of 100 queries are allowed, each 4096 characters long. You may filter on the following attributes: enabled, name, fileSecurity, maximumFileSize, encryption, antivirus, transformations
-     * @param {string} params.search - Search term to filter your list results. Max length: 256 chars.
-     * @param {boolean} params.total - When set to false, the total count returned will be 0 and will not be calculated.
-     * @throws {AppwriteException}
-     * @returns {Promise<Models.BucketList>}
-     */
-    listBuckets(this: Storage<ServerAuth>, params?: { queries?: string[], search?: string, total?: boolean }): Promise<Models.BucketList>;
-    /**
-     * Get a list of all the storage buckets. You can use the query params to filter your results.
-     *
-     * @param {string[]} queries - Array of query strings generated using the Query class provided by the SDK. [Learn more about queries](https://appwrite.io/docs/queries). Maximum of 100 queries are allowed, each 4096 characters long. You may filter on the following attributes: enabled, name, fileSecurity, maximumFileSize, encryption, antivirus, transformations
-     * @param {string} search - Search term to filter your list results. Max length: 256 chars.
-     * @param {boolean} total - When set to false, the total count returned will be 0 and will not be calculated.
-     * @throws {AppwriteException}
-     * @returns {Promise<Models.BucketList>}
-     * @deprecated Use the object parameter style method for a better developer experience.
-     */
-    listBuckets(this: Storage<ServerAuth>, queries?: string[], search?: string, total?: boolean): Promise<Models.BucketList>;
-    listBuckets(
-        paramsOrFirst?: { queries?: string[], search?: string, total?: boolean } | string[],
-        ...rest: [(string)?, (boolean)?]    
-    ): Promise<Models.BucketList> {
-        let params: { queries?: string[], search?: string, total?: boolean };
-        
-        if (!paramsOrFirst || (paramsOrFirst && typeof paramsOrFirst === 'object' && !Array.isArray(paramsOrFirst))) {
-            params = (paramsOrFirst || {}) as { queries?: string[], search?: string, total?: boolean };
-        } else {
-            params = {
-                queries: paramsOrFirst as string[],
-                search: rest[0] as string,
-                total: rest[1] as boolean            
-            };
-        }
-        
-        const queries = params.queries;
-        const search = params.search;
-        const total = params.total;
-
-
-        const apiPath = '/storage/buckets';
-        const payload: Payload = {};
-        if (typeof queries !== 'undefined') {
-            payload['queries'] = queries;
-        }
-        if (typeof search !== 'undefined') {
-            payload['search'] = search;
-        }
-        if (typeof total !== 'undefined') {
-            payload['total'] = total;
-        }
-        const uri = new URL(this.client.config.endpoint + apiPath);
-
-        const apiHeaders: { [header: string]: string } = {
-        }
-
-        return this.client.call(
-            'get',
-            uri,
-            apiHeaders,
-            payload
-        );
-    }
-
-    /**
-     * Create a new storage bucket.
-     *
-     * @param {string} params.bucketId - Unique Id. Choose a custom ID or generate a random ID with `ID.unique()`. Valid chars are a-z, A-Z, 0-9, period, hyphen, and underscore. Can't start with a special char. Max length is 36 chars.
-     * @param {string} params.name - Bucket name
-     * @param {string[]} params.permissions - An array of permission strings. By default, no user is granted with any permissions. [Learn more about permissions](https://appwrite.io/docs/permissions).
-     * @param {boolean} params.fileSecurity - Enables configuring permissions for individual file. A user needs one of file or bucket level permissions to access a file. [Learn more about permissions](https://appwrite.io/docs/permissions).
-     * @param {boolean} params.enabled - Is bucket enabled? When set to 'disabled', users cannot access the files in this bucket but Server SDKs with and API key can still access the bucket. No files are lost when this is toggled.
-     * @param {number} params.maximumFileSize - Maximum file size allowed in bytes. Maximum allowed value is 5GB.
-     * @param {string[]} params.allowedFileExtensions - Allowed file extensions. Maximum of 100 extensions are allowed, each 64 characters long.
-     * @param {Compression} params.compression - Compression algorithm chosen for compression. Can be one of none,  [gzip](https://en.wikipedia.org/wiki/Gzip), or [zstd](https://en.wikipedia.org/wiki/Zstd), For file size above 20MB compression is skipped even if it's enabled
-     * @param {boolean} params.encryption - Is encryption enabled? For file size above 20MB encryption is skipped even if it's enabled
-     * @param {boolean} params.antivirus - Is virus scanning enabled? For file size above 20MB AntiVirus scanning is skipped even if it's enabled
-     * @param {boolean} params.transformations - Are image transformations enabled?
-     * @throws {AppwriteException}
-     * @returns {Promise<Models.Bucket>}
-     */
-    createBucket(this: Storage<ServerAuth>, params: { bucketId: string, name: string, permissions?: string[], fileSecurity?: boolean, enabled?: boolean, maximumFileSize?: number, allowedFileExtensions?: string[], compression?: Compression, encryption?: boolean, antivirus?: boolean, transformations?: boolean }): Promise<Models.Bucket>;
-    /**
-     * Create a new storage bucket.
-     *
-     * @param {string} bucketId - Unique Id. Choose a custom ID or generate a random ID with `ID.unique()`. Valid chars are a-z, A-Z, 0-9, period, hyphen, and underscore. Can't start with a special char. Max length is 36 chars.
-     * @param {string} name - Bucket name
-     * @param {string[]} permissions - An array of permission strings. By default, no user is granted with any permissions. [Learn more about permissions](https://appwrite.io/docs/permissions).
-     * @param {boolean} fileSecurity - Enables configuring permissions for individual file. A user needs one of file or bucket level permissions to access a file. [Learn more about permissions](https://appwrite.io/docs/permissions).
-     * @param {boolean} enabled - Is bucket enabled? When set to 'disabled', users cannot access the files in this bucket but Server SDKs with and API key can still access the bucket. No files are lost when this is toggled.
-     * @param {number} maximumFileSize - Maximum file size allowed in bytes. Maximum allowed value is 5GB.
-     * @param {string[]} allowedFileExtensions - Allowed file extensions. Maximum of 100 extensions are allowed, each 64 characters long.
-     * @param {Compression} compression - Compression algorithm chosen for compression. Can be one of none,  [gzip](https://en.wikipedia.org/wiki/Gzip), or [zstd](https://en.wikipedia.org/wiki/Zstd), For file size above 20MB compression is skipped even if it's enabled
-     * @param {boolean} encryption - Is encryption enabled? For file size above 20MB encryption is skipped even if it's enabled
-     * @param {boolean} antivirus - Is virus scanning enabled? For file size above 20MB AntiVirus scanning is skipped even if it's enabled
-     * @param {boolean} transformations - Are image transformations enabled?
-     * @throws {AppwriteException}
-     * @returns {Promise<Models.Bucket>}
-     * @deprecated Use the object parameter style method for a better developer experience.
-     */
-    createBucket(this: Storage<ServerAuth>, bucketId: string, name: string, permissions?: string[], fileSecurity?: boolean, enabled?: boolean, maximumFileSize?: number, allowedFileExtensions?: string[], compression?: Compression, encryption?: boolean, antivirus?: boolean, transformations?: boolean): Promise<Models.Bucket>;
-    createBucket(
-        paramsOrFirst: { bucketId: string, name: string, permissions?: string[], fileSecurity?: boolean, enabled?: boolean, maximumFileSize?: number, allowedFileExtensions?: string[], compression?: Compression, encryption?: boolean, antivirus?: boolean, transformations?: boolean } | string,
-        ...rest: [(string)?, (string[])?, (boolean)?, (boolean)?, (number)?, (string[])?, (Compression)?, (boolean)?, (boolean)?, (boolean)?]    
-    ): Promise<Models.Bucket> {
-        let params: { bucketId: string, name: string, permissions?: string[], fileSecurity?: boolean, enabled?: boolean, maximumFileSize?: number, allowedFileExtensions?: string[], compression?: Compression, encryption?: boolean, antivirus?: boolean, transformations?: boolean };
-        
-        if ((paramsOrFirst && typeof paramsOrFirst === 'object' && !Array.isArray(paramsOrFirst))) {
-            params = (paramsOrFirst || {}) as { bucketId: string, name: string, permissions?: string[], fileSecurity?: boolean, enabled?: boolean, maximumFileSize?: number, allowedFileExtensions?: string[], compression?: Compression, encryption?: boolean, antivirus?: boolean, transformations?: boolean };
-        } else {
-            params = {
-                bucketId: paramsOrFirst as string,
-                name: rest[0] as string,
-                permissions: rest[1] as string[],
-                fileSecurity: rest[2] as boolean,
-                enabled: rest[3] as boolean,
-                maximumFileSize: rest[4] as number,
-                allowedFileExtensions: rest[5] as string[],
-                compression: rest[6] as Compression,
-                encryption: rest[7] as boolean,
-                antivirus: rest[8] as boolean,
-                transformations: rest[9] as boolean            
-            };
-        }
-        
-        const bucketId = params.bucketId;
-        const name = params.name;
-        const permissions = params.permissions;
-        const fileSecurity = params.fileSecurity;
-        const enabled = params.enabled;
-        const maximumFileSize = params.maximumFileSize;
-        const allowedFileExtensions = params.allowedFileExtensions;
-        const compression = params.compression;
-        const encryption = params.encryption;
-        const antivirus = params.antivirus;
-        const transformations = params.transformations;
-
-        if (typeof bucketId === 'undefined') {
-            throw new AppwriteException('Missing required parameter: "bucketId"');
-        }
-        if (typeof name === 'undefined') {
-            throw new AppwriteException('Missing required parameter: "name"');
-        }
-
-        const apiPath = '/storage/buckets';
-        const payload: Payload = {};
-        if (typeof bucketId !== 'undefined') {
-            payload['bucketId'] = bucketId;
-        }
-        if (typeof name !== 'undefined') {
-            payload['name'] = name;
-        }
-        if (typeof permissions !== 'undefined') {
-            payload['permissions'] = permissions;
-        }
-        if (typeof fileSecurity !== 'undefined') {
-            payload['fileSecurity'] = fileSecurity;
-        }
-        if (typeof enabled !== 'undefined') {
-            payload['enabled'] = enabled;
-        }
-        if (typeof maximumFileSize !== 'undefined') {
-            payload['maximumFileSize'] = maximumFileSize;
-        }
-        if (typeof allowedFileExtensions !== 'undefined') {
-            payload['allowedFileExtensions'] = allowedFileExtensions;
-        }
-        if (typeof compression !== 'undefined') {
-            payload['compression'] = compression;
-        }
-        if (typeof encryption !== 'undefined') {
-            payload['encryption'] = encryption;
-        }
-        if (typeof antivirus !== 'undefined') {
-            payload['antivirus'] = antivirus;
-        }
-        if (typeof transformations !== 'undefined') {
-            payload['transformations'] = transformations;
-        }
-        const uri = new URL(this.client.config.endpoint + apiPath);
-
-        const apiHeaders: { [header: string]: string } = {
-            'content-type': 'application/json',
-        }
-
-        return this.client.call(
-            'post',
-            uri,
-            apiHeaders,
-            payload
-        );
-    }
-
-    /**
-     * Get a storage bucket by its unique ID. This endpoint response returns a JSON object with the storage bucket metadata.
-     *
-     * @param {string} params.bucketId - Bucket unique ID.
-     * @throws {AppwriteException}
-     * @returns {Promise<Models.Bucket>}
-     */
-    getBucket(this: Storage<ServerAuth>, params: { bucketId: string }): Promise<Models.Bucket>;
-    /**
-     * Get a storage bucket by its unique ID. This endpoint response returns a JSON object with the storage bucket metadata.
-     *
-     * @param {string} bucketId - Bucket unique ID.
-     * @throws {AppwriteException}
-     * @returns {Promise<Models.Bucket>}
-     * @deprecated Use the object parameter style method for a better developer experience.
-     */
-    getBucket(this: Storage<ServerAuth>, bucketId: string): Promise<Models.Bucket>;
-    getBucket(
-        paramsOrFirst: { bucketId: string } | string    
-    ): Promise<Models.Bucket> {
-        let params: { bucketId: string };
-        
-        if ((paramsOrFirst && typeof paramsOrFirst === 'object' && !Array.isArray(paramsOrFirst))) {
-            params = (paramsOrFirst || {}) as { bucketId: string };
-        } else {
-            params = {
-                bucketId: paramsOrFirst as string            
-            };
-        }
-        
-        const bucketId = params.bucketId;
-
-        if (typeof bucketId === 'undefined') {
-            throw new AppwriteException('Missing required parameter: "bucketId"');
-        }
-
-        const apiPath = '/storage/buckets/{bucketId}'.replace('{bucketId}', bucketId);
-        const payload: Payload = {};
-        const uri = new URL(this.client.config.endpoint + apiPath);
-
-        const apiHeaders: { [header: string]: string } = {
-        }
-
-        return this.client.call(
-            'get',
-            uri,
-            apiHeaders,
-            payload
-        );
-    }
-
-    /**
-     * Update a storage bucket by its unique ID.
-     *
-     * @param {string} params.bucketId - Bucket unique ID.
-     * @param {string} params.name - Bucket name
-     * @param {string[]} params.permissions - An array of permission strings. By default, the current permissions are inherited. [Learn more about permissions](https://appwrite.io/docs/permissions).
-     * @param {boolean} params.fileSecurity - Enables configuring permissions for individual file. A user needs one of file or bucket level permissions to access a file. [Learn more about permissions](https://appwrite.io/docs/permissions).
-     * @param {boolean} params.enabled - Is bucket enabled? When set to 'disabled', users cannot access the files in this bucket but Server SDKs with and API key can still access the bucket. No files are lost when this is toggled.
-     * @param {number} params.maximumFileSize - Maximum file size allowed in bytes. Maximum allowed value is 5GB.
-     * @param {string[]} params.allowedFileExtensions - Allowed file extensions. Maximum of 100 extensions are allowed, each 64 characters long.
-     * @param {Compression} params.compression - Compression algorithm chosen for compression. Can be one of none, [gzip](https://en.wikipedia.org/wiki/Gzip), or [zstd](https://en.wikipedia.org/wiki/Zstd), For file size above 20MB compression is skipped even if it's enabled
-     * @param {boolean} params.encryption - Is encryption enabled? For file size above 20MB encryption is skipped even if it's enabled
-     * @param {boolean} params.antivirus - Is virus scanning enabled? For file size above 20MB AntiVirus scanning is skipped even if it's enabled
-     * @param {boolean} params.transformations - Are image transformations enabled?
-     * @throws {AppwriteException}
-     * @returns {Promise<Models.Bucket>}
-     */
-    updateBucket(this: Storage<ServerAuth>, params: { bucketId: string, name: string, permissions?: string[], fileSecurity?: boolean, enabled?: boolean, maximumFileSize?: number, allowedFileExtensions?: string[], compression?: Compression, encryption?: boolean, antivirus?: boolean, transformations?: boolean }): Promise<Models.Bucket>;
-    /**
-     * Update a storage bucket by its unique ID.
-     *
-     * @param {string} bucketId - Bucket unique ID.
-     * @param {string} name - Bucket name
-     * @param {string[]} permissions - An array of permission strings. By default, the current permissions are inherited. [Learn more about permissions](https://appwrite.io/docs/permissions).
-     * @param {boolean} fileSecurity - Enables configuring permissions for individual file. A user needs one of file or bucket level permissions to access a file. [Learn more about permissions](https://appwrite.io/docs/permissions).
-     * @param {boolean} enabled - Is bucket enabled? When set to 'disabled', users cannot access the files in this bucket but Server SDKs with and API key can still access the bucket. No files are lost when this is toggled.
-     * @param {number} maximumFileSize - Maximum file size allowed in bytes. Maximum allowed value is 5GB.
-     * @param {string[]} allowedFileExtensions - Allowed file extensions. Maximum of 100 extensions are allowed, each 64 characters long.
-     * @param {Compression} compression - Compression algorithm chosen for compression. Can be one of none, [gzip](https://en.wikipedia.org/wiki/Gzip), or [zstd](https://en.wikipedia.org/wiki/Zstd), For file size above 20MB compression is skipped even if it's enabled
-     * @param {boolean} encryption - Is encryption enabled? For file size above 20MB encryption is skipped even if it's enabled
-     * @param {boolean} antivirus - Is virus scanning enabled? For file size above 20MB AntiVirus scanning is skipped even if it's enabled
-     * @param {boolean} transformations - Are image transformations enabled?
-     * @throws {AppwriteException}
-     * @returns {Promise<Models.Bucket>}
-     * @deprecated Use the object parameter style method for a better developer experience.
-     */
-    updateBucket(this: Storage<ServerAuth>, bucketId: string, name: string, permissions?: string[], fileSecurity?: boolean, enabled?: boolean, maximumFileSize?: number, allowedFileExtensions?: string[], compression?: Compression, encryption?: boolean, antivirus?: boolean, transformations?: boolean): Promise<Models.Bucket>;
-    updateBucket(
-        paramsOrFirst: { bucketId: string, name: string, permissions?: string[], fileSecurity?: boolean, enabled?: boolean, maximumFileSize?: number, allowedFileExtensions?: string[], compression?: Compression, encryption?: boolean, antivirus?: boolean, transformations?: boolean } | string,
-        ...rest: [(string)?, (string[])?, (boolean)?, (boolean)?, (number)?, (string[])?, (Compression)?, (boolean)?, (boolean)?, (boolean)?]    
-    ): Promise<Models.Bucket> {
-        let params: { bucketId: string, name: string, permissions?: string[], fileSecurity?: boolean, enabled?: boolean, maximumFileSize?: number, allowedFileExtensions?: string[], compression?: Compression, encryption?: boolean, antivirus?: boolean, transformations?: boolean };
-        
-        if ((paramsOrFirst && typeof paramsOrFirst === 'object' && !Array.isArray(paramsOrFirst))) {
-            params = (paramsOrFirst || {}) as { bucketId: string, name: string, permissions?: string[], fileSecurity?: boolean, enabled?: boolean, maximumFileSize?: number, allowedFileExtensions?: string[], compression?: Compression, encryption?: boolean, antivirus?: boolean, transformations?: boolean };
-        } else {
-            params = {
-                bucketId: paramsOrFirst as string,
-                name: rest[0] as string,
-                permissions: rest[1] as string[],
-                fileSecurity: rest[2] as boolean,
-                enabled: rest[3] as boolean,
-                maximumFileSize: rest[4] as number,
-                allowedFileExtensions: rest[5] as string[],
-                compression: rest[6] as Compression,
-                encryption: rest[7] as boolean,
-                antivirus: rest[8] as boolean,
-                transformations: rest[9] as boolean            
-            };
-        }
-        
-        const bucketId = params.bucketId;
-        const name = params.name;
-        const permissions = params.permissions;
-        const fileSecurity = params.fileSecurity;
-        const enabled = params.enabled;
-        const maximumFileSize = params.maximumFileSize;
-        const allowedFileExtensions = params.allowedFileExtensions;
-        const compression = params.compression;
-        const encryption = params.encryption;
-        const antivirus = params.antivirus;
-        const transformations = params.transformations;
-
-        if (typeof bucketId === 'undefined') {
-            throw new AppwriteException('Missing required parameter: "bucketId"');
-        }
-        if (typeof name === 'undefined') {
-            throw new AppwriteException('Missing required parameter: "name"');
-        }
-
-        const apiPath = '/storage/buckets/{bucketId}'.replace('{bucketId}', bucketId);
-        const payload: Payload = {};
-        if (typeof name !== 'undefined') {
-            payload['name'] = name;
-        }
-        if (typeof permissions !== 'undefined') {
-            payload['permissions'] = permissions;
-        }
-        if (typeof fileSecurity !== 'undefined') {
-            payload['fileSecurity'] = fileSecurity;
-        }
-        if (typeof enabled !== 'undefined') {
-            payload['enabled'] = enabled;
-        }
-        if (typeof maximumFileSize !== 'undefined') {
-            payload['maximumFileSize'] = maximumFileSize;
-        }
-        if (typeof allowedFileExtensions !== 'undefined') {
-            payload['allowedFileExtensions'] = allowedFileExtensions;
-        }
-        if (typeof compression !== 'undefined') {
-            payload['compression'] = compression;
-        }
-        if (typeof encryption !== 'undefined') {
-            payload['encryption'] = encryption;
-        }
-        if (typeof antivirus !== 'undefined') {
-            payload['antivirus'] = antivirus;
-        }
-        if (typeof transformations !== 'undefined') {
-            payload['transformations'] = transformations;
-        }
-        const uri = new URL(this.client.config.endpoint + apiPath);
-
-        const apiHeaders: { [header: string]: string } = {
-            'content-type': 'application/json',
-        }
-
-        return this.client.call(
-            'put',
-            uri,
-            apiHeaders,
-            payload
-        );
-    }
-
-    /**
-     * Delete a storage bucket by its unique ID.
-     *
-     * @param {string} params.bucketId - Bucket unique ID.
-     * @throws {AppwriteException}
-     * @returns {Promise<{}>}
-     */
-    deleteBucket(this: Storage<ServerAuth>, params: { bucketId: string }): Promise<{}>;
-    /**
-     * Delete a storage bucket by its unique ID.
-     *
-     * @param {string} bucketId - Bucket unique ID.
-     * @throws {AppwriteException}
-     * @returns {Promise<{}>}
-     * @deprecated Use the object parameter style method for a better developer experience.
-     */
-    deleteBucket(this: Storage<ServerAuth>, bucketId: string): Promise<{}>;
-    deleteBucket(
-        paramsOrFirst: { bucketId: string } | string    
-    ): Promise<{}> {
-        let params: { bucketId: string };
-        
-        if ((paramsOrFirst && typeof paramsOrFirst === 'object' && !Array.isArray(paramsOrFirst))) {
-            params = (paramsOrFirst || {}) as { bucketId: string };
-        } else {
-            params = {
-                bucketId: paramsOrFirst as string            
-            };
-        }
-        
-        const bucketId = params.bucketId;
-
-        if (typeof bucketId === 'undefined') {
-            throw new AppwriteException('Missing required parameter: "bucketId"');
-        }
-
-        const apiPath = '/storage/buckets/{bucketId}'.replace('{bucketId}', bucketId);
-        const payload: Payload = {};
-        const uri = new URL(this.client.config.endpoint + apiPath);
-
-        const apiHeaders: { [header: string]: string } = {
-            'content-type': 'application/json',
-        }
-
-        return this.client.call(
-            'delete',
-            uri,
-            apiHeaders,
-            payload
-        );
     }
 
     /**
@@ -510,6 +75,8 @@ class StorageRuntime<TAuth extends ClientAuth | ServerAuth = ClientAuth | Server
         const uri = new URL(this.client.config.endpoint + apiPath);
 
         const apiHeaders: { [header: string]: string } = {
+            'X-Appwrite-Project': this.client.config.project,
+            'accept': 'application/json',
         }
 
         return this.client.call(
@@ -606,7 +173,9 @@ class StorageRuntime<TAuth extends ClientAuth | ServerAuth = ClientAuth | Server
         const uri = new URL(this.client.config.endpoint + apiPath);
 
         const apiHeaders: { [header: string]: string } = {
+            'X-Appwrite-Project': this.client.config.project,
             'content-type': 'multipart/form-data',
+            'accept': 'application/json',
         }
 
         return this.client.chunkedUpload(
@@ -667,6 +236,8 @@ class StorageRuntime<TAuth extends ClientAuth | ServerAuth = ClientAuth | Server
         const uri = new URL(this.client.config.endpoint + apiPath);
 
         const apiHeaders: { [header: string]: string } = {
+            'X-Appwrite-Project': this.client.config.project,
+            'accept': 'application/json',
         }
 
         return this.client.call(
@@ -740,7 +311,9 @@ class StorageRuntime<TAuth extends ClientAuth | ServerAuth = ClientAuth | Server
         const uri = new URL(this.client.config.endpoint + apiPath);
 
         const apiHeaders: { [header: string]: string } = {
+            'X-Appwrite-Project': this.client.config.project,
             'content-type': 'application/json',
+            'accept': 'application/json',
         }
 
         return this.client.call(
@@ -800,6 +373,7 @@ class StorageRuntime<TAuth extends ClientAuth | ServerAuth = ClientAuth | Server
         const uri = new URL(this.client.config.endpoint + apiPath);
 
         const apiHeaders: { [header: string]: string } = {
+            'X-Appwrite-Project': this.client.config.project,
             'content-type': 'application/json',
         }
 
@@ -867,12 +441,16 @@ class StorageRuntime<TAuth extends ClientAuth | ServerAuth = ClientAuth | Server
         const uri = new URL(this.client.config.endpoint + apiPath);
 
         const apiHeaders: { [header: string]: string } = {
+            'X-Appwrite-Project': this.client.config.project,
+            'accept': '*/*',
         }
 
-        payload['project'] = (this.client.config as unknown as Record<string, string>)['project'];
+        payload['project'] = this.client.config.project;
+
         for (const [key, value] of Object.entries(Service.flatten(payload))) {
             uri.searchParams.append(key, value);
         }
+        
         return uri.toString();
     }
 
@@ -1009,12 +587,16 @@ class StorageRuntime<TAuth extends ClientAuth | ServerAuth = ClientAuth | Server
         const uri = new URL(this.client.config.endpoint + apiPath);
 
         const apiHeaders: { [header: string]: string } = {
+            'X-Appwrite-Project': this.client.config.project,
+            'accept': 'image/*',
         }
 
-        payload['project'] = (this.client.config as unknown as Record<string, string>)['project'];
+        payload['project'] = this.client.config.project;
+
         for (const [key, value] of Object.entries(Service.flatten(payload))) {
             uri.searchParams.append(key, value);
         }
+        
         return uri.toString();
     }
 
@@ -1074,18 +656,16 @@ class StorageRuntime<TAuth extends ClientAuth | ServerAuth = ClientAuth | Server
         const uri = new URL(this.client.config.endpoint + apiPath);
 
         const apiHeaders: { [header: string]: string } = {
+            'X-Appwrite-Project': this.client.config.project,
+            'accept': '*/*',
         }
 
-        payload['project'] = (this.client.config as unknown as Record<string, string>)['project'];
+        payload['project'] = this.client.config.project;
+
         for (const [key, value] of Object.entries(Service.flatten(payload))) {
             uri.searchParams.append(key, value);
         }
+        
         return uri.toString();
     }
 }
-
-const Storage = StorageRuntime as unknown as {
-    new <TAuth extends ClientAuth | ServerAuth = ClientAuth | ServerAuth>(client: Client<TAuth>): Storage<TAuth>;
-};
-
-export { Storage };
