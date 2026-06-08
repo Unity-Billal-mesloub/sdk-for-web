@@ -92,7 +92,7 @@ export class Functions {
      * @throws {AppwriteException}
      * @returns {Promise<Models.Execution>}
      */
-    createExecution(params: { functionId: string, body?: string, async?: boolean, xpath?: string, method?: ExecutionMethod, headers?: object, scheduledAt?: string, onProgress?: (progress: UploadProgress) => void }): Promise<Models.Execution>;
+    createExecution(params: { functionId: string, body?: string, async?: boolean, xpath?: string, method?: ExecutionMethod, headers?: object, scheduledAt?: string }): Promise<Models.Execution>;
     /**
      * Trigger a function execution. The returned object will return you the current execution status. You can ping the `Get Execution` endpoint to get updates on the current execution status. Once this endpoint is called, your function execution process will start asynchronously.
      *
@@ -107,17 +107,15 @@ export class Functions {
      * @returns {Promise<Models.Execution>}
      * @deprecated Use the object parameter style method for a better developer experience.
      */
-    createExecution(functionId: string, body?: string, async?: boolean, xpath?: string, method?: ExecutionMethod, headers?: object, scheduledAt?: string, onProgress?: (progress: UploadProgress) => void): Promise<Models.Execution>;
+    createExecution(functionId: string, body?: string, async?: boolean, xpath?: string, method?: ExecutionMethod, headers?: object, scheduledAt?: string): Promise<Models.Execution>;
     createExecution(
-        paramsOrFirst: { functionId: string, body?: string, async?: boolean, xpath?: string, method?: ExecutionMethod, headers?: object, scheduledAt?: string, onProgress?: (progress: UploadProgress) => void } | string,
-        ...rest: [(string)?, (boolean)?, (string)?, (ExecutionMethod)?, (object)?, (string)?,((progress: UploadProgress) => void)?]    
+        paramsOrFirst: { functionId: string, body?: string, async?: boolean, xpath?: string, method?: ExecutionMethod, headers?: object, scheduledAt?: string } | string,
+        ...rest: [(string)?, (boolean)?, (string)?, (ExecutionMethod)?, (object)?, (string)?]    
     ): Promise<Models.Execution> {
         let params: { functionId: string, body?: string, async?: boolean, xpath?: string, method?: ExecutionMethod, headers?: object, scheduledAt?: string };
-        let onProgress: ((progress: UploadProgress) => void);
         
         if ((paramsOrFirst && typeof paramsOrFirst === 'object' && !Array.isArray(paramsOrFirst))) {
             params = (paramsOrFirst || {}) as { functionId: string, body?: string, async?: boolean, xpath?: string, method?: ExecutionMethod, headers?: object, scheduledAt?: string };
-            onProgress = paramsOrFirst?.onProgress as ((progress: UploadProgress) => void);
         } else {
             params = {
                 functionId: paramsOrFirst as string,
@@ -128,7 +126,6 @@ export class Functions {
                 headers: rest[4] as object,
                 scheduledAt: rest[5] as string            
             };
-            onProgress = rest[6] as ((progress: UploadProgress) => void);
         }
         
         const functionId = params.functionId;
@@ -167,16 +164,15 @@ export class Functions {
 
         const apiHeaders: { [header: string]: string } = {
             'X-Appwrite-Project': this.client.config.project,
-            'content-type': 'multipart/form-data',
+            'content-type': 'application/json',
             'accept': 'application/json',
         }
 
-        return this.client.chunkedUpload(
+        return this.client.call(
             'post',
             uri,
             apiHeaders,
-            payload,
-            onProgress
+            payload
         );
     }
 
