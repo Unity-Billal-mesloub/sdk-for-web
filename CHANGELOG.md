@@ -2,11 +2,11 @@
 
 ## 26.0.0
 
-* Breaking: Removed `Client.setKey()` and `Client.setForwardedUserAgent()` methods.
 * Breaking: Renamed `Theme` enum to `BrowserTheme`, changing `avatars.getScreenshot()` `theme` param type.
 * Breaking: Made `presences` `list`/`get`/`upsert`/`update` non-generic and removed `Models.DefaultPresence`.
 * Added: Email metadata fields to `User` (`emailCanonical`, `emailIsFree`, `emailIsDisposable`, `emailIsCorporate`, `emailIsCanonical`).
 * Added: `Membership.userAccessedAt` and `Presence.metadata` fields.
+* Fixed: Removed `Client.setKey()` and `Client.setForwardedUserAgent()` methods that were exposed on the client SDK by mistake.
 * Fixed: `toString()` on response objects now returns valid JSON via `JSONbig.stringify`, preserving large integers.
 * Updated: Requests now send an explicit `accept` header matching each endpoint's response type.
 
