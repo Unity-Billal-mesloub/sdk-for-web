@@ -39,7 +39,7 @@ export namespace Models {
     /**
      * Presences List
      */
-    export type PresenceList<Presence extends Models.Presence = Models.DefaultPresence> = {
+    export type PresenceList = {
         /**
          * Total number of presences that matched your query.
          */
@@ -360,12 +360,11 @@ export namespace Models {
          * Presence expiry date in ISO 8601 format.
          */
         expiresAt?: string;
+        /**
+         * Presence metadata.
+         */
+        metadata?: object;
     }
-
-    export type DefaultPresence = Presence & {
-        [key: string]: any;
-        [__default]: true;
-    };
 
     /**
      * Log
@@ -521,6 +520,26 @@ export namespace Models {
          * Email verification status.
          */
         emailVerification: boolean;
+        /**
+         * Canonical form of the user email address.
+         */
+        emailCanonical?: string;
+        /**
+         * Whether the user email is from a free email provider.
+         */
+        emailIsFree?: boolean;
+        /**
+         * Whether the user email is from a disposable email provider.
+         */
+        emailIsDisposable?: boolean;
+        /**
+         * Whether the user email is from a corporate domain.
+         */
+        emailIsCorporate?: boolean;
+        /**
+         * Whether the user email is in its canonical form.
+         */
+        emailIsCanonical?: boolean;
         /**
          * Phone verification status.
          */
@@ -1076,6 +1095,10 @@ export namespace Models {
          * Multi factor authentication status, true if the user has MFA enabled or false otherwise. Hide this attribute by toggling membership privacy in the Console.
          */
         mfa: boolean;
+        /**
+         * Most recent access date in ISO 8601 format. Show this attribute by toggling membership privacy in the Console.
+         */
+        userAccessedAt: string;
         /**
          * User list of roles
          */

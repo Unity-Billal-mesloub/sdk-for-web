@@ -354,11 +354,9 @@ class Client {
         endpoint: string;
         endpointRealtime: string;
         project: string;
-        key: string;
         jwt: string;
         locale: string;
         session: string;
-        forwardeduseragent: string;
         devkey: string;
         cookie: string;
         impersonateuserid: string;
@@ -368,11 +366,9 @@ class Client {
         endpoint: 'https://cloud.appwrite.io/v1',
         endpointRealtime: '',
         project: '',
-        key: '',
         jwt: '',
         locale: '',
         session: '',
-        forwardeduseragent: '',
         devkey: '',
         cookie: '',
         impersonateuserid: '',
@@ -384,9 +380,9 @@ class Client {
      */
     headers: Headers = {
         'x-sdk-name': 'Web',
-        'x-sdk-platform': 'server',
+        'x-sdk-platform': 'client',
         'x-sdk-language': 'web',
-        'x-sdk-version': '25.2.0',
+        'x-sdk-version': '26.0.0',
         'X-Appwrite-Response-Format': '1.9.5',
     };
 
@@ -456,22 +452,7 @@ class Client {
      * @return {this}
      */
     setProject(value: string): this {
-        this.headers['X-Appwrite-Project'] = value;
         this.config.project = value;
-        return this;
-    }
-    /**
-     * Set Key
-     *
-     * Your secret API key
-     *
-     * @param value string
-     *
-     * @return {this}
-     */
-    setKey(value: string): this {
-        this.headers['X-Appwrite-Key'] = value;
-        this.config.key = value;
         return this;
     }
     /**
@@ -512,20 +493,6 @@ class Client {
     setSession(value: string): this {
         this.headers['X-Appwrite-Session'] = value;
         this.config.session = value;
-        return this;
-    }
-    /**
-     * Set ForwardedUserAgent
-     *
-     * The user agent string of the client that made the request
-     *
-     * @param value string
-     *
-     * @return {this}
-     */
-    setForwardedUserAgent(value: string): this {
-        this.headers['X-Forwarded-User-Agent'] = value;
-        this.config.forwardeduseragent = value;
         return this;
     }
     /**
@@ -1075,7 +1042,9 @@ class Client {
     }
 
     async ping(): Promise<unknown> {
-        return this.call('GET', new URL(this.config.endpoint + '/ping'));
+        return this.call('GET', new URL(this.config.endpoint + '/ping'), {
+            'X-Appwrite-Project': this.config.project,
+        });
     }
 
     async call(method: string, url: URL, headers: Headers = {}, params: Payload = {}, responseType = 'json'): Promise<any> {
@@ -1128,7 +1097,12 @@ class Client {
         }
 
         if (data && typeof data === 'object') {
-            data.toString = () => JSONbig.stringify(data);
+            Object.defineProperty(data, 'toString', {
+                value: () => JSONbig.stringify(data),
+                writable: true,
+                enumerable: false,
+                configurable: true,
+            });
         }
 
         return data;
