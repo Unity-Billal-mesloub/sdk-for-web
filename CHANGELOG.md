@@ -1,5 +1,12 @@
 # Change Log
 
+## 26.1.0
+
+* Added: Realtime connections now send the configured JWT for authentication.
+* Added: Forwarded `impersonateUserId` on `avatars` and `storage` file requests.
+* Fixed: URL-encode path parameters across all services.
+* Fixed: `ping` now sends an `Accept: application/json` header.
+
 ## 26.0.0
 
 * Breaking: Renamed `Theme` enum to `BrowserTheme`, changing `avatars.getScreenshot()` `theme` param type.
