@@ -692,19 +692,19 @@ class Client {
                     case 'connected': {
                         const messageData = <RealtimeResponseConnected>message.data;
 
-                            let session = this.config.session;
-                            if (!session) {
-                                const cookie = JSONbig.parse(window.localStorage.getItem('cookieFallback') ?? '{}');
-                                session = cookie?.[`a_session_${this.config.project}`];
-                            }
-                            if (session && !messageData?.user) {
-                                this.realtime.socket?.send(JSONbig.stringify(<RealtimeRequest>{
-                                    type: 'authentication',
-                                    data: {
-                                        session
-                                    }
-                                }));
-                            }
+                        let session = this.config.session;
+                        if (!session) {
+                            const cookie = JSONbig.parse(window.localStorage.getItem('cookieFallback') ?? '{}');
+                            session = cookie?.[`a_session_${this.config.project}`];
+                        }
+                        if (session && !messageData?.user) {
+                            this.realtime.socket?.send(JSONbig.stringify(<RealtimeRequest>{
+                                type: 'authentication',
+                                data: {
+                                    session
+                                }
+                            }));
+                        }
 
                         this.realtime.subscriptions.forEach((sub, subscriptionId) => {
                             this.realtime.pendingSubscribes.set(subscriptionId, {
