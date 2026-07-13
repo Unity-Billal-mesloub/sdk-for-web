@@ -355,6 +355,7 @@ class Client {
         endpointRealtime: string;
         project: string;
         jwt: string;
+        bearer: string;
         locale: string;
         session: string;
         devkey: string;
@@ -367,6 +368,7 @@ class Client {
         endpointRealtime: '',
         project: '',
         jwt: '',
+        bearer: '',
         locale: '',
         session: '',
         devkey: '',
@@ -382,7 +384,7 @@ class Client {
         'x-sdk-name': 'Web',
         'x-sdk-platform': 'client',
         'x-sdk-language': 'web',
-        'x-sdk-version': '26.1.0',
+        'x-sdk-version': '26.2.0',
         'X-Appwrite-Response-Format': '1.9.5',
     };
 
@@ -467,6 +469,20 @@ class Client {
     setJWT(value: string): this {
         this.headers['X-Appwrite-JWT'] = value;
         this.config.jwt = value;
+        return this;
+    }
+    /**
+     * Set Bearer
+     *
+     * The OAuth access token to authenticate with
+     *
+     * @param value string
+     *
+     * @return {this}
+     */
+    setBearer(value: string): this {
+        this.headers['Authorization'] = `Bearer ${value}`;
+        this.config.bearer = value;
         return this;
     }
     /**
@@ -1091,7 +1107,7 @@ class Client {
             } else {
                 responseText = data?.message;
             }
-            throw new AppwriteException(data?.message, response.status, data?.type, responseText);
+            throw new AppwriteException(data?.message ?? responseText, response.status, data?.type, responseText);
         }
 
         const cookieFallback = response.headers.get('X-Fallback-Cookies');
