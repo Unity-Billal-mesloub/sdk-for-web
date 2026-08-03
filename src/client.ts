@@ -1,29 +1,44 @@
 import { Models } from './models';
 import { Channel, ActionableChannel, ResolvedChannel } from './channel';
+import { Query } from './query';
+import { ID } from './id';
 import JSONbigModule from 'json-bigint';
-import BigNumber from 'bignumber.js';
 const JSONbigParser = JSONbigModule({ storeAsString: false });
 const JSONbigSerializer = JSONbigModule({ useNativeBigInt: true });
 
 const MAX_SAFE = BigInt(Number.MAX_SAFE_INTEGER);
 const MIN_SAFE = BigInt(Number.MIN_SAFE_INTEGER);
+const MAX_INT64 = BigInt('9223372036854775807');
+const MIN_INT64 = BigInt('-9223372036854775808');
+
+function isBigNumber(value: any): boolean {
+    return value !== null
+        && typeof value === 'object'
+        && value._isBigNumber === true
+        && typeof value.isInteger === 'function'
+        && typeof value.toFixed === 'function'
+        && typeof value.toNumber === 'function';
+}
 
 function reviver(_key: string, value: any): any {
-    if (BigNumber.isBigNumber(value)) {
+    if (isBigNumber(value)) {
         if (value.isInteger()) {
             const str = value.toFixed();
             const bi = BigInt(str);
             if (bi >= MIN_SAFE && bi <= MAX_SAFE) {
                 return Number(str);
             }
-            return bi;
+            if (bi >= MIN_INT64 && bi <= MAX_INT64) {
+                return bi;
+            }
+            return value.toNumber();
         }
         return value.toNumber();
     }
     return value;
 }
 
-const JSONbig = {
+export const JSONbig = {
     parse: (text: string) => JSONbigParser.parse(text, reviver),
     stringify: JSONbigSerializer.stringify
 };
@@ -62,14 +77,20 @@ type RealtimeResponse = {
  */
 type RealtimeRequest = {
     /**
-     * Type of the request: 'authentication'.
+     * Type of the request: 'authentication' or 'subscribe'.
      */
-    type: 'authentication';
+    type: 'authentication' | 'subscribe';
 
     /**
      * Data required for authentication.
      */
-    data: RealtimeRequestAuthenticate;
+    data: RealtimeRequestAuthenticate | RealtimeRequestSubscribe[];
+}
+
+type RealtimeRequestSubscribe = {
+    subscriptionId: string;
+    channels: string[];
+    queries: string[];
 }
 
 /**
@@ -89,12 +110,17 @@ type RealtimeResponseEvent<T extends unknown> = {
     /**
      * Timestamp indicating the time of the event.
      */
-    timestamp: number;
+    timestamp: string;
 
     /**
      * Payload containing event-specific data.
      */
     payload: T;
+
+    /**
+     * Subscription IDs this event matches (from backend, optional).
+     */
+    subscriptions?: string[];
 }
 
 /**
@@ -194,17 +220,18 @@ type Realtime = {
     channels: Set<string>;
 
     /**
-     * Map of subscriptions containing channel names and corresponding callback functions.
+     * Map of subscriptions keyed by client-generated subscriptionId.
      */
-    subscriptions: Map<number, {
+    subscriptions: Map<string, {
         channels: string[];
+        queries: string[];
         callback: (payload: RealtimeResponseEvent<any>) => void
     }>;
 
     /**
-     * Counter for managing subscriptions.
+     * Pending subscribe rows keyed by subscriptionId. Flushed and cleared on each send.
      */
-    subscriptionsCounter: number;
+    pendingSubscribes: Map<string, RealtimeRequestSubscribe>;
 
     /**
      * Boolean indicating whether automatic reconnection is enabled.
@@ -236,12 +263,7 @@ type Realtime = {
      */
     createHeartbeat: () => void;
 
-    /**
-     * Function to clean up resources associated with specified channels.
-     *
-     * @param {string[]} channels - List of channel names to clean up.
-     */
-    cleanUp: (channels: string[]) => void;
+    sendPendingSubscribes: () => void;
 
     /**
      * Function to handle incoming messages from the WebSocket connection.
@@ -333,17 +355,27 @@ class Client {
         endpointRealtime: string;
         project: string;
         jwt: string;
+        bearer: string;
         locale: string;
         session: string;
         devkey: string;
+        cookie: string;
+        impersonateuserid: string;
+        impersonateuseremail: string;
+        impersonateuserphone: string;
     } = {
         endpoint: 'https://cloud.appwrite.io/v1',
         endpointRealtime: '',
         project: '',
         jwt: '',
+        bearer: '',
         locale: '',
         session: '',
         devkey: '',
+        cookie: '',
+        impersonateuserid: '',
+        impersonateuseremail: '',
+        impersonateuserphone: '',
     };
     /**
      * Custom headers for API requests.
@@ -352,9 +384,21 @@ class Client {
         'x-sdk-name': 'Web',
         'x-sdk-platform': 'client',
         'x-sdk-language': 'web',
-        'x-sdk-version': '22.0.0',
-        'X-Appwrite-Response-Format': '1.8.0',
+        'x-sdk-version': '26.2.0',
+        'X-Appwrite-Response-Format': '1.9.5',
     };
+
+    /**
+     * Get Headers
+     *
+     * Returns a copy of the current request headers, including any
+     * authentication headers. Handle with care.
+     *
+     * @returns {Headers}
+     */
+    getHeaders(): Headers {
+        return { ...this.headers };
+    }
 
     /**
      * Set Endpoint
@@ -410,7 +454,6 @@ class Client {
      * @return {this}
      */
     setProject(value: string): this {
-        this.headers['X-Appwrite-Project'] = value;
         this.config.project = value;
         return this;
     }
@@ -426,6 +469,20 @@ class Client {
     setJWT(value: string): this {
         this.headers['X-Appwrite-JWT'] = value;
         this.config.jwt = value;
+        return this;
+    }
+    /**
+     * Set Bearer
+     *
+     * The OAuth access token to authenticate with
+     *
+     * @param value string
+     *
+     * @return {this}
+     */
+    setBearer(value: string): this {
+        this.headers['Authorization'] = `Bearer ${value}`;
+        this.config.bearer = value;
         return this;
     }
     /**
@@ -468,6 +525,62 @@ class Client {
         this.config.devkey = value;
         return this;
     }
+    /**
+     * Set Cookie
+     *
+     * The user cookie to authenticate with. Used by SDKs that forward an incoming Cookie header in server-side runtimes.
+     *
+     * @param value string
+     *
+     * @return {this}
+     */
+    setCookie(value: string): this {
+        this.headers['Cookie'] = value;
+        this.config.cookie = value;
+        return this;
+    }
+    /**
+     * Set ImpersonateUserId
+     *
+     * Impersonate a user by ID
+     *
+     * @param value string
+     *
+     * @return {this}
+     */
+    setImpersonateUserId(value: string): this {
+        this.headers['X-Appwrite-Impersonate-User-Id'] = value;
+        this.config.impersonateuserid = value;
+        return this;
+    }
+    /**
+     * Set ImpersonateUserEmail
+     *
+     * Impersonate a user by email
+     *
+     * @param value string
+     *
+     * @return {this}
+     */
+    setImpersonateUserEmail(value: string): this {
+        this.headers['X-Appwrite-Impersonate-User-Email'] = value;
+        this.config.impersonateuseremail = value;
+        return this;
+    }
+    /**
+     * Set ImpersonateUserPhone
+     *
+     * Impersonate a user by phone
+     *
+     * @param value string
+     *
+     * @return {this}
+     */
+    setImpersonateUserPhone(value: string): this {
+        this.headers['X-Appwrite-Impersonate-User-Phone'] = value;
+        this.config.impersonateuserphone = value;
+        return this;
+    }
 
     private realtime: Realtime = {
         socket: undefined,
@@ -476,7 +589,7 @@ class Client {
         url: '',
         channels: new Set(),
         subscriptions: new Map(),
-        subscriptionsCounter: 0,
+        pendingSubscribes: new Map(),
         reconnect: true,
         reconnectAttempts: 0,
         lastMessage: undefined,
@@ -510,21 +623,21 @@ class Client {
             }, 20_000);
         },
         createSocket: () => {
-            if (this.realtime.channels.size < 1) {
+            if (this.realtime.subscriptions.size < 1) {
                 this.realtime.reconnect = false;
                 this.realtime.socket?.close();
                 return;
             }
 
-            const channels = new URLSearchParams();
-            if (this.config.project) {
-                channels.set('project', this.config.project as string);
-            }
-            this.realtime.channels.forEach(channel => {
-                channels.append('channels[]', channel);
-            });
+            const encodedProject = encodeURIComponent((this.config.project as string) ?? '');
+            // URL carries only the project; channels/queries are sent via subscribe message.
+            let queryParams = 'project=' + encodedProject;
 
-            const url = this.config.endpointRealtime + '/realtime?' + channels.toString();
+            if (this.config.jwt) {
+                queryParams += '&jwt=' + encodeURIComponent(this.config.jwt as string);
+            }
+
+            const url = this.config.endpointRealtime + '/realtime?' + queryParams;
 
             if (
                 url !== this.realtime.url || // Check if URL is present
@@ -566,22 +679,41 @@ class Client {
                         this.realtime.createSocket();
                     }, timeout);
                 })
+            } else if (this.realtime.socket?.readyState === WebSocket.OPEN) {
+                this.realtime.sendPendingSubscribes();
             }
+        },
+        sendPendingSubscribes: () => {
+            if (!this.realtime.socket || this.realtime.socket.readyState !== WebSocket.OPEN) {
+                return;
+            }
+
+            if (this.realtime.pendingSubscribes.size < 1) {
+                return;
+            }
+
+            const rows = Array.from(this.realtime.pendingSubscribes.values());
+            this.realtime.pendingSubscribes.clear();
+
+            this.realtime.socket.send(JSONbig.stringify(<RealtimeRequest>{
+                type: 'subscribe',
+                data: rows
+            }));
         },
         onMessage: (event) => {
             try {
                 const message: RealtimeResponse = JSONbig.parse(event.data);
                 this.realtime.lastMessage = message;
                 switch (message.type) {
-                    case 'connected':
+                    case 'connected': {
+                        const messageData = <RealtimeResponseConnected>message.data;
+
                         let session = this.config.session;
                         if (!session) {
                             const cookie = JSONbig.parse(window.localStorage.getItem('cookieFallback') ?? '{}');
                             session = cookie?.[`a_session_${this.config.project}`];
                         }
-
-                        const messageData = <RealtimeResponseConnected>message.data;
-                        if (session && !messageData.user) {
+                        if (session && !messageData?.user) {
                             this.realtime.socket?.send(JSONbig.stringify(<RealtimeRequest>{
                                 type: 'authentication',
                                 data: {
@@ -589,19 +721,45 @@ class Client {
                                 }
                             }));
                         }
+
+                        this.realtime.subscriptions.forEach((sub, subscriptionId) => {
+                            this.realtime.pendingSubscribes.set(subscriptionId, {
+                                subscriptionId,
+                                channels: sub.channels,
+                                queries: sub.queries ?? []
+                            });
+                        });
+                        this.realtime.sendPendingSubscribes();
                         break;
-                    case 'event':
-                        let data = <RealtimeResponseEvent<unknown>>message.data;
-                        if (data?.channels) {
+                    }
+                    case 'response':
+                        // The SDK generates subscriptionIds client-side and sends them on every
+                        // subscribe/unsubscribe, so subscribe/unsubscribe acks carry no state
+                        // the SDK needs to reconcile.
+                        break;
+                    case 'event': {
+                        const data = <RealtimeResponseEvent<unknown>>message.data;
+                        if (!data?.channels) break;
+
+                        const eventSubIds = data.subscriptions;
+                        if (eventSubIds && eventSubIds.length > 0) {
+                            for (const subscriptionId of eventSubIds) {
+                                const subscription = this.realtime.subscriptions.get(subscriptionId);
+                                if (subscription) {
+                                    setTimeout(() => subscription.callback(data));
+                                }
+                            }
+                        } else {
                             const isSubscribed = data.channels.some(channel => this.realtime.channels.has(channel));
-                            if (!isSubscribed) return;
+                            if (!isSubscribed) break;
                             this.realtime.subscriptions.forEach(subscription => {
                                 if (data.channels.some(channel => subscription.channels.includes(channel))) {
                                     setTimeout(() => subscription.callback(data));
                                 }
-                            })
+                            });
                         }
                         break;
+                    }
                     case 'pong':
                         break; // Handle pong response if needed
                     case 'error':
@@ -612,19 +770,6 @@ class Client {
             } catch (e) {
                 console.error(e);
             }
-        },
-        cleanUp: channels => {
-            this.realtime.channels.forEach(channel => {
-                if (channels.includes(channel)) {
-                    let found = Array.from(this.realtime.subscriptions).some(([_key, subscription] )=> {
-                        return subscription.channels.includes(channel);
-                    })
-
-                    if (!found) {
-                        this.realtime.channels.delete(channel);
-                    }
-                }
-            })
         }
     }
 
@@ -663,7 +808,11 @@ class Client {
      * @param {(payload: RealtimeMessage) => void} callback Is called on every realtime update.
      * @returns {() => void} Unsubscribes from events.
      */
-    subscribe<T extends unknown>(channels: string | string[] | Channel<any> | ActionableChannel | ResolvedChannel | (Channel<any> | ActionableChannel | ResolvedChannel)[], callback: (payload: RealtimeResponseEvent<T>) => void): () => void {
+    subscribe<T extends unknown>(
+        channels: string | string[] | Channel<any> | ActionableChannel | ResolvedChannel | (Channel<any> | ActionableChannel | ResolvedChannel)[],
+        callback: (payload: RealtimeResponseEvent<T>) => void,
+        queries: (string | Query)[] = []
+    ): () => void {
         const channelArray = Array.isArray(channels) ? channels : [channels];
         // Convert Channel instances to strings
         const channelStrings = channelArray.map(ch => {
@@ -679,17 +828,45 @@ class Client {
         });
         channelStrings.forEach(channel => this.realtime.channels.add(channel));
 
-        const counter = this.realtime.subscriptionsCounter++;
-        this.realtime.subscriptions.set(counter, {
+        const queryStrings = (queries ?? []).map(q => typeof q === 'string' ? q : q.toString());
+
+        let subscriptionId = '';
+        const attempts = this.realtime.subscriptions.size + 1;
+        for (let i = 0; i < attempts; i++) {
+            const candidate = ID.unique();
+            if (!this.realtime.subscriptions.has(candidate)) {
+                subscriptionId = candidate;
+                break;
+            }
+        }
+        if (subscriptionId === '') {
+            throw new AppwriteException('Failed to generate unique subscription id');
+        }
+        this.realtime.subscriptions.set(subscriptionId, {
             channels: channelStrings,
+            queries: queryStrings,
             callback
+        });
+        this.realtime.pendingSubscribes.set(subscriptionId, {
+            subscriptionId,
+            channels: channelStrings,
+            queries: queryStrings
         });
 
         this.realtime.connect();
 
         return () => {
-            this.realtime.subscriptions.delete(counter);
-            this.realtime.cleanUp(channelStrings);
+            this.realtime.subscriptions.delete(subscriptionId);
+            this.realtime.pendingSubscribes.delete(subscriptionId);
+            const stillUsed = new Set<string>();
+            this.realtime.subscriptions.forEach(sub => {
+                sub.channels.forEach(channel => stillUsed.add(channel));
+            });
+            this.realtime.channels.forEach(channel => {
+                if (!stillUsed.has(channel)) {
+                    this.realtime.channels.delete(channel);
+                }
+            });
             this.realtime.connect();
         }
     }
@@ -760,45 +937,135 @@ class Client {
             return await this.call(method, url, headers, originalPayload);
         }
 
-        let start = 0;
-        let response = null;
+        const totalChunks = Math.ceil(file.size / Client.CHUNK_SIZE);
 
-        while (start < file.size) {
-            let end = start + Client.CHUNK_SIZE; // Prepare end for the next chunk
-            if (end >= file.size) {
-                end = file.size; // Adjust for the last chunk to include the last byte
+        // Upload first chunk alone to get the upload ID
+        const firstChunkEnd = Math.min(Client.CHUNK_SIZE, file.size);
+        const firstChunkHeaders = { ...headers, 'content-range': `bytes 0-${firstChunkEnd - 1}/${file.size}` };
+        const firstChunk = file.slice(0, firstChunkEnd);
+        const firstPayload = { ...originalPayload };
+        firstPayload[fileParam] = new File([firstChunk], file.name);
+
+        let response = await this.call(method, url, firstChunkHeaders, firstPayload);
+        const uploadId = response?.$id;
+
+        if (onProgress && typeof onProgress === 'function') {
+            onProgress({
+                $id: uploadId,
+                progress: Math.round((firstChunkEnd / file.size) * 100),
+                sizeUploaded: firstChunkEnd,
+                chunksTotal: totalChunks,
+                chunksUploaded: 1
+            });
+        }
+
+        if (totalChunks === 1) {
+            return response;
+        }
+
+        // Prepare remaining chunks
+        const chunks: { start: number; end: number }[] = [];
+        for (let i = 1; i < totalChunks; i++) {
+            const start = i * Client.CHUNK_SIZE;
+            const end = Math.min(start + Client.CHUNK_SIZE, file.size);
+            chunks.push({ start, end });
+        }
+
+        // Upload remaining chunks with max concurrency of 8
+        const CONCURRENCY = 8;
+        let completedCount = 1;
+        let uploadedBytes = firstChunkEnd;
+        let lastResponse = response;
+        let finalResponse = null;
+        let rejected = false;
+
+        const isUploadComplete = (chunkResponse: any) => {
+            const chunksUploaded = chunkResponse?.chunksUploaded;
+            const chunksTotal = chunkResponse?.chunksTotal ?? totalChunks;
+            return typeof chunksUploaded === 'number' && typeof chunksTotal === 'number' && chunksUploaded >= chunksTotal;
+        };
+
+        const uploadChunk = async (chunk: typeof chunks[0]) => {
+            const chunkHeaders = { ...headers };
+            if (uploadId) {
+                chunkHeaders['x-appwrite-id'] = uploadId;
             }
+            chunkHeaders['content-range'] = `bytes ${chunk.start}-${chunk.end - 1}/${file.size}`;
+            
+            const chunkBlob = file.slice(chunk.start, chunk.end);
+            const chunkPayload = { ...originalPayload };
+            chunkPayload[fileParam] = new File([chunkBlob], file.name);
 
-            headers['content-range'] = `bytes ${start}-${end-1}/${file.size}`;
-            const chunk = file.slice(start, end);
+            const chunkResponse = await this.call(method, url, chunkHeaders, chunkPayload);
 
-            let payload = { ...originalPayload };
-            payload[fileParam] = new File([chunk], file.name);
-
-            response = await this.call(method, url, headers, payload);
+            if (rejected) {
+                return chunkResponse;
+            }
+            
+            completedCount++;
+            uploadedBytes += (chunk.end - chunk.start);
+            
+            lastResponse = chunkResponse;
+            if (isUploadComplete(chunkResponse)) {
+                finalResponse = chunkResponse;
+            }
 
             if (onProgress && typeof onProgress === 'function') {
                 onProgress({
-                    $id: response.$id,
-                    progress: Math.round((end / file.size) * 100),
-                    sizeUploaded: end,
-                    chunksTotal: Math.ceil(file.size / Client.CHUNK_SIZE),
-                    chunksUploaded: Math.ceil(end / Client.CHUNK_SIZE)
+                    $id: uploadId,
+                    progress: Math.round((uploadedBytes / file.size) * 100),
+                    sizeUploaded: uploadedBytes,
+                    chunksTotal: totalChunks,
+                    chunksUploaded: completedCount
                 });
             }
 
-            if (response && response.$id) {
-                headers['x-appwrite-id'] = response.$id;
-            }
+            return chunkResponse;
+        };
 
-            start = end;
-        }
+        await new Promise<void>((resolve, reject) => {
+            let nextChunk = 0;
+            let inFlight = 0;
+            let completed = 0;
 
-        return response;
+            const uploadNext = () => {
+                if (rejected) {
+                    return;
+                }
+
+                if (completed === chunks.length) {
+                    resolve();
+                    return;
+                }
+
+                while (inFlight < CONCURRENCY && nextChunk < chunks.length) {
+                    const chunk = chunks[nextChunk++];
+                    inFlight++;
+
+                    uploadChunk(chunk)
+                        .then(() => {
+                            inFlight--;
+                            completed++;
+                            uploadNext();
+                        })
+                        .catch((error) => {
+                            rejected = true;
+                            reject(error);
+                        });
+                }
+            };
+
+            uploadNext();
+        });
+
+        return finalResponse ?? lastResponse;
     }
 
-    async ping(): Promise<string> {
-        return this.call('GET', new URL(this.config.endpoint + '/ping'));
+    async ping(): Promise<unknown> {
+        return this.call('GET', new URL(this.config.endpoint + '/ping'), {
+            'X-Appwrite-Project': this.config.project,
+            'accept': 'application/json',
+        });
     }
 
     async call(method: string, url: URL, headers: Headers = {}, params: Payload = {}, responseType = 'json'): Promise<any> {
@@ -840,7 +1107,7 @@ class Client {
             } else {
                 responseText = data?.message;
             }
-            throw new AppwriteException(data?.message, response.status, data?.type, responseText);
+            throw new AppwriteException(data?.message ?? responseText, response.status, data?.type, responseText);
         }
 
         const cookieFallback = response.headers.get('X-Fallback-Cookies');
@@ -848,6 +1115,15 @@ class Client {
         if (typeof window !== 'undefined' && window.localStorage && cookieFallback) {
             window.console.warn('Appwrite is using localStorage for session management. Increase your security by adding a custom domain as your API endpoint.');
             window.localStorage.setItem('cookieFallback', cookieFallback);
+        }
+
+        if (data && typeof data === 'object') {
+            Object.defineProperty(data, 'toString', {
+                value: () => JSONbig.stringify(data),
+                writable: true,
+                enumerable: false,
+                configurable: true,
+            });
         }
 
         return data;

@@ -32,7 +32,7 @@ export class Graphql {
     ): Promise<{}> {
         let params: { query: object };
         
-        if ((paramsOrFirst && typeof paramsOrFirst === 'object' && !Array.isArray(paramsOrFirst) && 'query' in paramsOrFirst)) {
+        if ((paramsOrFirst && typeof paramsOrFirst === 'object' && !Array.isArray(paramsOrFirst) && ('query' in paramsOrFirst))) {
             params = (paramsOrFirst || {}) as { query: object };
         } else {
             params = {
@@ -54,8 +54,10 @@ export class Graphql {
         const uri = new URL(this.client.config.endpoint + apiPath);
 
         const apiHeaders: { [header: string]: string } = {
+            'X-Appwrite-Project': this.client.config.project,
             'x-sdk-graphql': 'true',
             'content-type': 'application/json',
+            'accept': 'application/json',
         }
 
         return this.client.call(
@@ -88,7 +90,7 @@ export class Graphql {
     ): Promise<{}> {
         let params: { query: object };
         
-        if ((paramsOrFirst && typeof paramsOrFirst === 'object' && !Array.isArray(paramsOrFirst) && 'query' in paramsOrFirst)) {
+        if ((paramsOrFirst && typeof paramsOrFirst === 'object' && !Array.isArray(paramsOrFirst) && ('query' in paramsOrFirst))) {
             params = (paramsOrFirst || {}) as { query: object };
         } else {
             params = {
@@ -110,8 +112,10 @@ export class Graphql {
         const uri = new URL(this.client.config.endpoint + apiPath);
 
         const apiHeaders: { [header: string]: string } = {
+            'X-Appwrite-Project': this.client.config.project,
             'x-sdk-graphql': 'true',
             'content-type': 'application/json',
+            'accept': 'application/json',
         }
 
         return this.client.call(

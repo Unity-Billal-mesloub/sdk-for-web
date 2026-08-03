@@ -272,13 +272,39 @@ export class Query {
 
   /**
    * Filter resources where attribute contains the specified value.
+   * For string attributes, checks if the string contains the substring.
    *
+   * Note: For array attributes, use {@link containsAny} or {@link containsAll} instead.
    * @param {string} attribute
    * @param {string | string[]} value
    * @returns {string}
    */
   static contains = (attribute: string, value: string | any[]): string =>
     new Query("contains", attribute, value).toString();
+
+  /**
+   * Filter resources where attribute contains ANY of the specified values.
+   * For array and relationship attributes, matches documents where the attribute
+   * contains at least one of the given values.
+   *
+   * @param {string} attribute
+   * @param {any[]} value
+   * @returns {string}
+   */
+  static containsAny = (attribute: string, value: any[]): string =>
+    new Query("containsAny", attribute, value).toString();
+
+  /**
+   * Filter resources where attribute contains ALL of the specified values.
+   * For array and relationship attributes, matches documents where the attribute
+   * contains every one of the given values.
+   *
+   * @param {string} attribute
+   * @param {any[]} value
+   * @returns {string}
+   */
+  static containsAll = (attribute: string, value: any[]): string =>
+    new Query("containsAll", attribute, value).toString();
 
   /**
    * Filter resources where attribute does not contain the specified value.
@@ -467,6 +493,36 @@ export class Query {
    */
   static distanceLessThan = (attribute: string, values: any[], distance: number, meters: boolean = true): string =>
     new Query("distanceLessThan", attribute, [[values, distance, meters]] as QueryTypesList).toString();
+
+  /**
+   * Filter resources using vector dot product similarity.
+   *
+   * @param {string} attribute
+   * @param {number[]} vector
+   * @returns {string}
+   */
+  static vectorDot = (attribute: string, vector: number[]): string =>
+    new Query("vectorDot", attribute, [vector] as QueryTypesList).toString();
+
+  /**
+   * Filter resources using vector cosine similarity.
+   *
+   * @param {string} attribute
+   * @param {number[]} vector
+   * @returns {string}
+   */
+  static vectorCosine = (attribute: string, vector: number[]): string =>
+    new Query("vectorCosine", attribute, [vector] as QueryTypesList).toString();
+
+  /**
+   * Filter resources using vector Euclidean distance.
+   *
+   * @param {string} attribute
+   * @param {number[]} vector
+   * @returns {string}
+   */
+  static vectorEuclidean = (attribute: string, vector: number[]): string =>
+    new Query("vectorEuclidean", attribute, [vector] as QueryTypesList).toString();
 
   /**
    * Filter resources where attribute intersects with the given geometry.

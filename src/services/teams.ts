@@ -2,7 +2,6 @@ import { Service } from '../service';
 import { AppwriteException, Client, type Payload, UploadProgress } from '../client';
 import type { Models } from '../models';
 
-import { Roles } from '../enums/roles';
 
 export class Teams {
     client: Client;
@@ -67,6 +66,8 @@ export class Teams {
         const uri = new URL(this.client.config.endpoint + apiPath);
 
         const apiHeaders: { [header: string]: string } = {
+            'X-Appwrite-Project': this.client.config.project,
+            'accept': 'application/json',
         }
 
         return this.client.call(
@@ -139,7 +140,9 @@ export class Teams {
         const uri = new URL(this.client.config.endpoint + apiPath);
 
         const apiHeaders: { [header: string]: string } = {
+            'X-Appwrite-Project': this.client.config.project,
             'content-type': 'application/json',
+            'accept': 'application/json',
         }
 
         return this.client.call(
@@ -186,11 +189,13 @@ export class Teams {
             throw new AppwriteException('Missing required parameter: "teamId"');
         }
 
-        const apiPath = '/teams/{teamId}'.replace('{teamId}', teamId);
+        const apiPath = '/teams/{teamId}'.replace('{teamId}', encodeURIComponent(String(teamId)));
         const payload: Payload = {};
         const uri = new URL(this.client.config.endpoint + apiPath);
 
         const apiHeaders: { [header: string]: string } = {
+            'X-Appwrite-Project': this.client.config.project,
+            'accept': 'application/json',
         }
 
         return this.client.call(
@@ -245,7 +250,7 @@ export class Teams {
             throw new AppwriteException('Missing required parameter: "name"');
         }
 
-        const apiPath = '/teams/{teamId}'.replace('{teamId}', teamId);
+        const apiPath = '/teams/{teamId}'.replace('{teamId}', encodeURIComponent(String(teamId)));
         const payload: Payload = {};
         if (typeof name !== 'undefined') {
             payload['name'] = name;
@@ -253,7 +258,9 @@ export class Teams {
         const uri = new URL(this.client.config.endpoint + apiPath);
 
         const apiHeaders: { [header: string]: string } = {
+            'X-Appwrite-Project': this.client.config.project,
             'content-type': 'application/json',
+            'accept': 'application/json',
         }
 
         return this.client.call(
@@ -300,11 +307,12 @@ export class Teams {
             throw new AppwriteException('Missing required parameter: "teamId"');
         }
 
-        const apiPath = '/teams/{teamId}'.replace('{teamId}', teamId);
+        const apiPath = '/teams/{teamId}'.replace('{teamId}', encodeURIComponent(String(teamId)));
         const payload: Payload = {};
         const uri = new URL(this.client.config.endpoint + apiPath);
 
         const apiHeaders: { [header: string]: string } = {
+            'X-Appwrite-Project': this.client.config.project,
             'content-type': 'application/json',
         }
 
@@ -365,7 +373,7 @@ export class Teams {
             throw new AppwriteException('Missing required parameter: "teamId"');
         }
 
-        const apiPath = '/teams/{teamId}/memberships'.replace('{teamId}', teamId);
+        const apiPath = '/teams/{teamId}/memberships'.replace('{teamId}', encodeURIComponent(String(teamId)));
         const payload: Payload = {};
         if (typeof queries !== 'undefined') {
             payload['queries'] = queries;
@@ -379,6 +387,8 @@ export class Teams {
         const uri = new URL(this.client.config.endpoint + apiPath);
 
         const apiHeaders: { [header: string]: string } = {
+            'X-Appwrite-Project': this.client.config.project,
+            'accept': 'application/json',
         }
 
         return this.client.call(
@@ -400,7 +410,7 @@ export class Teams {
      * 
      *
      * @param {string} params.teamId - Team ID.
-     * @param {Roles[]} params.roles - Array of strings. Use this param to set the user roles in the team. A role can be any string. Learn more about [roles and permissions](https://appwrite.io/docs/permissions). Maximum of 100 roles are allowed, each 32 characters long.
+     * @param {string[]} params.roles - Array of strings. Use this param to set the user roles in the team. A role can be any string. Learn more about [roles and permissions](https://appwrite.io/docs/permissions). Maximum of 100 roles are allowed, each 81 characters long.
      * @param {string} params.email - Email of the new team member.
      * @param {string} params.userId - ID of the user to be added to a team.
      * @param {string} params.phone - Phone number. Format this number with a leading '+' and a country code, e.g., +16175551212.
@@ -409,7 +419,7 @@ export class Teams {
      * @throws {AppwriteException}
      * @returns {Promise<Models.Membership>}
      */
-    createMembership(params: { teamId: string, roles: Roles[], email?: string, userId?: string, phone?: string, url?: string, name?: string }): Promise<Models.Membership>;
+    createMembership(params: { teamId: string, roles: string[], email?: string, userId?: string, phone?: string, url?: string, name?: string }): Promise<Models.Membership>;
     /**
      * Invite a new member to join your team. Provide an ID for existing users, or invite unregistered users using an email or phone number. If initiated from a Client SDK, Appwrite will send an email or sms with a link to join the team to the invited user, and an account will be created for them if one doesn't exist. If initiated from a Server SDK, the new member will be added automatically to the team.
      * 
@@ -421,7 +431,7 @@ export class Teams {
      * 
      *
      * @param {string} teamId - Team ID.
-     * @param {Roles[]} roles - Array of strings. Use this param to set the user roles in the team. A role can be any string. Learn more about [roles and permissions](https://appwrite.io/docs/permissions). Maximum of 100 roles are allowed, each 32 characters long.
+     * @param {string[]} roles - Array of strings. Use this param to set the user roles in the team. A role can be any string. Learn more about [roles and permissions](https://appwrite.io/docs/permissions). Maximum of 100 roles are allowed, each 81 characters long.
      * @param {string} email - Email of the new team member.
      * @param {string} userId - ID of the user to be added to a team.
      * @param {string} phone - Phone number. Format this number with a leading '+' and a country code, e.g., +16175551212.
@@ -431,19 +441,19 @@ export class Teams {
      * @returns {Promise<Models.Membership>}
      * @deprecated Use the object parameter style method for a better developer experience.
      */
-    createMembership(teamId: string, roles: Roles[], email?: string, userId?: string, phone?: string, url?: string, name?: string): Promise<Models.Membership>;
+    createMembership(teamId: string, roles: string[], email?: string, userId?: string, phone?: string, url?: string, name?: string): Promise<Models.Membership>;
     createMembership(
-        paramsOrFirst: { teamId: string, roles: Roles[], email?: string, userId?: string, phone?: string, url?: string, name?: string } | string,
-        ...rest: [(Roles[])?, (string)?, (string)?, (string)?, (string)?, (string)?]    
+        paramsOrFirst: { teamId: string, roles: string[], email?: string, userId?: string, phone?: string, url?: string, name?: string } | string,
+        ...rest: [(string[])?, (string)?, (string)?, (string)?, (string)?, (string)?]    
     ): Promise<Models.Membership> {
-        let params: { teamId: string, roles: Roles[], email?: string, userId?: string, phone?: string, url?: string, name?: string };
+        let params: { teamId: string, roles: string[], email?: string, userId?: string, phone?: string, url?: string, name?: string };
         
         if ((paramsOrFirst && typeof paramsOrFirst === 'object' && !Array.isArray(paramsOrFirst))) {
-            params = (paramsOrFirst || {}) as { teamId: string, roles: Roles[], email?: string, userId?: string, phone?: string, url?: string, name?: string };
+            params = (paramsOrFirst || {}) as { teamId: string, roles: string[], email?: string, userId?: string, phone?: string, url?: string, name?: string };
         } else {
             params = {
                 teamId: paramsOrFirst as string,
-                roles: rest[0] as Roles[],
+                roles: rest[0] as string[],
                 email: rest[1] as string,
                 userId: rest[2] as string,
                 phone: rest[3] as string,
@@ -467,7 +477,7 @@ export class Teams {
             throw new AppwriteException('Missing required parameter: "roles"');
         }
 
-        const apiPath = '/teams/{teamId}/memberships'.replace('{teamId}', teamId);
+        const apiPath = '/teams/{teamId}/memberships'.replace('{teamId}', encodeURIComponent(String(teamId)));
         const payload: Payload = {};
         if (typeof email !== 'undefined') {
             payload['email'] = email;
@@ -490,7 +500,9 @@ export class Teams {
         const uri = new URL(this.client.config.endpoint + apiPath);
 
         const apiHeaders: { [header: string]: string } = {
+            'X-Appwrite-Project': this.client.config.project,
             'content-type': 'application/json',
+            'accept': 'application/json',
         }
 
         return this.client.call(
@@ -545,11 +557,13 @@ export class Teams {
             throw new AppwriteException('Missing required parameter: "membershipId"');
         }
 
-        const apiPath = '/teams/{teamId}/memberships/{membershipId}'.replace('{teamId}', teamId).replace('{membershipId}', membershipId);
+        const apiPath = '/teams/{teamId}/memberships/{membershipId}'.replace('{teamId}', encodeURIComponent(String(teamId))).replace('{membershipId}', encodeURIComponent(String(membershipId)));
         const payload: Payload = {};
         const uri = new URL(this.client.config.endpoint + apiPath);
 
         const apiHeaders: { [header: string]: string } = {
+            'X-Appwrite-Project': this.client.config.project,
+            'accept': 'application/json',
         }
 
         return this.client.call(
@@ -566,36 +580,36 @@ export class Teams {
      *
      * @param {string} params.teamId - Team ID.
      * @param {string} params.membershipId - Membership ID.
-     * @param {Roles[]} params.roles - An array of strings. Use this param to set the user's roles in the team. A role can be any string. Learn more about [roles and permissions](https://appwrite.io/docs/permissions). Maximum of 100 roles are allowed, each 32 characters long.
+     * @param {string[]} params.roles - An array of strings. Use this param to set the user's roles in the team. A role can be any string. Learn more about [roles and permissions](https://appwrite.io/docs/permissions). Maximum of 100 roles are allowed, each 81 characters long.
      * @throws {AppwriteException}
      * @returns {Promise<Models.Membership>}
      */
-    updateMembership(params: { teamId: string, membershipId: string, roles: Roles[] }): Promise<Models.Membership>;
+    updateMembership(params: { teamId: string, membershipId: string, roles: string[] }): Promise<Models.Membership>;
     /**
      * Modify the roles of a team member. Only team members with the owner role have access to this endpoint. Learn more about [roles and permissions](https://appwrite.io/docs/permissions).
      * 
      *
      * @param {string} teamId - Team ID.
      * @param {string} membershipId - Membership ID.
-     * @param {Roles[]} roles - An array of strings. Use this param to set the user's roles in the team. A role can be any string. Learn more about [roles and permissions](https://appwrite.io/docs/permissions). Maximum of 100 roles are allowed, each 32 characters long.
+     * @param {string[]} roles - An array of strings. Use this param to set the user's roles in the team. A role can be any string. Learn more about [roles and permissions](https://appwrite.io/docs/permissions). Maximum of 100 roles are allowed, each 81 characters long.
      * @throws {AppwriteException}
      * @returns {Promise<Models.Membership>}
      * @deprecated Use the object parameter style method for a better developer experience.
      */
-    updateMembership(teamId: string, membershipId: string, roles: Roles[]): Promise<Models.Membership>;
+    updateMembership(teamId: string, membershipId: string, roles: string[]): Promise<Models.Membership>;
     updateMembership(
-        paramsOrFirst: { teamId: string, membershipId: string, roles: Roles[] } | string,
-        ...rest: [(string)?, (Roles[])?]    
+        paramsOrFirst: { teamId: string, membershipId: string, roles: string[] } | string,
+        ...rest: [(string)?, (string[])?]    
     ): Promise<Models.Membership> {
-        let params: { teamId: string, membershipId: string, roles: Roles[] };
+        let params: { teamId: string, membershipId: string, roles: string[] };
         
         if ((paramsOrFirst && typeof paramsOrFirst === 'object' && !Array.isArray(paramsOrFirst))) {
-            params = (paramsOrFirst || {}) as { teamId: string, membershipId: string, roles: Roles[] };
+            params = (paramsOrFirst || {}) as { teamId: string, membershipId: string, roles: string[] };
         } else {
             params = {
                 teamId: paramsOrFirst as string,
                 membershipId: rest[0] as string,
-                roles: rest[1] as Roles[]            
+                roles: rest[1] as string[]            
             };
         }
         
@@ -613,7 +627,7 @@ export class Teams {
             throw new AppwriteException('Missing required parameter: "roles"');
         }
 
-        const apiPath = '/teams/{teamId}/memberships/{membershipId}'.replace('{teamId}', teamId).replace('{membershipId}', membershipId);
+        const apiPath = '/teams/{teamId}/memberships/{membershipId}'.replace('{teamId}', encodeURIComponent(String(teamId))).replace('{membershipId}', encodeURIComponent(String(membershipId)));
         const payload: Payload = {};
         if (typeof roles !== 'undefined') {
             payload['roles'] = roles;
@@ -621,7 +635,9 @@ export class Teams {
         const uri = new URL(this.client.config.endpoint + apiPath);
 
         const apiHeaders: { [header: string]: string } = {
+            'X-Appwrite-Project': this.client.config.project,
             'content-type': 'application/json',
+            'accept': 'application/json',
         }
 
         return this.client.call(
@@ -676,11 +692,12 @@ export class Teams {
             throw new AppwriteException('Missing required parameter: "membershipId"');
         }
 
-        const apiPath = '/teams/{teamId}/memberships/{membershipId}'.replace('{teamId}', teamId).replace('{membershipId}', membershipId);
+        const apiPath = '/teams/{teamId}/memberships/{membershipId}'.replace('{teamId}', encodeURIComponent(String(teamId))).replace('{membershipId}', encodeURIComponent(String(membershipId)));
         const payload: Payload = {};
         const uri = new URL(this.client.config.endpoint + apiPath);
 
         const apiHeaders: { [header: string]: string } = {
+            'X-Appwrite-Project': this.client.config.project,
             'content-type': 'application/json',
         }
 
@@ -756,7 +773,7 @@ export class Teams {
             throw new AppwriteException('Missing required parameter: "secret"');
         }
 
-        const apiPath = '/teams/{teamId}/memberships/{membershipId}/status'.replace('{teamId}', teamId).replace('{membershipId}', membershipId);
+        const apiPath = '/teams/{teamId}/memberships/{membershipId}/status'.replace('{teamId}', encodeURIComponent(String(teamId))).replace('{membershipId}', encodeURIComponent(String(membershipId)));
         const payload: Payload = {};
         if (typeof userId !== 'undefined') {
             payload['userId'] = userId;
@@ -767,7 +784,9 @@ export class Teams {
         const uri = new URL(this.client.config.endpoint + apiPath);
 
         const apiHeaders: { [header: string]: string } = {
+            'X-Appwrite-Project': this.client.config.project,
             'content-type': 'application/json',
+            'accept': 'application/json',
         }
 
         return this.client.call(
@@ -814,11 +833,13 @@ export class Teams {
             throw new AppwriteException('Missing required parameter: "teamId"');
         }
 
-        const apiPath = '/teams/{teamId}/prefs'.replace('{teamId}', teamId);
+        const apiPath = '/teams/{teamId}/prefs'.replace('{teamId}', encodeURIComponent(String(teamId)));
         const payload: Payload = {};
         const uri = new URL(this.client.config.endpoint + apiPath);
 
         const apiHeaders: { [header: string]: string } = {
+            'X-Appwrite-Project': this.client.config.project,
+            'accept': 'application/json',
         }
 
         return this.client.call(
@@ -873,7 +894,7 @@ export class Teams {
             throw new AppwriteException('Missing required parameter: "prefs"');
         }
 
-        const apiPath = '/teams/{teamId}/prefs'.replace('{teamId}', teamId);
+        const apiPath = '/teams/{teamId}/prefs'.replace('{teamId}', encodeURIComponent(String(teamId)));
         const payload: Payload = {};
         if (typeof prefs !== 'undefined') {
             payload['prefs'] = prefs;
@@ -881,7 +902,9 @@ export class Teams {
         const uri = new URL(this.client.config.endpoint + apiPath);
 
         const apiHeaders: { [header: string]: string } = {
+            'X-Appwrite-Project': this.client.config.project,
             'content-type': 'application/json',
+            'accept': 'application/json',
         }
 
         return this.client.call(

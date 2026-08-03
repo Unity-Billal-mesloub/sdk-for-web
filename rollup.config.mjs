@@ -1,4 +1,5 @@
-import pkg from "./package.json";
+import { readFileSync } from "fs";
+const pkg = JSON.parse(readFileSync("./package.json", "utf8"));
 import typescript from "@rollup/plugin-typescript";
 import resolve from "@rollup/plugin-node-resolve";
 import commonjs from "@rollup/plugin-commonjs";
@@ -9,7 +10,7 @@ export default [
     {
         input: "src/index.ts",
         external,
-        plugins: [typescript()],
+        plugins: [typescript({ outDir: "dist" })],
         output: [
             {
                 format: "cjs",
@@ -29,7 +30,7 @@ export default [
         plugins: [
             resolve({ browser: true }),
             commonjs(),
-            typescript()
+            typescript({ outDir: "dist" })
         ],
         output: [
             {

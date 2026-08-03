@@ -1,3 +1,4 @@
+```javascript
 import { Client, Account } from "appwrite";
 
 const client = new Client()
@@ -9,7 +10,8 @@ const account = new Account(client);
 const result = await account.updateRecovery({
     userId: '<USER_ID>',
     secret: '<SECRET>',
-    password: ''
+    password: 'password'
 });
 
 console.log(result);
+```

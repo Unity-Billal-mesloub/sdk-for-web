@@ -37,6 +37,20 @@ export namespace Models {
     }
 
     /**
+     * Presences List
+     */
+    export type PresenceList = {
+        /**
+         * Total number of presences that matched your query.
+         */
+        total: number;
+        /**
+         * List of presences.
+         */
+        presences: Presence[];
+    }
+
+    /**
      * Sessions List
      */
     export type SessionList = {
@@ -241,9 +255,9 @@ export namespace Models {
          */
         $id: string;
         /**
-         * Row automatically incrementing ID.
+         * Row sequence ID.
          */
-        $sequence: number;
+        $sequence: string;
         /**
          * Table ID.
          */
@@ -280,9 +294,9 @@ export namespace Models {
          */
         $id: string;
         /**
-         * Document automatically incrementing ID.
+         * Document sequence ID.
          */
-        $sequence: number;
+        $sequence: string;
         /**
          * Collection ID.
          */
@@ -311,6 +325,48 @@ export namespace Models {
     };
 
     /**
+     * Presence
+     */
+    export type Presence = {
+        /**
+         * Presence ID.
+         */
+        $id: string;
+        /**
+         * Presence creation date in ISO 8601 format.
+         */
+        $createdAt: string;
+        /**
+         * Presence update date in ISO 8601 format.
+         */
+        $updatedAt: string;
+        /**
+         * Presence permissions. [Learn more about permissions](https://appwrite.io/docs/permissions).
+         */
+        $permissions: string[];
+        /**
+         * User ID.
+         */
+        userId: string;
+        /**
+         * Presence status.
+         */
+        status?: string;
+        /**
+         * Presence source.
+         */
+        source: string;
+        /**
+         * Presence expiry date in ISO 8601 format.
+         */
+        expiresAt?: string;
+        /**
+         * Presence metadata.
+         */
+        metadata?: object;
+    }
+
+    /**
      * Log
      */
     export type Log = {
@@ -319,21 +375,25 @@ export namespace Models {
          */
         event: string;
         /**
-         * User ID.
+         * User ID of the actor recorded for this log. During impersonation, this is the original impersonator, not the impersonated target user.
          */
         userId: string;
         /**
-         * User Email.
+         * User email of the actor recorded for this log. During impersonation, this is the original impersonator.
          */
         userEmail: string;
         /**
-         * User Name.
+         * User name of the actor recorded for this log. During impersonation, this is the original impersonator.
          */
         userName: string;
         /**
          * API mode when event triggered.
          */
         mode: string;
+        /**
+         * User type who triggered the audit log. Possible values: user, admin, guest, hidden, keyProject, keyAccount, keyOrganization.
+         */
+        userType: string;
         /**
          * IP session in use when the session was created.
          */
@@ -461,6 +521,26 @@ export namespace Models {
          */
         emailVerification: boolean;
         /**
+         * Canonical form of the user email address.
+         */
+        emailCanonical?: string;
+        /**
+         * Whether the user email is from a free email provider.
+         */
+        emailIsFree?: boolean;
+        /**
+         * Whether the user email is from a disposable email provider.
+         */
+        emailIsDisposable?: boolean;
+        /**
+         * Whether the user email is from a corporate domain.
+         */
+        emailIsCorporate?: boolean;
+        /**
+         * Whether the user email is in its canonical form.
+         */
+        emailIsCanonical?: boolean;
+        /**
          * Phone verification status.
          */
         phoneVerification: boolean;
@@ -480,6 +560,14 @@ export namespace Models {
          * Most recent access date in ISO 8601 format. This attribute is only updated again after 24 hours.
          */
         accessedAt: string;
+        /**
+         * Whether the user can impersonate other users.
+         */
+        impersonator?: boolean;
+        /**
+         * ID of the original actor performing the impersonation. Present only when the current request is impersonating another user. Internal audit logs attribute the action to this user, while the impersonated target is recorded only in internal audit payload data.
+         */
+        impersonatorUserId?: string;
     }
 
     /**
@@ -843,6 +931,50 @@ export namespace Models {
          * Currency code in [ISO 4217-1](http://en.wikipedia.org/wiki/ISO_4217) three-character format
          */
         currency: string;
+        /**
+         * City
+         */
+        city?: string;
+        /**
+         * Name of timezone
+         */
+        timeZone?: string;
+        /**
+         * Postal code
+         */
+        postalCode?: string;
+        /**
+         * Latitude
+         */
+        latitude?: number;
+        /**
+         * Longitude
+         */
+        longitude?: number;
+        /**
+         * Autonomous System Number (ASN) of the IP
+         */
+        autonomousSystemNumber?: string;
+        /**
+         * Organization that owns the ASN
+         */
+        autonomousSystemOrganization?: string;
+        /**
+         * Internet service provider of the IP
+         */
+        isp?: string;
+        /**
+         * Connection type of the IP (e.g. cable, cellular, corporate)
+         */
+        connectionType?: string;
+        /**
+         * User type classification of the IP (e.g. residential, business, hosting)
+         */
+        connectionUsageType?: string;
+        /**
+         * Registered organization of the IP
+         */
+        connectionOrganization?: string;
     }
 
     /**
@@ -899,6 +1031,10 @@ export namespace Models {
          * File original size in bytes.
          */
         sizeOriginal: number;
+        /**
+         * File actual stored size in bytes after compression and/or encryption.
+         */
+        sizeActual: number;
         /**
          * Total number of chunks available
          */
@@ -976,6 +1112,10 @@ export namespace Models {
          */
         userEmail: string;
         /**
+         * User phone number. Hide this attribute by toggling membership privacy in the Console.
+         */
+        userPhone: string;
+        /**
          * Team ID.
          */
         teamId: string;
@@ -999,6 +1139,10 @@ export namespace Models {
          * Multi factor authentication status, true if the user has MFA enabled or false otherwise. Hide this attribute by toggling membership privacy in the Console.
          */
         mfa: boolean;
+        /**
+         * Most recent access date in ISO 8601 format. Show this attribute by toggling membership privacy in the Console.
+         */
+        userAccessedAt: string;
         /**
          * User list of roles
          */

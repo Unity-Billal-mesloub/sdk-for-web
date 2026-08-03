@@ -56,7 +56,7 @@ export class Functions {
             throw new AppwriteException('Missing required parameter: "functionId"');
         }
 
-        const apiPath = '/functions/{functionId}/executions'.replace('{functionId}', functionId);
+        const apiPath = '/functions/{functionId}/executions'.replace('{functionId}', encodeURIComponent(String(functionId)));
         const payload: Payload = {};
         if (typeof queries !== 'undefined') {
             payload['queries'] = queries;
@@ -67,6 +67,8 @@ export class Functions {
         const uri = new URL(this.client.config.endpoint + apiPath);
 
         const apiHeaders: { [header: string]: string } = {
+            'X-Appwrite-Project': this.client.config.project,
+            'accept': 'application/json',
         }
 
         return this.client.call(
@@ -138,7 +140,7 @@ export class Functions {
             throw new AppwriteException('Missing required parameter: "functionId"');
         }
 
-        const apiPath = '/functions/{functionId}/executions'.replace('{functionId}', functionId);
+        const apiPath = '/functions/{functionId}/executions'.replace('{functionId}', encodeURIComponent(String(functionId)));
         const payload: Payload = {};
         if (typeof body !== 'undefined') {
             payload['body'] = body;
@@ -161,7 +163,9 @@ export class Functions {
         const uri = new URL(this.client.config.endpoint + apiPath);
 
         const apiHeaders: { [header: string]: string } = {
+            'X-Appwrite-Project': this.client.config.project,
             'content-type': 'application/json',
+            'accept': 'application/json',
         }
 
         return this.client.call(
@@ -216,11 +220,13 @@ export class Functions {
             throw new AppwriteException('Missing required parameter: "executionId"');
         }
 
-        const apiPath = '/functions/{functionId}/executions/{executionId}'.replace('{functionId}', functionId).replace('{executionId}', executionId);
+        const apiPath = '/functions/{functionId}/executions/{executionId}'.replace('{functionId}', encodeURIComponent(String(functionId))).replace('{executionId}', encodeURIComponent(String(executionId)));
         const payload: Payload = {};
         const uri = new URL(this.client.config.endpoint + apiPath);
 
         const apiHeaders: { [header: string]: string } = {
+            'X-Appwrite-Project': this.client.config.project,
+            'accept': 'application/json',
         }
 
         return this.client.call(

@@ -1,7 +1,7 @@
 /**
  * Appwrite Web SDK
  *
- * This SDK is compatible with Appwrite server version 1.8.x. 
+ * This SDK is compatible with Appwrite server version 1.9.x. 
  * For older versions, please check
  * [previous releases](https://github.com/appwrite/sdk-for-web/releases).
  */
@@ -13,11 +13,13 @@ export { Functions } from './services/functions';
 export { Graphql } from './services/graphql';
 export { Locale } from './services/locale';
 export { Messaging } from './services/messaging';
+export { Presences } from './services/presences';
 export { Storage } from './services/storage';
 export { TablesDB } from './services/tables-db';
 export { Teams } from './services/teams';
 export { Realtime } from './services/realtime';
 export type { Models, Payload, RealtimeResponseEvent, UploadProgress } from './client';
+export type { RealtimeSubscription } from './services/realtime';
 export type { QueryTypes, QueryTypesList } from './query';
 export { Permission } from './permission';
 export { Role } from './role';
@@ -30,12 +32,11 @@ export { OAuthProvider } from './enums/o-auth-provider';
 export { Browser } from './enums/browser';
 export { CreditCard } from './enums/credit-card';
 export { Flag } from './enums/flag';
-export { Theme } from './enums/theme';
+export { BrowserTheme } from './enums/browser-theme';
 export { Timezone } from './enums/timezone';
 export { BrowserPermission } from './enums/browser-permission';
 export { ImageFormat } from './enums/image-format';
 export { ExecutionMethod } from './enums/execution-method';
 export { ImageGravity } from './enums/image-gravity';
-export { Roles } from './enums/roles';
 export { ExecutionTrigger } from './enums/execution-trigger';
 export { ExecutionStatus } from './enums/execution-status';

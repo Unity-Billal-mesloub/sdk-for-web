@@ -1,3 +1,4 @@
+```javascript
 import { Client, Account } from "appwrite";
 
 const client = new Client()
@@ -9,8 +10,9 @@ const account = new Account(client);
 const result = await account.create({
     userId: '<USER_ID>',
     email: 'email@example.com',
-    password: '',
+    password: 'password',
     name: '<NAME>' // optional
 });
 
 console.log(result);
+```

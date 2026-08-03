@@ -1,3 +1,4 @@
+```javascript
 import { Client, Account } from "appwrite";
 
 const client = new Client()
@@ -7,8 +8,9 @@ const client = new Client()
 const account = new Account(client);
 
 const result = await account.updatePassword({
-    password: '',
+    password: 'password',
     oldPassword: 'password' // optional
 });
 
 console.log(result);
+```
